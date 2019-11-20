@@ -25,7 +25,7 @@ namespace MTUComm
         
             try
             {
-                Mobile.ConfigData data = Mobile.configData;
+                Mobile.ConfigData data = Mobile.ConfData;
                 using ( sftp = new SftpClient ( data.FtpDownload_Host, data.FtpDownload_Port, data.FtpDownload_User, data.FtpDownload_Pass ) )
                 {
                     sftp.Connect ();

@@ -114,7 +114,7 @@ namespace MTUComm
                 allTypes = null;
 
                 // Regenerate certificate from base64 string
-                Mobile.configData.GenerateCertFromStore();
+                Mobile.ConfData.GenerateCertFromStore();
                 //Mobile.configData.GenerateCert ();
                 //Mobile.configData.LoadCertFromKeychain ();
                 

@@ -338,7 +338,7 @@ namespace aclara_meters
             var Host = SecureStorage.GetAsync("ftpDownload_Host");
             if (!String.IsNullOrEmpty(Host.Result))
             {
-                var data = Mobile.configData;
+                var data = Mobile.ConfData;
                 data.FtpDownload_Host = Host.Result;
                 data.FtpDownload_Path = SecureStorage.GetAsync("ftpDownload_Path").Result;
                 data.FtpDownload_User = SecureStorage.GetAsync("ftpDownload_User").Result;
@@ -370,7 +370,7 @@ namespace aclara_meters
             string sVersion = string.Empty;
             try
             {
-                Mobile.ConfigData data = Mobile.configData;
+                Mobile.ConfigData data = Mobile.ConfData;
                 using (SftpClient sftp = new SftpClient(data.FtpDownload_Host, data.FtpDownload_Port, data.FtpDownload_User, data.FtpDownload_Pass))
                 {
                     sftp.Connect();
@@ -429,7 +429,7 @@ namespace aclara_meters
             sfileCert = String.Empty;
             try
             {
-                Mobile.ConfigData data = Mobile.configData;
+                Mobile.ConfigData data = Mobile.ConfData;
                 using (SftpClient sftp = new SftpClient(data.FtpDownload_Host, data.FtpDownload_Port, data.FtpDownload_User, data.FtpDownload_Pass))
                 {
                     sftp.Connect();

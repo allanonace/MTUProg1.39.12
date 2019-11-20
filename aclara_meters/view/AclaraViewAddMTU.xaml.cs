@@ -4015,7 +4015,7 @@ namespace aclara_meters.view
             }
                 
             // Port 2
-            if ( ( addMtuForm.usePort2 = mtu.TwoPorts && this.port2IsActivated ) &&
+            if ( ( addMtuForm.UsePort2 = mtu.TwoPorts && this.port2IsActivated ) &&
                     ! mtu.Port2.IsSetFlow )
             {
                 value_acn_2 = this.tbx_AccountNumber_2           .Text;
@@ -4212,7 +4212,7 @@ namespace aclara_meters.view
 
             #region Set parameters Port 2
 
-            if ( addMtuForm.usePort2 )
+            if ( addMtuForm.UsePort2 )
             {
                 // No RDD
                 if ( ! mtu.Port2.IsSetFlow )

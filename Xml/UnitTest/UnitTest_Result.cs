@@ -41,9 +41,9 @@ namespace Xml.UnitTest
                 foreach ( UnitTest_Output output in this.Outputs )
                     this.dictionary.Add ( new KeyValuePair<string, UnitTest_Output> ( output.Id, output ) );
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
-
+                // only for testing
             }
         }
     }

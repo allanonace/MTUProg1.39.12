@@ -77,8 +77,8 @@ namespace aclara_meters.view
 
                         if (checkConfigFiles)
                         {
-                            if (Mobile.configData.HasFTP ||
-                                 Mobile.configData.HasIntune)
+                            if (Mobile.ConfData.HasFTP ||
+                                 Mobile.ConfData.HasIntune)
                                 NewConfigVersion = GenericUtilsClass.CheckFTPConfigVersion();
                             else NewConfigVersion = GenericUtilsClass.CheckPubConfigVersion();
                             checkConfigFiles = false;
@@ -127,15 +127,15 @@ namespace aclara_meters.view
                 }
 
                 Utils.Print($"Config version: { ConfigVersion} ");
-                if (!Mobile.configData.HasIntune) Utils.Print("Local parameters loaded..");
+                if (!Mobile.ConfData.HasIntune) Utils.Print("Local parameters loaded..");
                 else Utils.Print("Intune parameters loaded..");
-                if (Mobile.configData.HasIntune || Mobile.configData.HasFTP)
+                if (Mobile.ConfData.HasIntune || Mobile.ConfData.HasFTP)
                 {
-                    Utils.Print("FTP: " + Mobile.configData.FtpDownload_Host + ":" + Mobile.configData.FtpDownload_Port + " - "
-                        + Mobile.configData.FtpDownload_User + " [ " + Mobile.configData.FtpDownload_Pass + " ]");
-                    if (Mobile.configData.IsCertLoaded)
+                    Utils.Print("FTP: " + Mobile.ConfData.FtpDownload_Host + ":" + Mobile.ConfData.FtpDownload_Port + " - "
+                        + Mobile.ConfData.FtpDownload_User + " [ " + Mobile.ConfData.FtpDownload_Pass + " ]");
+                    if (Mobile.ConfData.IsCertLoaded)
                     {
-                        Utils.Print("Certificate: " + Mobile.configData.certificate.Subject + " [ " + Mobile.configData.certificate.NotAfter + " ]");
+                        Utils.Print("Certificate: " + Mobile.ConfData.certificate.Subject + " [ " + Mobile.ConfData.certificate.NotAfter + " ]");
                     }
                 }
 
@@ -161,7 +161,7 @@ namespace aclara_meters.view
                 {
                     var MamServ = DependencyService.Get<IMAMService>();
                     MamServ.UtilMAMService();
-                    if (Mobile.configData.HasIntune)
+                    if (Mobile.ConfData.HasIntune)
                     {
                         NewConfigVersion = GenericUtilsClass.CheckFTPConfigVersion();
                         if (!string.IsNullOrEmpty(NewConfigVersion))
@@ -173,8 +173,8 @@ namespace aclara_meters.view
                             }
                             else
                             {
-                                if (!Mobile.configData.IsCertLoaded && !string.IsNullOrEmpty(sFileCert))
-                                    Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
+                                if (!Mobile.ConfData.IsCertLoaded && !string.IsNullOrEmpty(sFileCert))
+                                    Mobile.ConfData.StoreCertificate(Mobile.ConfData.CreateCertificate(null, sFileCert));
 
                             }
                             return true;
@@ -196,7 +196,7 @@ namespace aclara_meters.view
             }
             else if (Mode.Equals("Manual"))
             {
-                Mobile.configData.HasFTP = false;
+                Mobile.ConfData.HasFTP = false;
 
                 // Check if all configuration files are available in public folder
                 if (GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPublicPath))
@@ -214,7 +214,7 @@ namespace aclara_meters.view
                         return false;
                     }
                     if (!string.IsNullOrEmpty(sFileCert))
-                        Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
+                        Mobile.ConfData.StoreCertificate(Mobile.ConfData.CreateCertificate(null, sFileCert));
 
 
                     return true;
@@ -381,9 +381,9 @@ namespace aclara_meters.view
                 {
                     return false;
                 }
-                if (!Mobile.configData.IsCertLoaded && !string.IsNullOrEmpty(sFileCert))
+                if (!Mobile.ConfData.IsCertLoaded && !string.IsNullOrEmpty(sFileCert))
                 {
-                    Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
+                    Mobile.ConfData.StoreCertificate(Mobile.ConfData.CreateCertificate(null, sFileCert));
                 }
                 return true;
             }
@@ -400,7 +400,7 @@ namespace aclara_meters.view
                     return false;
                 }
                 if (!string.IsNullOrEmpty(sFileCert))
-                    Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
+                    Mobile.ConfData.StoreCertificate(Mobile.ConfData.CreateCertificate(null, sFileCert));
 
                 if (!GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPath))
                     return false;

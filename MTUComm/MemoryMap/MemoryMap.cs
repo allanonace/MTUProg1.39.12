@@ -1447,7 +1447,7 @@ namespace MTUComm.MemoryMap
             }
             catch ( Exception )
             {
-
+                //use only for testing
             }
         }
 

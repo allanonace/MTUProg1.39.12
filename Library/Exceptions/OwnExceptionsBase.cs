@@ -22,7 +22,6 @@ namespace Library.Exceptions
             this.Port            = port;
         }
 
-        public OwnExceptionsBase () { }
     }
 
     public class OwnSpecialExceptionsBase<T> : OwnExceptionsBase

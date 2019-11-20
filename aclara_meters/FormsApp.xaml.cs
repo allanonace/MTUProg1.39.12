@@ -41,17 +41,17 @@ namespace aclara_meters
         private IBluetoothLowEnergyAdapter adapter;
         private IUserDialogs dialogs;
         private string appVersion;
-        public static bool StartInteractive;
 
         #endregion
 
         #region Properties
-               
+
         public static string AppName { get; private set; } = "Aclara MTU Programmer ";
 
         public static string DeviceId { get; set; }
         public static string AppVersion_str { get; set; }
         public static Uri DataUrl { get; set; }
+        public static bool StartInteractive { get; set; }
 
         #endregion
 

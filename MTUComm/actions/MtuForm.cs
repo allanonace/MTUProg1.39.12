@@ -15,8 +15,8 @@ namespace MTUComm.actions
         private Dictionary<string,Parameter> dictionary;
         protected List<Parameter> additionalParams;
         public Mtu mtu { get; }
-        public dynamic map;
 
+        public dynamic Map { get; set; }
         #endregion
 
         public Parameter[] AdditionalParameters

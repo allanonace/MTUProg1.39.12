@@ -15,7 +15,7 @@ namespace aclara_meters.view
 {
     public partial class FtpDownloadSettings: INotifyPropertyChanged//: Rg.Plugins.Popup.Pages.PopupPage
     {
-        private MTUComm.Mobile.ConfigData config = MTUComm.Mobile.configData;
+        private MTUComm.Mobile.ConfigData config = MTUComm.Mobile.ConfData;
         private TaskCompletionSource<string> taskSemaphoreDownload;
         const int smallWidthResolution = 768;
        
@@ -125,7 +125,7 @@ namespace aclara_meters.view
                     SecureStorage.SetAsync("ConfigVersion", NewConfigVersion);
                     if (!string.IsNullOrEmpty(sFileCert))
                     {
-                        Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
+                        Mobile.ConfData.StoreCertificate(Mobile.ConfData.CreateCertificate(null, sFileCert));
                     }
                     return true;
                 }

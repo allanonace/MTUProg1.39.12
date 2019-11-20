@@ -65,7 +65,7 @@ namespace aclara_meters.iOS
                     }
                 }
 
-                var data = Mobile.configData;
+                var data = Mobile.ConfData;
                 
                 // Convert parameters to string and regenerate the certificate
                 if (stringValues.ContainsKey(Mobile.ID_FTP_HOST))

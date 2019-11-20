@@ -794,13 +794,13 @@ namespace aclara_meters.view
 
             customers_copyr  .Text = TEXT_COPYR;
             customers_support.Text = TEXT_SUPPORT;
-            customers_version.Text = TEXT_VERSION + Singleton.Get.Configuration.GetApplicationVersion () + ( ( Mobile.configData.HasIntune ) ? TEXT_INTUNE : string.Empty );
+            customers_version.Text = TEXT_VERSION + Singleton.Get.Configuration.GetApplicationVersion () + ( ( Mobile.ConfData.HasIntune ) ? TEXT_INTUNE : string.Empty );
             config_version   .Text = TEXT_CONFVER + SecureStorage.GetAsync("ConfigVersion").Result;
 
-            if ( Mobile.configData.IsCertLoaded )
+            if ( Mobile.ConfData.IsCertLoaded )
             {
-                certificate_name.Text = "Certificate: " + Mobile.configData.certificate.Subject;
-                certificate_exp .Text = $"Expiration date: " + Mobile.configData.certificate.NotAfter.ToString ( "MM/dd/yyyy hh:mm:ss" );
+                certificate_name.Text = "Certificate: " + Mobile.ConfData.certificate.Subject;
+                certificate_exp .Text = $"Expiration date: " + Mobile.ConfData.certificate.NotAfter.ToString ( "MM/dd/yyyy hh:mm:ss" );
             }
             else
             {
@@ -1041,13 +1041,13 @@ namespace aclara_meters.view
 
         public async Task<bool> DownloadConfigProcess()
         {
-            if (Mobile.configData.HasIntune)
+            if (Mobile.ConfData.HasIntune)
             {
                 if (Mobile.IsNetAvailable())
                 {
                     GenericUtilsClass.DownloadConfigFiles(out string sFileCert);
                     if (!string.IsNullOrEmpty(sFileCert))
-                        Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
+                        Mobile.ConfData.StoreCertificate(Mobile.ConfData.CreateCertificate(null, sFileCert));
                     NewConfigVersion = GenericUtilsClass.CheckFTPConfigVersion();
                     return true;
                 }
@@ -1057,7 +1057,7 @@ namespace aclara_meters.view
                     return false;
                 }
             }
-            else if (Mobile.configData.HasFTP)
+            else if (Mobile.ConfData.HasFTP)
             {
                 if (Mobile.IsNetAvailable())
                 {
@@ -1122,7 +1122,7 @@ namespace aclara_meters.view
                     }
                     GenericUtilsClass.CopyConfigFiles(!CPD, Mobile.ConfigPublicPath, Mobile.ConfigPath, out string sFileCert);
                     if (!string.IsNullOrEmpty(sFileCert))
-                        Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
+                        Mobile.ConfData.StoreCertificate(Mobile.ConfData.CreateCertificate(null, sFileCert));
 
                     NewConfigVersion = GenericUtilsClass.CheckPubConfigVersion();
                     if (!GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPath))

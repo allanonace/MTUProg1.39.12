@@ -189,7 +189,7 @@ namespace MTUComm
             
                 if ( ! mtu.IsFamily35xx36xx )
                 {
-                    Mobile.ConfigData data = Mobile.configData;
+                    Mobile.ConfigData data = Mobile.ConfData;
 
                     // Using certificate with public key
                     if ( data.IsCertLoaded )

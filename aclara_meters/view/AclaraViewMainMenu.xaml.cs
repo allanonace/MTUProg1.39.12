@@ -114,11 +114,11 @@ namespace aclara_meters.view
 
         public async Task UploadFilesAndCheckCertificate()
         {
-            if (Mobile.configData.IsCertLoaded)
+            if (Mobile.ConfData.IsCertLoaded)
             {
-               if (Mobile.configData.certificate.NotAfter.AddMonths(-2) <= DateTime.Today)
+               if (Mobile.ConfData.certificate.NotAfter.AddMonths(-2) <= DateTime.Today)
                 {
-                   await DisplayAlert("Alert", $"The installed certificate will expire on: {Mobile.configData.certificate.NotAfter.ToShortDateString()}", "OK");
+                   await DisplayAlert("Alert", $"The installed certificate will expire on: {Mobile.ConfData.certificate.NotAfter.ToShortDateString()}", "OK");
                 }
             }
             // Upload log files

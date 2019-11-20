@@ -107,7 +107,6 @@ namespace MTUComm.actions
         // 2. Custom display   = <display>
         public Dictionary<FIELD, string[]> Texts { get; private set; }
 
-        public bool usePort2;
         private Dictionary<FIELD,Parameter> dictionary;
 
         public int NumOfParamRegistered
@@ -119,6 +118,8 @@ namespace MTUComm.actions
         {
             get { return new Dictionary<FIELD,Parameter> ( this.dictionary ); }
         }
+
+        public bool UsePort2 { get; set; }
 
         public AddMtuForm ( Mtu mtu ) : base ( mtu )
         {

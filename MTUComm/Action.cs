@@ -1203,9 +1203,9 @@ namespace MTUComm
                         result.AddParameter ( new Parameter ( child.Name.ToString (), string.Empty, child.Value, string.Empty, indexPort ) );
                 }
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
-
+                // control outside 
             }
 
             return result;

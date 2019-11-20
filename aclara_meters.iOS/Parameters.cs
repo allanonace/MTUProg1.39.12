@@ -26,7 +26,7 @@ namespace aclara_meters.iOS
                 NSDictionary paramsGroups    = dictionary.GetDictionaryOfValuesFromKeys ( keys );
                 NSObject     paramsGroup     = paramsGroups.ElementAt ( 0 ).Value;
 
-                var data = Mobile.configData;
+                var data = Mobile.ConfData;
 
                 // Convert parameters to string and regenerate the certificate
                 data.FtpDownload_User =             paramsGroup.ValueForKey ( new NSString ( Mobile.ID_FTP_USER    ) ).ToString ();

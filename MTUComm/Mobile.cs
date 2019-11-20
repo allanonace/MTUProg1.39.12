@@ -300,7 +300,6 @@ namespace MTUComm
                 Directory.CreateDirectory ( path );
         }
 
-        public  static ConfigData configData;
         private static string     pathCachePublic;
         private static string     pathCacheConfig;
         private static string     pathCacheLogs;
@@ -440,9 +439,11 @@ namespace MTUComm
             }
         }
 
+        public static ConfigData ConfData { get; set; }
+
         static Mobile ()
         {
-            configData = new ConfigData ();
+            ConfData = new ConfigData ();
         }
 
         public static bool IsNetAvailable ()

@@ -369,7 +369,7 @@ namespace Lexi
                 }
                 catch ( Exception )
                 {
-
+                    // only for testing
                 }
             }
             
@@ -555,7 +555,7 @@ namespace Lexi
                 }
                 catch ( Exception )
                 {
-
+                    // only for testing
                 }
             }
 

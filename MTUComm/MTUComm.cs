@@ -3667,7 +3667,7 @@ namespace MTUComm
             {
                 if ( ok )
                 {
-                    Mobile.ConfigData data = Mobile.configData;
+                    Mobile.ConfigData data = Mobile.ConfData;
                     
                     data.LastRandomKey    = new byte[ aesKey.Length ];
                     data.LastRandomKeySha = new byte[ sha   .Length ];
@@ -3684,7 +3684,7 @@ namespace MTUComm
             }
             
             // MTU encryption has failed
-            if ( ! ( Mobile.configData.IsMtuEncrypted = ok ) )
+            if ( ! ( Mobile.ConfData.IsMtuEncrypted = ok ) )
                 throw new ActionNotAchievedEncryptionException ( CMD_ENCRYP_OLD_MAX + "" );
             
             await this.CheckIsTheSameMTU ();
