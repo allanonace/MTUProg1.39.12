@@ -10,6 +10,8 @@ namespace MTUComm
     {
         private const string BTN_OK     = "Ok";
         private const string BTN_CANCEL = "Cancel";
+        private const string ID_ERROR   = "\nError ID: ";
+        private const string ID_INFO    = "\nID: ";
     
         private static PageLinker instance;
 
@@ -79,10 +81,13 @@ namespace MTUComm
             bool   kill    = false,
             string btnText = BTN_OK )
         {
-            if ( error.Id > -1 &&
-                 ! error.NoError )
+            if ( error.Id > -1 )
+            {
                 await GetInstance ()._ShowAlert (
-                    title, error.Message + "\nError ID: " + error.Id, btnText, kill );
+                    title, error.Message +
+                    ( ( ! error.NoError ) ? ID_ERROR : ID_INFO ) +
+                    error.Id, btnText, kill );
+            }
             else
                 await GetInstance ()._ShowAlert (
                     title, error.Message, btnText, kill );
