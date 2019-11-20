@@ -445,13 +445,17 @@ namespace MTUComm
                 // that cancel the action but not move to the main menu and could be happen
                 // that perform the basic read with a different MTU
                 //if ( ! this.basicInfoLoaded )
-                if ( ! Data.Contains ( "MtuBasicInfo" ) || type == ActionType.ReadMtu || type==ActionType.MtuInstallationConfirmation )
+                if ( ! Data.Contains ( "MtuBasicInfo" ) ||
+                     type == ActionType.ReadMtu ||
+                     type == ActionType.MtuInstallationConfirmation )
                     await this.LoadMtuBasicInfo ();
-                else 
-                    this.mtu = configuration.GetMtuTypeById((int)Data.Get.MtuBasicInfo.Type);
+                else
+                    this.mtu = configuration.GetMtuTypeById ( ( int )Data.Get.MtuBasicInfo.Type );
 
                 // Checks if the MTU remains the same as in the initial reading
-                if ( type != ActionType.BasicRead && type != ActionType.ReadMtu && type != ActionType.MtuInstallationConfirmation)
+                if ( type != ActionType.BasicRead &&
+                     type != ActionType.ReadMtu   &&
+                     type != ActionType.MtuInstallationConfirmation )
                     await this.CheckIsTheSameMTU ();
 
                 switch ( type )
@@ -1311,6 +1315,10 @@ namespace MTUComm
 
                 Utils.Print ( "DataRead Finished: " + eventLogList.Count );
 
+                // It's just an informative pop-up, not an error
+                if ( eventLogList.Count <= 0 )
+                    await Errors.ShowAlert ( new NoEventsLogException () );
+
                 // Load memory map and prepare to read from Meters
                 var map = await ReadMtu_Logic ();
                 
@@ -1396,10 +1404,10 @@ namespace MTUComm
             try
             {
                 Utils.Print ( "InstallConfirmation trigger start" );
-                await map.DcuId.SetValueToMtu(0);
+
+                await map.DcuId.SetValueToMtu ( 0 );
 
                 await regICNotSynced.SetValueToMtu ( true );
-               
 
                 // MTU is turned off
                 if ( ! force &&
@@ -1462,33 +1470,27 @@ namespace MTUComm
                 }
 
                 // Retry action
-                if (++time < global.TimeSyncCountRepeat)
+                if ( ++time < global.TimeSyncCountRepeat )
                 {
-                    Utils.Print($"___________________InstallConf: {time.ToString()}");
-                    await Task.Delay(WAIT_BTW_IC_ERROR);
+                    await Task.Delay ( WAIT_BTW_IC_ERROR );
 
-                    result = await this.InstallConfirmation_Logic(force, time);
-
-                    // If this is not the first iteration, we need it to
-                    // returns the result up to the initial invocation
-                    //if (result > 0)
-                        return result;
+                    return await this.InstallConfirmation_Logic ( force, time );
                 }
                 else
                 {
                     // Finish with error
-                    Errors.LogErrorNowAndContinue(new ActionNotAchievedICException((global.TimeSyncCountRepeat) + ""));
+                    Errors.LogErrorNowAndContinue ( new ActionNotAchievedICException ( ( global.TimeSyncCountRepeat ) + "" ) );
                     result = IC_NOT_ACHIEVED;
                 }
             }
 
             // Node Discovery with OnDemand 1.2 MTUs
-            if (result == IC_OK &&
+            if ( result == IC_OK         &&
                  this.global.AutoRFCheck &&
-                 this.mtu.MtuDemand &&
-                 this.mtu.NodeDiscovery)
+                 this.mtu.MtuDemand      &&
+                 this.mtu.NodeDiscovery )
             {
-                switch (await this.NodeDiscovery(map))
+                switch ( await this.NodeDiscovery ( map ) )
                 {
                     case NodeDiscoveryResult.EXCELLENT:
                     case NodeDiscoveryResult.GOOD:
@@ -1501,6 +1503,7 @@ namespace MTUComm
                         return IC_EXCEPTION;
                 }
             }
+
             // Result of the IC only
             return result;
         }
@@ -1870,14 +1873,6 @@ namespace MTUComm
                              Data.Get.UNIT_TEST &&
                              result == NodeDiscoveryResult.GOOD )
                             break; // Exit from infinite while
-
-                        //#if DEBUG
-
-                        //// NOTE: Avoid to perform all the attempts debugging
-                        //if ( result == NodeDiscoveryResult.GOOD )
-                        //    break;
-
-                        //#endif
 
                         #endregion
                     }

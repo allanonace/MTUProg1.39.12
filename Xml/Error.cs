@@ -29,6 +29,9 @@ namespace Xml
         [XmlAttribute("id")]
         public int Id { get; set; }
 
+        [XmlAttribute("no_error")]
+        public bool NoError { get; set; }
+
         [XmlIgnore]
         public int DotNetId { get; set; }
         
