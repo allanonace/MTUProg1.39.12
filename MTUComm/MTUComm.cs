@@ -2416,7 +2416,7 @@ namespace MTUComm
             truquitoAction   = action;
             Parameter[] ps   = action.GetParameters ();
             dynamic     form = new AddMtuForm ( this.mtu );
-            form.usePort2    = false;
+            form.UsePort2    = false;
             bool scriptUseP2 = false;
 
             // Action is about Replace Meter
@@ -2446,11 +2446,11 @@ namespace MTUComm
                     form.AddParameterTranslatingAclaraXml ( parameter );
                     
                     if ( parameter.Port == 1 )
-                        form.usePort2 = true;
+                        form.UsePort2 = true;
                 }
    
-                scriptUseP2    = form.usePort2;
-                form.usePort2 &= this.mtu.TwoPorts;
+                scriptUseP2    = form.UsePort2;
+                form.UsePort2 &= this.mtu.TwoPorts;
 
                 #region Mandatory Meter Serial Number [ DEACTIVATED ]
 
@@ -3107,7 +3107,7 @@ namespace MTUComm
                 #region Check Meter for Encoder
 
                 if ( this.mtu.Port1.IsForEncoderOrEcoder ||
-                     form.usePort2 &&
+                     form.UsePort2 &&
                      this.mtu.Port2.IsForEncoderOrEcoder )
                 {
                     Utils.Print ( "------CHECK_ENCODER_START-----" );
@@ -3118,7 +3118,7 @@ namespace MTUComm
                     if ( this.mtu.Port1.IsForEncoderOrEcoder )
                         await this.CheckSelectedEncoderMeter ();
 
-                    if ( form.usePort2 &&
+                    if ( form.UsePort2 &&
                          this.mtu.Port2.IsForEncoderOrEcoder )
                         await this.CheckSelectedEncoderMeter ( 2 );
 
@@ -3144,7 +3144,7 @@ namespace MTUComm
                 // Only first 12 numeric characters are recorded in MTU memory
                 // F1 electric can have 20 alphanumeric characters but in the activity log should be written all characters
                 map.P1MeterId = Utils.GetValueOrDefault<ulong> ( Data.Get.AccountNumber, 12 );
-                if ( form.usePort2 &&
+                if ( form.UsePort2 &&
                      form.ContainsParameter ( FIELD.ACCOUNT_NUMBER_2 ) )
                     map.P2MeterId = Utils.GetValueOrDefault<ulong> ( Data.Get.AccountNumber_2, 12 );
 
@@ -3160,7 +3160,7 @@ namespace MTUComm
                 else selectedMeter = this.configuration.getMeterTypeById ( Convert.ToInt32 ( ( string )Data.Get.Meter ) );
                 map.P1MeterType = selectedMeter.Id;
 
-                if ( form.usePort2 &&
+                if ( form.UsePort2 &&
                      form.ContainsParameter ( FIELD.METER_TYPE_2 ) )
                 {
                     if ( ! Data.Get.IsFromScripting )
@@ -3195,7 +3195,7 @@ namespace MTUComm
                     }
                 }
 
-                if ( form.usePort2 &&
+                if ( form.UsePort2 &&
                      noRddOrNotIn2 )
                 {
                     if ( form.ContainsParameter ( FIELD.METER_READING_2 ) )
@@ -3278,7 +3278,7 @@ namespace MTUComm
                             // Set alarms [ Alarm Message Transmission ]
                             if ( mtu.InsufficientMemory     ) map.InsufficientMemoryAlarm    = alarms.InsufficientMemory;
                             if ( mtu.GasCutWireAlarm        ) map.GasCutWireAlarm            = alarms.CutAlarmCable;
-                            if ( form.usePort2 &&
+                            if ( form.UsePort2 &&
                                  mtu.GasCutWireAlarm        ) map.P2GasCutWireAlarm          = alarms.CutAlarmCable;
                             if ( mtu.SerialComProblem       ) map.SerialComProblemAlarm      = alarms.SerialComProblem;
                             if ( mtu.LastGasp               ) map.LastGaspAlarm              = alarms.LastGasp;
@@ -3288,7 +3288,7 @@ namespace MTUComm
                             if ( mtu.ReverseFlowTamper      ) map.ReverseFlowAlarm           = alarms.ReverseFlow;
                             if ( mtu.SerialCutWire          ) map.SerialCutWireAlarm         = alarms.SerialCutWire;
                             if ( mtu.TamperPort1            ) map.P1CutWireAlarm             = alarms.TamperPort1;
-                            if ( form.usePort2 &&
+                            if ( form.UsePort2 &&
                                  mtu.TamperPort2            ) map.P2CutWireAlarm             = alarms.TamperPort2;
                             if ( mtu.CutWireDelaySetting    ) map.CutWireDelaySetting        = alarms.CutWireDelaySetting;
 
@@ -3307,7 +3307,7 @@ namespace MTUComm
                             if ( mtu.ReverseFlowTamperImm   ) map.ReverseFlowImmAlarm        = alarms.ReverseFlowTamperImm;
                             if ( mtu.SerialCutWireImm       ) map.SerialCutWireImmAlarm      = alarms.SerialCutWireImm;
                             if ( mtu.TamperPort1Imm         ) map.P1CutWireImmAlarm          = alarms.TamperPort1Imm;
-                            if ( form.usePort2 &&
+                            if ( form.UsePort2 &&
                                  mtu.TamperPort2Imm         ) map.P2CutWireImmAlarm          = alarms.TamperPort2Imm;
 
                             // Ecoder alarms
@@ -3337,7 +3337,7 @@ namespace MTUComm
                             
                             // Overlap count
                             map.MessageOverlapCount = alarms.Overlap;
-                            if ( form.usePort2 )
+                            if ( form.UsePort2 )
                                 map.P2MessageOverlapCount = alarms.Overlap;
 
                             // For the moment only for the family 33xx

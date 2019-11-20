@@ -294,7 +294,7 @@ namespace MTUComm
 
             #region Port 2
 
-            if ( form.usePort2 )
+            if ( form.UsePort2 )
             {
                 Meter meter2 = ( ! Data.Get.IsFromScripting ) ?
                     ( Meter )form.Meter_2.Value :
@@ -416,7 +416,7 @@ namespace MTUComm
                     await AddParamCondMap ( "InsufficentMemory",         "Insufficent Memory",           "InsufficientMemoryTamperStatus",       mtu.InsufficientMemory );
                     await AddParamCondMap ( "InsufficentMemoryImm",      "Insufficent Memory Imm",       "InsufficientMemoryImmTamperStatus",    mtu.InsufficientMemoryImm );
                     await AddParamCondMap ( "CutAlarmCable",             "Cut Alarm Cable",              "GasCutWireTamperStatus",               mtu.GasCutWireAlarm );
-                    await AddParamCondMap ( "Cut2AlarmCable",            "Cut Port2 Alarm Cable",        "P2GasCutWireTamperStatus",             form.usePort2 && mtu.GasCutWireAlarm );
+                    await AddParamCondMap ( "Cut2AlarmCable",            "Cut Port2 Alarm Cable",        "P2GasCutWireTamperStatus",             form.UsePort2 && mtu.GasCutWireAlarm );
                     await AddParamCondMap ( "SerialComProblem",          "Serial Com Problem",           "SerialComProblemTamperStatus",         mtu.SerialComProblem );
                     await AddParamCondMap ( "SerialComProblemImm",       "Serial Com Problem Imm",       "SerialComProblemImmTamperStatus",      mtu.SerialComProblemImm );
                     await AddParamCondMap ( "LastGasp",                  "Last Gasp",                    "LastGaspTamperStatus",                 mtu.LastGasp );
@@ -436,8 +436,8 @@ namespace MTUComm
                     await AddParamCondMap ( "SerialCutWire",             "Serial Cut Wire",              "SerialCutWireImmATamperStatus",        mtu.SerialCutWireImm );
                     await AddParamCondMap ( "Cut1WireTamper",            "Cut Port1 Wire Tamper",        "P1CutWireTamperStatus",                mtu.TamperPort1 );
                     await AddParamCondMap ( "Cut1WireTamperImm",         "Cut Port1 Wire Tamper Imm",    "P1CutWireImmTamperStatus",             mtu.TamperPort1Imm );
-                    await AddParamCondMap ( "Cut2WireTamper",            "Cut Port2 Wire Tamper",        "P2CutWireTamperStatus",                form.usePort2 && mtu.TamperPort2 );
-                    await AddParamCondMap ( "Cut2WireTamperImm",         "Cut Port2 Wire Tamper Imm",    "P2CutWireImmTamperStatus",             form.usePort2 && mtu.TamperPort2Imm );
+                    await AddParamCondMap ( "Cut2WireTamper",            "Cut Port2 Wire Tamper",        "P2CutWireTamperStatus",                form.UsePort2 && mtu.TamperPort2 );
+                    await AddParamCondMap ( "Cut2WireTamperImm",         "Cut Port2 Wire Tamper Imm",    "P2CutWireImmTamperStatus",             form.UsePort2 && mtu.TamperPort2Imm );
                     await AddParamCondMap ( "CutWireDelaySetting",       "Cut Wire Delay Setting",       "CutWireDelaySetting",                  mtu.CutWireDelaySetting );
 
                     this.addMtuAction.Add ( alarmSelection );
