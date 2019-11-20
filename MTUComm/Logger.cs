@@ -453,7 +453,7 @@ namespace MTUComm
 
         #endregion
 
-        #region Data Read
+        #region Historical Read ( prev. Data Read )
 
         public string DataRead (
             ActionResult dataRead_allParamsFromInterface,

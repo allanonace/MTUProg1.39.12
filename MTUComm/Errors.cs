@@ -44,6 +44,8 @@ namespace MTUComm
             { new ActionNotAchievedGetEventsLogException (),    107 },
             // The MtU is not an OnDemand device
             { new MtuIsNotOnDemandCompatibleDevice (),          108 },
+            // There are no records to retrieve for the Historical Read process
+            { new NoEventsLogException (),                      109 },
         
             // Meter [ 2xx ]
             //------

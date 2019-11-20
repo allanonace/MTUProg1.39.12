@@ -79,7 +79,8 @@ namespace MTUComm
             bool   kill    = false,
             string btnText = BTN_OK )
         {
-            if ( error.Id > -1 )
+            if ( error.Id > -1 &&
+                 ! error.NoError )
                 await GetInstance ()._ShowAlert (
                     title, error.Message + "\nError ID: " + error.Id, btnText, kill );
             else

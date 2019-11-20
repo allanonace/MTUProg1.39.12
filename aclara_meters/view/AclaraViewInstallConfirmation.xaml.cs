@@ -868,7 +868,7 @@ namespace aclara_meters.view
             }
             catch (Exception ex)
             {
-                await Errors.ShowAlert(new CameraException(ex.Message));
+                await Errors.ShowAlert(new CameraException());
             }
         }
         protected override bool OnBackButtonPressed()

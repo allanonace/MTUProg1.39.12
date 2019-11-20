@@ -92,6 +92,11 @@
     {
         public MtuIsNotOnDemandCompatibleDevice ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
     }
+
+    public class NoEventsLogException : OwnExceptionsBase
+    {
+        public NoEventsLogException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
     
     #endregion
 
