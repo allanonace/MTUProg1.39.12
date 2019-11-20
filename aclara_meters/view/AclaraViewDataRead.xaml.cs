@@ -981,7 +981,7 @@ namespace aclara_meters.view
                 ChangeLowerButtonImage(false);
                 backdark_bg.IsVisible = false;
                 indicator.IsVisible = false;
-                bottomBar.GetLabelElement("label_read").Text = "Successful Data Read";
+                bottomBar.GetLabelElement("label_read").Text = "Successful Historical Read";
                 ContentNav.IsEnabled = true;
                 background_scan_page.IsEnabled = true;
                 ReadMTUChangeView.IsVisible = false;

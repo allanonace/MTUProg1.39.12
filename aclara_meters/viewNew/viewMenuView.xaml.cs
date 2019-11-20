@@ -77,7 +77,7 @@ namespace aclara_meters.view
                 MenuList.Add(new PageItem() { Title = "Install Confirmation", Icon = "installConfirm.png", Color = "White", TargetType = ActionType.MtuInstallationConfirmation });
 
             if (Singleton.Get.Configuration.Global.ShowDataRead)
-                MenuList.Add(new PageItem() { Title = "Data Read", Icon = "readmtu_icon.png", Color = "White", TargetType = ActionType.DataRead });
+                MenuList.Add(new PageItem() { Title = "Historical Read", Icon = "readmtu_icon.png", Color = "White", TargetType = ActionType.DataRead });
 #if DEBUG
              MenuList.Add(new PageItem() { Title = "Read Fabric", Icon = "readmtu_icon.png", Color = "White", TargetType = ActionType.ReadFabric });
 #endif

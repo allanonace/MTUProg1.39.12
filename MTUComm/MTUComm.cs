@@ -101,7 +101,7 @@ namespace MTUComm
         private const int WAIT_BTW_CMD_ATTEMPTS    = 1;
         private const int CMD_BYTE_RES             = 2;
 
-        /* Constants: Data Read
+        /* Constants: Historical Read ( prev. Data Read )
             CMD_INIT_EVENT_LOGS   - Request code of the LExI command "START EVENT LOG QUERY" = 0x13 = 19
             WAIT_BEFORE_LOGS      - Waiting time before start retrieving the logs stored in the MTU = 10s
             CMD_NEXT_EVENT_LOG    - Request code of the LExI command "GET NEXT EVENT LOG RESPONSE" = 0x14 = 20
