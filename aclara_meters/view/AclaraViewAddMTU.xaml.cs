@@ -3221,6 +3221,24 @@ namespace aclara_meters.view
                 else
                     selectedCancelReason = cancelReasonOtherInput.Text;
             }
+            /* Data and Mtu Id for cancel log */
+            this.add_mtu.AddAdditionalParameter(new Parameter("MtuId","MTU ID",this.mtuBasicInfo.Id));
+            /* Port 1 */
+            if (!string.IsNullOrEmpty(tbx_AccountNumber.Text))
+                this.add_mtu.AddAdditionalParameter(new Parameter("AccountNumber","Account Number",tbx_AccountNumber.Text,null, 1));
+
+            if (!string.IsNullOrEmpty(tbx_MeterSerialNumber.Text))
+                this.add_mtu.AddAdditionalParameter(new Parameter("OldMeterSerialNumber", "Old Meter Serial Number", tbx_MeterSerialNumber.Text,null, 1));
+            /* Port 2 */
+            if (this.add_mtu.CurrentMtu.TwoPorts)
+            {
+                if (!string.IsNullOrEmpty(tbx_AccountNumber_2.Text))
+                    this.add_mtu.AddAdditionalParameter(new Parameter("AccountNumber", "Account Number", tbx_AccountNumber_2.Text,null, 2));
+
+                if (!string.IsNullOrEmpty(tbx_MeterSerialNumber_2.Text))
+                    this.add_mtu.AddAdditionalParameter(new Parameter("OldMeterSerialNumber", "Old Meter Serial Number", tbx_MeterSerialNumber_2.Text,null, 2));
+            }
+
             this.add_mtu.Cancel ( selectedCancelReason );
 
             dialog_open_bg.IsVisible = false;

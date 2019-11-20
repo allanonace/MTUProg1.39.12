@@ -336,7 +336,24 @@ namespace MTUComm
 
             AddParameter(element, new Parameter("Cancel", "Cancel Action", cancel));
             AddParameter(element, new Parameter("Reason", "Cancel Reason", reason));
-
+            if (action.AdditionalScriptParameters.Count > 0)
+            {
+                List<Parameter> param1 = new List<Parameter>();
+                List<Parameter> param2 = new List<Parameter>();
+                foreach (var entry in action.AdditionalScriptParameters)
+                {
+                    if (entry.Port == 0)
+                        AddParameter(element, entry);
+                    else if (entry.Port == 1)
+                        param1.Add(entry);
+                    else
+                        param2.Add(entry);
+                }
+                if (param1.Count > 0)
+                    Port(0, element, param1.ToArray());
+                if (param2.Count > 0)
+                    Port(1, element, param1.ToArray());
+            }
             doc.Root.Element("Mtus").Add(element);
             doc.Save(uri);
         }
@@ -769,6 +786,18 @@ namespace MTUComm
 
             foreach (InterfaceParameters parameter in parameters)
                 this.ComplexParameter(element, allParamsFromInterface, parameter, portnumber );
+
+            parent.Add(element);
+        }
+        public void Port(int portnumber, XElement parent, Parameter[] parameters)
+        {
+            XElement element = new XElement("Port");
+
+            AddAtrribute(element, "display", "Port " + (portnumber + 1).ToString());
+            AddAtrribute(element, "number", (portnumber + 1).ToString());
+
+            foreach (Parameter parameter in parameters)
+                this.AddParameter(element, parameter);
 
             parent.Add(element);
         }
