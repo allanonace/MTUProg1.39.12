@@ -7,42 +7,42 @@
 
     <!-- MTU -->
     <Error id="100" message="MTU is not the same as at the beginning of the process" footer="Different MTU" no_error="true" />
-    <Error id="101" message="Puck cannot communicate with MTU" footer="Puck communication" />
-    <Error id="102" message="Puck cannot communicate with MTU after has completed writing process" footer="Puck communication after writing" />
-    <Error id="103" message="The Mtu.xml file does no contain the MTU ID specified" footer="MTU not listed in Mtu.xml" />
-    <Error id="104" message="Error trying to start the MeterRead events log query" footer="Historical Read not started" />
+    <Error id="101" message="Puck cannot communicate with MTU" footer="Puck comm." />
+    <Error id="102" message="Puck cannot communicate with MTU after has completed writing process" footer="Puck comm. after writing" />
+    <Error id="103" message="The Mtu.xml file does no contain the MTU ID specified" footer="MTU not in Mtu.xml" />
+    <Error id="104" message="Error trying to start the MeterRead events log query" footer="HR not started" />
     <Error id="105" message="Historical Read process has failed trying to recover data from the MTU" /> <!-- footer not necessary -->
     <Error id="106" message="Historical Read process has failed trying because the MTU is busy" /> <!-- footer not necessary -->
-    <Error id="107" message="Historical Read process can't be performed after having tried it several times" footer="Historical Read not completed" />
-    <Error id="108" message="The MTU is not an OnDemand compatible device" footer="It isn't an OnDemand MTU" no_error="true" />
+    <Error id="107" message="Historical Read process can't be performed after having tried it several times" footer="HR not completed" />
+    <Error id="108" message="The MTU is not an OnDemand compatible device" footer="MTU is not OnDemand 1.2" no_error="true" />
     <Error id="109" message="There are no records to retrieve for the Historical Read process" no_error="true" />
 
     <!-- Meter -->
-    <Error id="200" message="The Meter.xml file does not contain the Meter ID specified" footer="Meter not listed in Meter.xml" />
+    <Error id="200" message="The Meter.xml file does not contain the Meter ID specified" footer="Meter not in Meter.xml" />
     <Error id="201" message="Selected Meter is not supported for current MTU" footer="Meter not supported" />
-    <Error id="202" message="The Meter.xml file does not contain the Meter type specified with the tags NumberOfDials, DriveDialSize and UnitOfMeasure" footer="Meter auto-detection failed" />
+    <Error id="202" message="The Meter.xml file does not contain the Meter type specified with the tags NumberOfDials, DriveDialSize and UnitOfMeasure" footer="Meter detection failed" />
     <Error id="203" message="The script does not contain the tag NumberOfDials needed to select the MTU" /> <!-- footer not necessary -->
     <Error id="204" message="The script does not contain the tag DriveDialSize needed to select the MTU" /> <!-- footer not necessary -->
     <Error id="205" message="The script does not contain the tag UnitOfMeasure needed to select the MTU" /> <!-- footer not necessary -->
-    <Error id="206" message="Some of the necessary parameters for Meter autodetection are missing in the script" footer="Missing Meter auto-detection params" />
+    <Error id="206" message="Some of the necessary parameters for Meter autodetection are missing in the script" footer="Missing Meter detection params" />
     <Error id="207" message="The selected Meter is not compatible with the Encoder connected" footer="Incompatible Meter selected" />
     <Error id="208" message="The selected Meter is not compatible with the Encoder because of 'Encoder has bad digit in reading'" footer="Incompatible Meter selected" />
     <Error id="209" message="The selected Meter is not compatible with the Encoder because of 'Delta overflow'" footer="Incompatible Meter selected" />
     <Error id="210" message="The selected Meter is not compatible with the Encoder because of 'Deltas purged / New install / Reset'" footer="Incompatible Meter selected" />
     <Error id="211" message="The selected Meter is not compatible with the Encoder because of 'Encoder clock shorted'" footer="Incompatible Meter selected" />
     <Error id="212" message="The selected Meter is not compatible with the Encoder because of an unknown error code" footer="Incompatible Meter selected" />
-    <Error id="213" message="Encoder auto-detection process for port _var_ cannot be performed" footer="Encoder auto-detect not achieved" />
-    <Error id="214" message="Encoder auto-detection process for port _var_ cannot be performed, perhaps due to a problem with the puck or MTU" footer="Encoder auto-detect not achieved" />
+    <Error id="213" message="Encoder auto-detection process for port _var_ cannot be performed" footer="Encoder detect not achieved" />
+    <Error id="214" message="Encoder auto-detection process for port _var_ cannot be performed, perhaps due to a problem with the puck or MTU" footer="Encoder detect not achieved" />
     <Error id="215" message="The status of the RDD device is unknown" footer="RDD status unknown" />
     <Error id="216" message="The RDD device is disabled" footer="RDD is disabled" />
     <Error id="217" message="The status of the RDD device is not busy after executing the LExI command" footer="RDD is not busy" />
-    <Error id="218" message="The RDD device continue in transition status after _var_ seconds" footer="RDD continues in transition" />
+    <Error id="218" message="The RDD device continue in transition status after _var_ seconds" footer="RDD in transition" />
     <Error id="219" message="The status of the RDD device is unknown after _var_ seconds" footer="RDD is now unknown" />
     <Error id="220" message="The status of the RDD device is different than expected after _var_ seconds" footer="RDD wrong status" />
     
     <!-- Scripting parameters -->
     <Error id="300" message="Error translating or validating parameters _var_ from script file" footer="Translating script params" />
-    <Error id="301" message="The script file is for one port only but the MTU has two port and both activated" footer="Script for one port only" />
+    <Error id="301" message="The script file is for one port only but the MTU has two port and both activated" footer="Script for one port" />
     <Error id="302" message="The script file is for two ports but the MTU has one port only or second port is disabled" footer="Script for two ports" />
     <Error id="303" message="The script file does not contain logfile parameter or it has some invalid character" footer="Missing logfile" />
     <Error id="304" message="Action type _var_ in the script is not one of the available options" footer="Action not supported" />
@@ -62,25 +62,25 @@
     <Error id="451" message="No demand was selected but the MTU entry in Mtu.xml requires using one" footer="No demand selected" />
 
     <!-- Turn Off -->
-    <Error id="500" message="Turn off MTU process has failed trying to activated the ShipBit" footer="MTU already turned off" />
-    <Error id="501" message="MTU cannot be turned on or off after having tried it _var_ times" footer="Turn on or off not achieved" />
+    <Error id="500" message="Turn off MTU process has failed trying to activated the ShipBit" footer="MTU already Off" />
+    <Error id="501" message="MTU cannot be turned on or off after having tried it _var_ times" footer="Turn On|Off not achieved" />
     
     <!-- Install Confirmation -->    
-    <Error id="600" message="The MTU does not support for two-way or tag TimeToSync is false in Globa.xml" footer="MTU not support two-way" no_error="true" />
-    <Error id="601" message="The MTU is turned off" footer="MTU turned off" no_error="true" />
+    <Error id="600" message="The MTU does not support for two-way or tag TimeToSync is false in Globa.xml" footer="MTU not support 2-way" no_error="true" />
+    <Error id="601" message="The MTU is turned off" footer="MTU turned Off" no_error="true" />
     <Error id="602" message="Installation Confirmation process has failed trying to communicate with the DCU" /> <!-- footer not necessary -->
     <Error id="603" message="Installation Confirmation cannot be performed after having tried it _var_ times" footer="IC not achieved" />
-    <Error id="604" message="Node Discovery not initialized correctly" footer="NodeDiscovery not initialized" />
-    <Error id="605" message="Node Discovery not started correctly" footer="NodeDiscovery not started" />
+    <Error id="604" message="Node Discovery not initialized correctly" footer="ND not initialized" />
+    <Error id="605" message="Node Discovery not started correctly" footer="ND not started" />
     <Error id="606" message="Node Discovery process has failed trying to recover a node/DCU" />
-    <Error id="607" message="Node Discovery cannot be performed after having tried it _var_ times" footer="NodeDiscovery not achieved" />
+    <Error id="607" message="Node Discovery cannot be performed after having tried it _var_ times" footer="ND not achieved" />
 
     <!-- Encryption -->
     <Error id="700" message="The MTU encryption process can't be performed after having tried it _var_ times" footer="Encryption not achieved" />
-    <Error id="701" message="The MTU encryption process can't be performed because public key is not present in Global.xml" footer="Encryption public key missed" />
-    <Error id="702" message="The MTU encryption process can't be performed because public key does not have the correct format" footer="Encryption public key format" />
-    <Error id="703" message="The MTU encryption process can't be performed because broadcast key is not present in Global.xml" footer="Encryption broadcast key missed" />
-    <Error id="704" message="The MTU encryption process can't be performed because broadcast key does not have the correct format" footer="Encryption broadcast key format" />
+    <Error id="701" message="The MTU encryption process can't be performed because public key is not present in Global.xml" footer="Public key missed" />
+    <Error id="702" message="The MTU encryption process can't be performed because public key does not have the correct format" footer="Public key format" />
+    <Error id="703" message="The MTU encryption process can't be performed because broadcast key is not present in Global.xml" footer="Broadcast key missed" />
+    <Error id="704" message="The MTU encryption process can't be performed because broadcast key does not have the correct format" footer="Broadcast key format" />
     <Error id="705" message="The MTU encryption index has reached its limit" footer="Encryption index limit" no_error="true" />
 
     <!-- Configuration Files -->
@@ -110,8 +110,8 @@
     <Error id="853" message="The DemandaConfig for the specified MTU ID was not found" /> <!-- message_release="" /> -->
     
     <!-- Internal -->
-    <Error id="900" message="Deserializing MemoryMap has failed due to validate required fields _var_" footer="Error validating MemoryMap" />
-    <Error id="901" message="Error generating MemoryMap in the _var_ register" footer="Error generating MemoryMap" />
+    <Error id="900" message="Deserializing MemoryMap has failed due to validate required fields _var_" footer="Validating MemoryMap" />
+    <Error id="901" message="Error generating MemoryMap in the _var_ register" footer="Generating MemoryMap" />
     <Error id="902" message="The register _var_ does not exist in the MemoryMap" footer="Register does not exist" />
     <Error id="903" message="Custom method _var_ does not exist in MTU family class" footer="Custom method does not exist" />
     <Error id="904" message="Overload register _var_ must have the custom field configured" footer="Overload method not set" />

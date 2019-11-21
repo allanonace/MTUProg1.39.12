@@ -603,7 +603,7 @@ namespace Lexi
                     else if ( --attempts > 0 )
                         await Task.Delay ( secsBtwAttempts * 1000 );
                     else
-                        throw;                  
+                        throw e;                  
                 }
             }
             while ( attempts > 0 );
