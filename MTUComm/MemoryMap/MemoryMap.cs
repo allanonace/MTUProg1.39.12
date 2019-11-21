@@ -786,7 +786,7 @@ namespace MTUComm.MemoryMap
                 
                 if ( ( register.size == register.sizeGet ||
                        register.valueType == RegType.BOOL ) &&
-                     ( ! otherMap.ContainsMember ( name ) ||                // Register not present in other memory map
+                     ( ! otherMap.ContainsMember ( name ) ||                // The register not present in the other memory map
                        ! await base[ name ].Equals ( otherMap[ name ] ) ) ) // Both registers are not equal
                 {
                     Utils.Print ( "Equals: " + name + " -> NO" );

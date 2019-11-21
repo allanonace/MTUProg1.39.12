@@ -832,8 +832,7 @@ namespace MTUComm
                         break;
 
                     case ActionType.BasicRead:
-                        this.mtucomm.OnBasicRead -= OnBasicRead;
-                        this.mtucomm.OnBasicRead += OnBasicRead;
+                        // NOTE: Not OnFinish nor OnError because the exception is catched and processed on BasePage.ValidateNavigation
                         break;
                 }
 
@@ -878,19 +877,6 @@ namespace MTUComm
         #region OnEvents
 
         /// <summary>
-        /// Method invoked after have completing correctly a <see cref="ActionType"/>.BasicRead
-        /// action, without exceptions.
-        /// <para>
-        /// See <see cref="MTUComm.OnBasicRead"/> for the associated event ( XAML <- Action <- MTUComm ).
-        /// </para>
-        /// </summary>
-        /// <seealso cref="MTUComm.BasicRead"/>
-        private async Task OnBasicRead ( Delegates.ActionArgs args )
-        {
-            await this.OnFinish ( this );
-        }
-
-        /// <summary>
         /// Method invoked after have completing correctly a <see cref="ActionType"/>.ReadFabric
         /// action, without exceptions.
         /// <para>
@@ -902,8 +888,18 @@ namespace MTUComm
         /// <seealso cref="MTUComm.ReadFabric"/>
         private async Task OnReadFabric ( Delegates.ActionArgs args )
         {
-            // Show result in the screen
-            await this.OnFinish ( this );
+            try
+            {
+                await this.OnFinish ( this );
+            }
+            catch ( Exception e )
+            {
+                if ( ! Errors.IsOwnException ( e ) )
+                     Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                else Errors.LogErrorNowAndContinue ( e );
+
+                this.OnError ();
+            }
         }
 
         /// <summary>
@@ -930,9 +926,12 @@ namespace MTUComm
                 // Show result in the screen
                 await this.OnFinish ( this, new Delegates.ActionFinishArgs (result, args.Mtu ) );
             }
-            catch ( Exception )
+            catch ( Exception e )
             {
-                Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                if ( ! Errors.IsOwnException ( e ) )
+                     Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                else Errors.LogErrorNowAndContinue ( e );
+
                 this.OnError ();
             }
         }
@@ -981,9 +980,12 @@ namespace MTUComm
 
                 //args.Map.LogFullMemory ();
             }
-            catch ( Exception )
+            catch ( Exception e )
             {
-                Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                if ( ! Errors.IsOwnException ( e ) )
+                     Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                else Errors.LogErrorNowAndContinue ( e );
+
                 this.OnError ();
             }
         }
@@ -1009,9 +1011,12 @@ namespace MTUComm
                 // Show result in the screen
                 await this.OnFinish ( this, new Delegates.ActionFinishArgs ( resultBasic ) );
             }
-            catch ( Exception )
+            catch ( Exception e )
             {
-                Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                if ( ! Errors.IsOwnException ( e ) )
+                     Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                else Errors.LogErrorNowAndContinue ( e );
+
                 this.OnError ();
             }
         }
@@ -1063,9 +1068,12 @@ namespace MTUComm
                 // Show only the ReadMTU result in the screen
                 await this.OnFinish ( this, new Delegates.ActionFinishArgs ( readMtu_allParamsFromInterface, args.Mtu ) );
             }
-            catch ( Exception )
+            catch ( Exception e )
             {
-                Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                if ( ! Errors.IsOwnException ( e ) )
+                     Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                else Errors.LogErrorNowAndContinue ( e );
+
                 this.OnError ();
             }
         }
@@ -1087,7 +1095,10 @@ namespace MTUComm
             }
             catch ( Exception e )
             {
-                Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                if ( ! Errors.IsOwnException ( e ) )
+                     Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                else Errors.LogErrorNowAndContinue ( e );
+
                 this.OnError ();
             }
         }
@@ -1134,9 +1145,12 @@ namespace MTUComm
                      result != NodeDiscoveryResult.EXCEPTION )
                     logger.NodeDiscovery ( nodeList, args.Mtu );
             }
-            catch ( Exception )
+            catch ( Exception e )
             {
-                Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                if ( ! Errors.IsOwnException ( e ) )
+                     Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                else Errors.LogErrorNowAndContinue ( e );
+
                 this.OnError ();
             }
         }
@@ -1272,6 +1286,7 @@ namespace MTUComm
             ActionResult result = new ActionResult ( actionType );
             InterfaceParameters[] parameters = this.config.getAllParamsFromInterface ( mtu, actionType );
             
+            string sourceWhere = string.Empty;
             foreach ( InterfaceParameters parameter in parameters )
             {
                 try
@@ -1284,8 +1299,8 @@ namespace MTUComm
                         if ( await ValidateCondition ( parameter.Conditional, map, mtu ) )
                         {
                             string value          = string.Empty;
-                            string sourceWhere    = string.Empty;
                             string sourceProperty = parameter.Name;
+                            sourceWhere           = string.Empty;
 
                             if ( ! string.IsNullOrEmpty ( parameter.Source ) &&
                                     Regex.IsMatch ( parameter.Source, DOTNET_IDS + "." + DOTNET_IDS ) )
@@ -1296,27 +1311,20 @@ namespace MTUComm
                             }
 
                             paramToAdd = null;
-                            try
+                            switch ( sourceWhere )
                             {
-                                switch ( sourceWhere )
-                                {
-                                    case IFACE_ACTION: value      = this .GetProperty  ( sourceProperty ); break; // Current action
-                                    case IFACE_MTU   : value      = mtu  .GetProperty  ( sourceProperty ); break; // Current MTU
-                                    case IFACE_PUCK  : value      = puck .GetProperty  ( sourceProperty ); break;
-                                    case IFACE_FORM  : paramToAdd = form .GetParameter ( sourceProperty ); break; // actions.AddMtuForm class
-                                    case IFACE_GLOBAL: value      = gType.GetProperty  ( sourceProperty ).GetValue ( global, null ).ToString(); break; // Global class
-                                    case IFACE_DATA  : if ( ! Data.Contains ( sourceProperty ) || // Library.Data class
-                                                            string.IsNullOrEmpty ( value = Data.Get[ sourceProperty ].ToString () ) )
-                                                         value = string.Empty;
-                                                       break; 
-                                    default          : value      = ( await map[ sourceProperty ].GetValue () ).ToString (); break; // MemoryMap.ParameterName
-                                }
+                                case IFACE_ACTION: value      = this .GetProperty  ( sourceProperty ); break; // Current action
+                                case IFACE_MTU   : value      = mtu  .GetProperty  ( sourceProperty ); break; // Current MTU
+                                case IFACE_PUCK  : value      = puck .GetProperty  ( sourceProperty ); break;
+                                case IFACE_FORM  : paramToAdd = form .GetParameter ( sourceProperty ); break; // actions.AddMtuForm class
+                                case IFACE_GLOBAL: value      = gType.GetProperty  ( sourceProperty ).GetValue ( global, null ).ToString(); break; // Global class
+                                case IFACE_DATA  : if ( ! Data.Contains ( sourceProperty ) || // Library.Data class
+                                                        string.IsNullOrEmpty ( value = Data.Get[ sourceProperty ].ToString () ) )
+                                                        value = string.Empty;
+                                                    break; 
+                                default          : value      = ( await map[ sourceProperty ].GetValue () ).ToString (); break; // MemoryMap.ParameterName
                             }
-                            catch ( Exception )
-                            {
-                                Utils.Print ( "Interface: Map Error: " + sourceProperty );
-                                throw new Exception ();
-                            }
+
                             if (!string.IsNullOrEmpty(value))
                             {
 
@@ -1354,7 +1362,10 @@ namespace MTUComm
                 }
                 catch ( Exception )
                 {
-                    Utils.PrintDeep ( "Error: Interface parameter '" + parameter.Name + "'" );
+                    Utils.Print ( "Error: Interface parameter '" + parameter.Name + "'" +
+                        ( ( string.IsNullOrEmpty ( sourceWhere ) ? string.Empty : " [ Source: " + sourceWhere + " ]" ) ) );
+
+                    throw new PreparingLogInterfaceException ();
                 }
             }
             

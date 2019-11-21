@@ -247,15 +247,6 @@ namespace MTUComm
         #region Events
 
         /// <summary>
-        /// Event invoked only if the <see cref="Action.ActionType"/>.BasicRead
-        /// action completes successfully, with no exceptions.
-        /// <para>
-        /// See <see cref="Action.OnBasicRead"/> for the associated method ( XAML <- Action <- MTUComm ).
-        /// </para>
-        /// </summary>
-        public event Delegates.ActionHandler OnBasicRead;
-
-        /// <summary>
         /// Event invoked only if the <see cref="Action.ActionType"/>.ReadFabric
         /// action completes successfully, with no exceptions.
         /// <para>
@@ -423,7 +414,6 @@ namespace MTUComm
         /// <param name="args">Arguments required for some actions</param>
         /// <seealso cref="AddMtu(Action)"/>
         /// <seealso cref="AddMtu(dynamic, string, Action)"/>
-        /// <seealso cref="BasicRead"/>
         /// <seealso cref="DataRead"/>
         /// <seealso cref="DataRead(Action)"/>
         /// <seealso cref="InstallConfirmation"/>
@@ -489,7 +479,6 @@ namespace MTUComm
                     case ActionType.ReadMtu                    : await Task.Run ( () => ReadMtu () ); break;
                     case ActionType.TurnOffMtu                 : await Task.Run ( () => TurnOnOffMtu ( false ) ); break;
                     case ActionType.TurnOnMtu                  : await Task.Run ( () => TurnOnOffMtu ( true  ) ); break;
-                    case ActionType.BasicRead                  : await Task.Run ( () => BasicRead () ); break;
                     default: break;
                 }
 
@@ -500,8 +489,10 @@ namespace MTUComm
             catch ( Exception e )
             {
                 Errors.LogRemainExceptions ( e );
-                
-                this.OnError ();
+
+                if ( this.OnError != null )
+                     this.OnError ();
+                else throw e; // For the basic reading, that has no OnFinish nor OnError events
             }
         }
 
@@ -3119,19 +3110,22 @@ namespace MTUComm
                     OnProgress ( this, new Delegates.ProgressArgs ( "Checking Encoder..." ) );
 
                     // Check if selected Meter is supported for current MTU
-                    if (this.mtu.Port1.IsForEncoderOrEcoder)
+                    if ( this.mtu.Port1.IsForEncoderOrEcoder )
                     {
-                        this.mtu.Port1.MeterProtocol = ((Meter)Data.Get.Meter).EncoderType;
-                        this.mtu.Port1.MeterLiveDigits = ((Meter)Data.Get.Meter).LiveDigits;
-                        await this.CheckSelectedEncoderMeter();
+                        // Updates the port information without fear, since it was only used to fill the meter list
+                        this.mtu.Port1.MeterProtocol   = ( ( Meter )Data.Get.Meter ).EncoderType;
+                        this.mtu.Port1.MeterLiveDigits = ( ( Meter )Data.Get.Meter ).LiveDigits;
+                        await this.CheckSelectedEncoderMeter ();
                     }
-                    if (form.UsePort2 &&
-                         this.mtu.Port2.IsForEncoderOrEcoder)
+
+                    if ( form.UsePort2 &&
+                         this.mtu.Port2.IsForEncoderOrEcoder )
                     {
-                        this.mtu.Port2.MeterProtocol = ((Meter)Data.Get.Meter_2).EncoderType;
-                        this.mtu.Port2.MeterLiveDigits = ((Meter)Data.Get.Meter_2).LiveDigits;
-                        await this.CheckSelectedEncoderMeter(2);
+                        this.mtu.Port2.MeterProtocol   = ( ( Meter )Data.Get.Meter_2 ).EncoderType;
+                        this.mtu.Port2.MeterLiveDigits = ( ( Meter )Data.Get.Meter_2 ).LiveDigits;
+                        await this.CheckSelectedEncoderMeter ( 2 );
                     }
+
                     Utils.Print ( "------CHECK_ENCODER_FINISH-----" );
                 
                     await this.CheckIsTheSameMTU ();
@@ -3548,10 +3542,10 @@ namespace MTUComm
 
                 Utils.Print ( "----FINAL_READ_START-----" );
                 
-                OnProgress ( this, new Delegates.ProgressArgs ( "Reading MTU..." ) );
+                OnProgress ( this, new Delegates.ProgressArgs ( "Verifying data..." ) );
                 
-                // Checks if all data was write ok, and then to generate the
-                // final log without read again from the MTU the registers already read
+                // Checks if all data was write ok, and then generate the final log
+                // without read again from the MTU the registers already read
                 if ( ( await map.GetModifiedRegistersDifferences ( this.GetMemoryMap ( true ) ) ).Length > 0 )
                     throw new PuckCantCommWithMtuException ();
 
@@ -3575,6 +3569,8 @@ namespace MTUComm
                 #endregion
 
                 await this.CheckIsTheSameMTU ();
+
+                OnProgress ( this, new Delegates.ProgressArgs ( "Reading MTU..." ) );
 
                 // Generate log to show on device screen
                 await this.OnAddMtu ( new Delegates.ActionArgs ( this.mtu, map, form, addMtuLog ) );
@@ -3891,19 +3887,6 @@ namespace MTUComm
         }
 
         #endregion
-
-        #endregion
-
-        #region Basic Read
-
-        /// <summary>
-        /// It is an action without logic, that only performs the initial MTU basic information reading.
-        /// </summary>
-        /// <seealso cref="OnBasicRead"/>
-        public void BasicRead ()
-        {
-            this.OnBasicRead ();
-        }
 
         #endregion
 
