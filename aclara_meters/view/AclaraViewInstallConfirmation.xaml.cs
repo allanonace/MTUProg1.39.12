@@ -358,7 +358,7 @@ namespace aclara_meters.view
                 }
             }
             
-            string resultMsg = ( ! ok ) ? "Unsuccessful Installation" : "Successful Installation";
+            string resultMsg = ( ! ok ) ? "Unsuccessful RF Check" : "Successful RF Check";
             
             await Task.Delay(100).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>

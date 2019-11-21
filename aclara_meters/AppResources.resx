@@ -41,7 +41,7 @@
     </data>
 
     <data name="InstallConfirmation" xml:space="preserve">
-        <value>Install Confirmation</value>
+        <value>RF Check</value>
     </data>
 
     <data name="Timeout" xml:space="preserve">

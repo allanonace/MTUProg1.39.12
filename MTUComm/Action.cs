@@ -556,7 +556,7 @@ namespace MTUComm
                 {ActionType.DataRead,                       "Read Data Log" },
                 {ActionType.MtuInstallationConfirmation,    "Install Confirmation" },
                 {ActionType.ReadFabric,                     "Read Fabric" },
-                {ActionType.ValveOperation,               "Valve Operation" }
+                {ActionType.ValveOperation,                 "Valve Operation" }
             };
 
             LogTypes = new Dictionary<ActionType,String> ()

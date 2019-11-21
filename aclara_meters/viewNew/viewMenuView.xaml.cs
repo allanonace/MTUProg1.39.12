@@ -74,7 +74,7 @@ namespace aclara_meters.view
                 MenuList.Add(new PageItem() { Title = "Rep.MTU / Rep. Meter", Icon = "repMTUrepmeter.png", Color = "White", TargetType = ActionType.ReplaceMtuReplaceMeter });
 
             if (Singleton.Get.Configuration.Global.ShowInstallConfirmation)
-                MenuList.Add(new PageItem() { Title = "Install Confirmation", Icon = "installConfirm.png", Color = "White", TargetType = ActionType.MtuInstallationConfirmation });
+                MenuList.Add(new PageItem() { Title = "Rf Check", Icon = "installConfirm.png", Color = "White", TargetType = ActionType.MtuInstallationConfirmation });
 
             if (Singleton.Get.Configuration.Global.ShowDataRead)
                 MenuList.Add(new PageItem() { Title = "Historical Read", Icon = "readmtu_icon.png", Color = "White", TargetType = ActionType.DataRead });
