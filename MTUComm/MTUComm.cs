@@ -3119,13 +3119,19 @@ namespace MTUComm
                     OnProgress ( this, new Delegates.ProgressArgs ( "Checking Encoder..." ) );
 
                     // Check if selected Meter is supported for current MTU
-                    if ( this.mtu.Port1.IsForEncoderOrEcoder )
-                        await this.CheckSelectedEncoderMeter ();
-
-                    if ( form.UsePort2 &&
-                         this.mtu.Port2.IsForEncoderOrEcoder )
-                        await this.CheckSelectedEncoderMeter ( 2 );
-
+                    if (this.mtu.Port1.IsForEncoderOrEcoder)
+                    {
+                        this.mtu.Port1.MeterProtocol = ((Meter)Data.Get.Meter).EncoderType;
+                        this.mtu.Port1.MeterLiveDigits = ((Meter)Data.Get.Meter).LiveDigits;
+                        await this.CheckSelectedEncoderMeter();
+                    }
+                    if (form.UsePort2 &&
+                         this.mtu.Port2.IsForEncoderOrEcoder)
+                    {
+                        this.mtu.Port2.MeterProtocol = ((Meter)Data.Get.Meter_2).EncoderType;
+                        this.mtu.Port2.MeterLiveDigits = ((Meter)Data.Get.Meter_2).LiveDigits;
+                        await this.CheckSelectedEncoderMeter(2);
+                    }
                     Utils.Print ( "------CHECK_ENCODER_FINISH-----" );
                 
                     await this.CheckIsTheSameMTU ();

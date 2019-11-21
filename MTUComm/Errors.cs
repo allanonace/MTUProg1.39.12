@@ -64,7 +64,7 @@ namespace MTUComm
             { new UnitOfMeasureTagMissingScript (),             205 },
             // Some of the necessary parameters for Meter autodetection are missing in the script
             { new ScriptingAutoDetectTagsMissingScript (),      206 },
-            // The selected Meter is not compatible with the Encoder because of 'No reading / No response from Encoder'
+            // The selected Meter is not compatible with the Encoder connected'
             { new EncoderMeterFFException (),                   207 },
             // The selected Meter is not compatible with the Encoder because of 'Encoder has bad digit in reading'
             { new EncoderMeterFEException (),                   208 },

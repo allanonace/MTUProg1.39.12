@@ -25,7 +25,7 @@
     <Error id="204" message="The script does not contain the tag DriveDialSize needed to select the MTU" /> <!-- footer not necessary -->
     <Error id="205" message="The script does not contain the tag UnitOfMeasure needed to select the MTU" /> <!-- footer not necessary -->
     <Error id="206" message="Some of the necessary parameters for Meter autodetection are missing in the script" footer="Missing Meter auto-detection params" />
-    <Error id="207" message="The selected Meter is not compatible with the Encoder because of 'No reading / No response from Encoder'" footer="Incompatible Meter selected" />
+    <Error id="207" message="The selected Meter is not compatible with the Encoder connected" footer="Incompatible Meter selected" />
     <Error id="208" message="The selected Meter is not compatible with the Encoder because of 'Encoder has bad digit in reading'" footer="Incompatible Meter selected" />
     <Error id="209" message="The selected Meter is not compatible with the Encoder because of 'Delta overflow'" footer="Incompatible Meter selected" />
     <Error id="210" message="The selected Meter is not compatible with the Encoder because of 'Deltas purged / New install / Reset'" footer="Incompatible Meter selected" />
