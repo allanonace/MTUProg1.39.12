@@ -1187,15 +1187,24 @@ namespace MTUComm
                 Array.Copy ( Utils.GetTimeSinceDate ( start ), 0, data, 2, 4 ); // Start time
                 Array.Copy ( Utils.GetTimeSinceDate ( end   ), 0, data, 6, 4 ); // Stop time
 
-                // Start new event log query
-                await this.lexi.Write (
-                    CMD_INIT_EVENT_LOGS,
-                    data,
-                    CMD_ATTEMPTS_N,
-                    WAIT_BTW_CMD_ATTEMPTS,
-                    null,
-                    null,
-                    LexiAction.OperationRequest );
+                try
+                {
+                    // Start new event log query
+                    await this.lexi.Write (
+                        CMD_INIT_EVENT_LOGS,
+                        data,
+                        CMD_ATTEMPTS_N,
+                        WAIT_BTW_CMD_ATTEMPTS,
+                        null,
+                        null,
+                        LexiAction.OperationRequest );
+                }
+                catch ( Exception e )
+                {
+                    if ( e is LexiWritingAckException )
+                         throw new MtuQueryEventLogsException ();
+                    else throw e;
+                }
 
                 await Task.Delay ( WAIT_BEFORE_LOGS );
 

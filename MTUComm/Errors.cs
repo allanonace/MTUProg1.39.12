@@ -30,6 +30,7 @@ namespace MTUComm
             { new PuckCantCommWithMtuException (),              101 },
             { new LexiReadingException (),                      101 },
             { new LexiWritingException (),                      101 },
+            { new LexiWritingAckException (),                   101 },
             // Puck can't read from MTU after has completed writing process
             { new PuckCantReadFromMtuAfterWritingException (),  102 },
             // The Mtu.xml file does no contain the MTU ID specified
@@ -199,7 +200,7 @@ namespace MTUComm
             // Sending activity logs to the FTP has failed, only _var_ files have been uploaded
             { new FtpUpdateLogsException (),                    811 },
  		    // Changed configuration files
-            { new ConfigFilesChangedException (),               812 },
+            { new ConfigFilesChangedException (),               812 }, // TODO: NOT IN USE -> REMOVE?
             // New version files corrupted
             { new ConfigurationFilesNewVersionException (),     813 },
             // Intune credentials missing

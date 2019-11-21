@@ -776,13 +776,13 @@ namespace Lexi
                     ( ( ! avoidACK ) ? "ACK " + Utils.ByteArrayToString ( response ) : "Avoid ACK" ) );
 
                 // If first byte of the recovered ACK is 6, everything has gone OK
-                if ( response[0] != 0x06 )
+                if ( response[ 0 ] != 0x06 )
                 {
                     // NOTE: The LexiWritingEncryptionException exception inherits from OwnSpecialExceptionsBase, a special
                     // NOTE: exception created only for use in a cases similar to this, allowing only one object as a parameter
                     if ( avoidACK )
                          throw new LexiWritingEncryptionException<LexiWriteResult> ( new LexiWriteResult ( rawBuffer, responseOffset ) );
-                    else throw new LexiWritingException ();
+                    else throw new LexiWritingAckException (); // Full response retrieved but without correct ack
                 }
                 else
                 {
@@ -794,7 +794,8 @@ namespace Lexi
             }
             catch ( Exception e )
             {
-                if ( e is LexiWritingEncryptionException<LexiWriteResult> )
+                if ( e is LexiWritingEncryptionException<LexiWriteResult> ||
+                     e is LexiWritingAckException )
                      throw e;
                 else throw new LexiWritingException ();
             }

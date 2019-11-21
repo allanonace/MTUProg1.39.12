@@ -1,15 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Errors>
+    <!--
+      Error: Start the process but stops without execute the whole logic or is impossible to start it due to some action incorrectly performed ( e.g. an empty script )
+      Information: Not start the process ( e.g. MTU is not compatible with the process ) or finish the process with "negative" result but can continue the execution ( e.g. RFCheck )
+    -->
+
     <!-- MTU -->
-    <Error id="100" message="MTU is not the same as at the beginning of the process" footer="Different MTU" />
+    <Error id="100" message="MTU is not the same as at the beginning of the process" footer="Different MTU" no_error="true" />
     <Error id="101" message="Puck cannot communicate with MTU" footer="Puck communication" />
     <Error id="102" message="Puck cannot communicate with MTU after has completed writing process" footer="Puck communication after writing" />
     <Error id="103" message="The Mtu.xml file does no contain the MTU ID specified" footer="MTU not listed in Mtu.xml" />
-    <Error id="104" message="Error trying to start the MeterRead events log query" footer="Starting events log query" />
+    <Error id="104" message="Error trying to start the MeterRead events log query" footer="Historical Read not started" />
     <Error id="105" message="Historical Read process has failed trying to recover data from the MTU" /> <!-- footer not necessary -->
     <Error id="106" message="Historical Read process has failed trying because the MTU is busy" /> <!-- footer not necessary -->
-    <Error id="107" message="Historical Read process can't be performed after having tried it several times" footer="Recover MeterRead events not achieved" />
-    <Error id="108" message="The MTU is not an OnDemand compatible device" footer="It isn't an OnDemand MTU" />
+    <Error id="107" message="Historical Read process can't be performed after having tried it several times" footer="Historical Read not completed" />
+    <Error id="108" message="The MTU is not an OnDemand compatible device" footer="It isn't an OnDemand MTU" no_error="true" />
     <Error id="109" message="There are no records to retrieve for the Historical Read process" no_error="true" />
 
     <!-- Meter -->
@@ -57,12 +62,12 @@
     <Error id="451" message="No demand was selected but the MTU entry in Mtu.xml requires using one" footer="No demand selected" />
 
     <!-- Turn Off -->
-    <Error id="500" message="Turn off MTU process has failed trying to activated the Ship Bit" footer="MTU already turned off" />
+    <Error id="500" message="Turn off MTU process has failed trying to activated the ShipBit" footer="MTU already turned off" />
     <Error id="501" message="MTU cannot be turned on or off after having tried it _var_ times" footer="Turn on or off not achieved" />
     
     <!-- Install Confirmation -->    
-    <Error id="600" message="The MTU does not support for two-way or tag TimeToSync is false in Globa.xml" footer="MTU not support two-way" />
-    <Error id="601" message="The MTU is turned off" footer="MTU turned off" />
+    <Error id="600" message="The MTU does not support for two-way or tag TimeToSync is false in Globa.xml" footer="MTU not support two-way" no_error="true" />
+    <Error id="601" message="The MTU is turned off" footer="MTU turned off" no_error="true" />
     <Error id="602" message="Installation Confirmation process has failed trying to communicate with the DCU" /> <!-- footer not necessary -->
     <Error id="603" message="Installation Confirmation cannot be performed after having tried it _var_ times" footer="IC not achieved" />
     <Error id="604" message="Node Discovery not initialized correctly" footer="NodeDiscovery not initialized" />
@@ -76,27 +81,27 @@
     <Error id="702" message="The MTU encryption process can't be performed because public key does not have the correct format" footer="Encryption public key format" />
     <Error id="703" message="The MTU encryption process can't be performed because broadcast key is not present in Global.xml" footer="Encryption broadcast key missed" />
     <Error id="704" message="The MTU encryption process can't be performed because broadcast key does not have the correct format" footer="Encryption broadcast key format" />
-    <Error id="705" message="The MTU encryption index has reached its limit" footer="Encryption index limit" />
+    <Error id="705" message="The MTU encryption index has reached its limit" footer="Encryption index limit" no_error="true" />
 
-  <!-- Configuration Files -->
+    <!-- Configuration Files -->
     <Error id="800" message="Some of the configuration files are not present in the root folder. Contact your IT administrator" />
     <Error id="801" message="There is a problem with the configuration files and some of them are corrupted. Contact your IT administrator" />
     <Error id="802" message="The certificate that you tried to install is not a valid certificate file ( *.cer )" />
     <Error id="803" message="It is not possible to use the currently installed certificate. Contact your IT administrator" />
-    <Error id="804" message="Download or install a new certificate because the one that is currently used has expired" />
-    <Error id="805" message="Not all necessary permissions have been granted on the Android device" />
+    <Error id="804" message="Download or install a new certificate because the one that is currently used has expired" no_error="true" />
+    <Error id="805" message="Not all necessary permissions have been granted on the Android device" no_error="true" />
     <Error id="806" message="There is a problem with the FTP and configuration files could not be downloaded. Contact your IT administrator" />
-    <Error id="807" message="The device has not internet connection" />
-    <Error id="808" message="The current date of the device is lower than allowed" />
+    <Error id="807" message="The device has not internet connection" no_error="true" />
+    <Error id="808" message="The current date of the device is lower than allowed" no_error="true" />
     <Error id="809" message="Missing credentials for SFTP" />
-    <Error id="810" message="App cannot communicate with the FTP" />
+    <Error id="810" message="App cannot communicate with the FTP" no_error="true" />
     <Error id="811" message="Sending activity logs to the FTP has failed, only _var_ files have been uploaded" />
 	  <Error id="812" message="Changed configuration files"/>
     <Error id="813" message="The new version configuration files are corrupted, the app will continues with the actual ones when restart it. Contact your IT administrator"/>
     <Error id="814" message="Credentials from Intune missing" />
     <Error id="815" message="There is a problem with the camera to scan or take photos" />
     <Error id="816" message="Modification of the content of Global.xml file has failed" />
-    <Error id="817" message="Port type missing in MTU ID: (_var_)" />
+    <Error id="817" message="Port type missing in MTU ID _var_" />
     
     <!-- Configuration Files -->
     <Error id="850" message="The interface for the specified MTU ID was not found" /> <!-- message_release="" /> -->
