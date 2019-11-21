@@ -3863,7 +3863,7 @@ namespace aclara_meters.view
         {
             if ( ! this.waitOnClickLogic )
             {
-                Utils.Print ( "CLICK!" );
+                Utils.PrintDeep ( "CLICK!" );
             
                 this.waitOnClickLogic = true;
                 

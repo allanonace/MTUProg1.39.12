@@ -972,7 +972,7 @@ namespace MTUComm
                 {
                     this.lastLogCreated = addMtuLog.Save ();
 
-                    Console.WriteLine ( this.lastLogCreated );
+                    Utils.PrintDeep ( this.lastLogCreated );
                 }
 
                 // Show result in the screen
@@ -1228,24 +1228,22 @@ namespace MTUComm
         private void LogResult (
             ActionResult result )
         {
-            Console.WriteLine ( "<Results>" );
-            Console.WriteLine ( "\t<Result interface=\"{0}\">", result.ActionType.ToString () );
+            Utils.PrintDeep ( "<Results>" );
+            Utils.PrintDeep ($"\t<Result interface=\"{result.ActionType.ToString ()}\">" );
 
             // Root properties
             foreach ( Parameter param in result.getParameters () )
-                Console.WriteLine (
-                    "\t\t<Output id=\"{0}\" value=\"{1}\"/>",
-                    param.CustomParameter, param.Value );
+                Utils.PrintDeep (
+                    $"\t\t<Output id=\"{param.CustomParameter}\" value=\"{param.Value}\"/>");
 
             // Port properties
             foreach ( ActionResult portResult in result.getPorts () )
                 foreach ( Parameter param in portResult.getParameters () )
-                    Console.WriteLine (
-                        "\t\t<Output port=\"{0}\" id=\"{1}\" value=\"{2}\"/>",
-                        param.Port, param.CustomParameter, param.Value );
+                    Utils.PrintDeep(
+                        $"\t\t<Output port=\"{param.Port}\" id=\"{param.CustomParameter}\" value=\"{param.Value}\"/>");
 
-            Console.WriteLine ("\t</Result>");
-            Console.WriteLine ( "</Results>" );
+            Utils.PrintDeep ("\t</Result>");
+            Utils.PrintDeep ( "</Results>" );
         }
 
         #endregion

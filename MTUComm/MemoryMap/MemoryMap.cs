@@ -1440,7 +1440,7 @@ namespace MTUComm.MemoryMap
                     }
                 }
                 str.AppendLine ( "</MemoryDump>" );
-                Utils.Print ( str.ToString () );
+                Utils.PrintDeep ( str.ToString () );
 
                 str.Clear ();
                 str = null;
