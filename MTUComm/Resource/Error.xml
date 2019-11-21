@@ -118,6 +118,7 @@
     <Error id="905" message="String argument can't be casted to _var_" footer="Invalid value casting" />
     <Error id="906" message="Argument value is outside _var_ limits" footer="Invalid value size" />
     <Error id="907" message="All overload registers are readonly members" footer="Overloads are read-only" />
+    <Error id="908" message="Error preparing values for the log. Check puck position and try again" footer="Preparing log" />
 
     <!--<Error id="" message="" />-->
     <!--<Error id="100" message="Mensaje de prueba de error propio" [ footer="..." ] />-->

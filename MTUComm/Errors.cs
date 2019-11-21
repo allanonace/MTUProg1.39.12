@@ -242,6 +242,8 @@ namespace MTUComm
             { new SetMemoryTypeLimitException (),               906 },
             // All overload registers are readonly members
             { new MemoryOverloadsAreReadOnly (),                907 },
+            // Preparing values to generate the log.\nPlease, check Puck position over the MTU and try again
+            { new PreparingLogInterfaceException (),            908 },
         };
 
         #endregion
