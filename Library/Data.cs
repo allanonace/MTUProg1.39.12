@@ -89,6 +89,38 @@ namespace Library
                .Invoke ( d, new object[] { name, value, true } );
         }
 
+        public static bool SaveIfDotNetAndContinue (
+            Exception e )
+        {
+            Utils.Print ( "Set Last Exception: " + e.Message );
+
+            if ( ! string.IsNullOrEmpty ( e.StackTrace ) )
+                Utils.Print ( e.StackTrace );
+
+            if ( e.IsSystemException () ) // Only cache .NET errors
+            {
+                Utils.Print ( "Set Last Exception: Save!" );
+
+                Data.Set ( "LastException", e );
+            }
+
+            return true;
+        }
+
+        public static Exception GetLastException ()
+        {
+            if ( Data.Contains ( "LastException" ) )
+            {
+                Exception e = Data.Get.LastException;
+
+                Data.Reset ( "LastException" );
+
+                return e;
+            }
+            
+            return null;
+        }
+
         public static void ResetAll ()
         {
             Data d = Get;

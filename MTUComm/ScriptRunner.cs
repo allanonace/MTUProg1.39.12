@@ -74,7 +74,7 @@ namespace MTUComm
             Script script = new Script();
             s = new XmlSerializer(typeof(Script));
             try
-            {             
+            {
                 // Register unknown elements ( not present in Script class ) as additional parameters
                 s.UnknownElement += this.UnknownElementEvent;
 
@@ -90,7 +90,7 @@ namespace MTUComm
 
                 BuildScriptActions ( serial_device, script );
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 if ( ! Errors.IsOwnException ( e ) )
                      Errors.LogErrorNowAndContinue ( new ScriptWrongStructureException () ); // Script file has invalid format or structure

@@ -384,7 +384,7 @@ namespace MTUComm
                 }
             }
             // MTUComm.Exceptions.MtuTypeIsNotFoundException
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 Errors.LogRemainExceptions ( e );
                 
@@ -486,7 +486,7 @@ namespace MTUComm
                 Data.Set ( "ActionInitialized", false );
             }
             // MTUComm.Exceptions.MtuTypeIsNotFoundException
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 Errors.LogRemainExceptions ( e );
 
@@ -569,7 +569,7 @@ namespace MTUComm
 
                 return map;
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 // Is not own exception
                 if ( ! Errors.IsOwnException ( e ) )
@@ -970,7 +970,7 @@ namespace MTUComm
                 }
                 else throw new EncoderAutodetectNotAchievedException ( portIndex.ToString () );
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 // Is not own exception
                 if ( ! Errors.IsOwnException ( e ) )
@@ -1043,7 +1043,7 @@ namespace MTUComm
                     default  : throw new EncoderMeterUnknownException ( "", portIndex ); // Unknown error code
                 }
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 // Is not own exception
                 if ( ! Errors.IsOwnException ( e ) )
@@ -1101,7 +1101,7 @@ namespace MTUComm
                 // Init DataRead logic using translated parameters
                 await this.DataRead ();
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 // Is not own exception
                 if ( ! Errors.IsOwnException ( e ) )
@@ -1190,7 +1190,7 @@ namespace MTUComm
                         null,
                         LexiAction.OperationRequest );
                 }
-                catch ( Exception e )
+                catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
                 {
                     if ( e is LexiWritingAckException )
                          throw new MtuQueryEventLogsException ();
@@ -1229,7 +1229,7 @@ namespace MTUComm
                                 } ),
                                 LexiAction.OperationRequest );
                     }
-                    catch ( Exception e )
+                    catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
                     {
                         // Is not own exception
                         if ( ! Errors.IsOwnException ( e ) )
@@ -1329,7 +1329,7 @@ namespace MTUComm
                 // Generates log using the interface
                 await this.OnDataRead ( new Delegates.ActionArgs ( this.mtu, map, eventLogList ) );
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 // Is not own exception
                 if ( ! Errors.IsOwnException ( e ) )
@@ -1454,7 +1454,7 @@ namespace MTUComm
                 Data.SetTemp("DcuId", DcuId);
                             
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 if ( ! ( e is PuckCantCommWithMtuException ) &&
                      e is AttemptNotAchievedICException )
@@ -1704,7 +1704,7 @@ namespace MTUComm
                                     } ),
                                     LexiAction.OperationRequest );
                             }
-                            catch ( Exception e )
+                            catch ( Exception )
                             {
                                 Utils.Print ( "Node Discovery: Error trying to recover the next node [ Attempts " + countAttemptsEr + " / " + maxAttemptsEr + " ]" );
 
@@ -1893,7 +1893,7 @@ namespace MTUComm
                         await Task.Delay ( WAIT_BTW_NODE_ERROR );
                 }
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 if ( ! Errors.IsOwnException ( e ) )
                      Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
@@ -1925,7 +1925,7 @@ namespace MTUComm
                 // Init DataRead logic using translated parameters
                 await this.RemoteDisconnect (true);
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 // Is not own exception
                 if ( ! Errors.IsOwnException ( e ) )
@@ -2126,7 +2126,7 @@ namespace MTUComm
                         Utils.WriteToGlobal ( "RDDFirmwareVersion", Data.Get.RDDFirmware );
                 }
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 if ( ! throwExceptions )
 		        {
@@ -2223,7 +2223,7 @@ namespace MTUComm
                     throw new AttemptNotAchievedTurnOffException ();
             }
             // System.IO.IOException = Puck is not well placed or is off
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 if ( Errors.IsOwnException ( e ) )
                     Errors.AddError ( e );
@@ -2281,7 +2281,7 @@ namespace MTUComm
 
                 await OnReadFabric ();
             }
-            catch ( Exception )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 Errors.LogErrorNow ( new PuckCantCommWithMtuException () );
             }
@@ -2319,7 +2319,7 @@ namespace MTUComm
                 // Generates log using the interface
                 await this.OnReadMtu ( new Delegates.ActionArgs ( this.mtu, map ) );
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 // Is not own exception
                 if ( ! Errors.IsOwnException ( e ) )
@@ -2514,7 +2514,7 @@ namespace MTUComm
         
                         // At least one Meter was found
                         if ( meters.Count > 0 )
-                            form.AddParameter ( FIELD.METER_TYPE, ( meterPort1 = meters[ 0 ] ).Id.ToString () );
+                            form.AddParameter ( FIELD.METER_TYPE, ( meterPort1 = meters[ 0 ] ) );
                         
                         // No meter was found using the selected parameters
                         else throw new ScriptingAutoDetectMeterException ();
@@ -2536,9 +2536,7 @@ namespace MTUComm
                     else if ( ! port.IsThisMeterSupported ( meterPort1 ) )
                         throw new ScriptingAutoDetectNotSupportedException ();
                     
-                    // Set values for the Meter selected InterfaceTamper the script
-                    this.mtu.Port1.MeterProtocol   = meterPort1.EncoderType;
-                    this.mtu.Port1.MeterLiveDigits = meterPort1.LiveDigits;
+                    form.AddParameter ( FIELD.METER_TYPE, meterPort1 );
                 }
     
                 // Port 2
@@ -2569,8 +2567,8 @@ namespace MTUComm
                             
                             // At least one Meter was found
                             if ( meters.Count > 0 )
-                                form.AddParameter ( FIELD.METER_TYPE_2, ( meterPort2 = meters[ 0 ] ).Id.ToString () );
-                                
+                                form.AddParameter ( FIELD.METER_TYPE_2, ( meterPort2 = meters[ 0 ] ) );
+                            
                             // No meter was found using the selected parameters
                             else throw new ScriptingAutoDetectMeterException ( string.Empty, 2 );
                         }
@@ -2590,10 +2588,8 @@ namespace MTUComm
                         // Current MTU does not support selected Meter
                         else if ( ! port.IsThisMeterSupported ( meterPort2 ) )
                             throw new ScriptingAutoDetectNotSupportedException ( string.Empty, 2 );
-                            
-                        // Set values for the Meter selected InterfaceTamper the script
-                        this.mtu.Port2.MeterProtocol   = meterPort2.EncoderType;
-                        this.mtu.Port2.MeterLiveDigits = meterPort2.LiveDigits;
+                        
+                        form.AddParameter ( FIELD.METER_TYPE_2, meterPort2 );
                     }
                 }
 
@@ -3039,7 +3035,7 @@ namespace MTUComm
 
                 await this.AddMtu ( form, action.User, action );
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 // Is not own exception
                 if ( ! Errors.IsOwnException ( e ) )
@@ -3159,17 +3155,13 @@ namespace MTUComm
                 Meter selectedMeter  = null;
                 Meter selectedMeter2 = null;
                 
-                if ( ! Data.Get.IsFromScripting )
-                     selectedMeter = (Meter)Data.Get.Meter;
-                else selectedMeter = this.configuration.getMeterTypeById ( Convert.ToInt32 ( ( string )Data.Get.Meter ) );
+                selectedMeter = (Meter)Data.Get.Meter;
                 map.P1MeterType = selectedMeter.Id;
 
                 if ( form.UsePort2 &&
                      form.ContainsParameter ( FIELD.METER_TYPE_2 ) )
                 {
-                    if ( ! Data.Get.IsFromScripting )
-                         selectedMeter2 = (Meter)Data.Get.Meter_2;
-                    else selectedMeter2 = this.configuration.getMeterTypeById ( Convert.ToInt32 ( ( string )Data.Get.Meter_2 ) );
+                    selectedMeter2 = (Meter)Data.Get.Meter_2;
                     map.P2MeterType = selectedMeter2.Id;
                 }
 
@@ -3575,7 +3567,7 @@ namespace MTUComm
                 // Generate log to show on device screen
                 await this.OnAddMtu ( new Delegates.ActionArgs ( this.mtu, map, form, addMtuLog ) );
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 // Is not own exception
                 if ( ! Errors.IsOwnException ( e ) )
@@ -3874,7 +3866,7 @@ namespace MTUComm
                     // The MTU is encrypted!
                     return;
                 }
-                catch ( Exception e )
+                catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
                 {
                     // Is not own exception
                     if ( ! Errors.IsOwnException ( e ) )
@@ -4040,7 +4032,7 @@ namespace MTUComm
                 finalRead.AddRange ( secondRead );
             }
             // System.IO.IOException = Puck is not well placed or is off
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 //if ( ! isAfterWriting )
                      Errors.LogErrorNow ( new PuckCantCommWithMtuException () );
@@ -4082,7 +4074,7 @@ namespace MTUComm
             {
                 read = await lexi.Read ( SAME_MTU_ADDRESS, SAME_MTU_DATA );
             }
-            catch ( Exception )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 throw new PuckCantCommWithMtuException ();
             }

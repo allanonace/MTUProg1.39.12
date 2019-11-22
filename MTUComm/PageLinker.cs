@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Acr.UserDialogs;
 using Xamarin.Forms;
 using Xml;
@@ -81,16 +82,29 @@ namespace MTUComm
             bool   kill    = false,
             string btnText = BTN_OK )
         {
+            string message = error.Message;
+
+            #if DEBUG
+
+            Exception e = Data.GetLastException ();
+            if ( e != null )
+            {
+                message += "\n\n" + e.Message;
+                message += "\n\n" + e.StackTrace + "\n";
+            }
+
+            #endif
+
             if ( error.Id > -1 )
             {
                 await GetInstance ()._ShowAlert (
-                    title, error.Message +
+                    title, message +
                     ( ( ! error.NoError ) ? ID_ERROR : ID_INFO ) +
                     error.Id, btnText, kill );
             }
             else
                 await GetInstance ()._ShowAlert (
-                    title, error.Message, btnText, kill );
+                    title, message, btnText, kill );
         }
     }
 }

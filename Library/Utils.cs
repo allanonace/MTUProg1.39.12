@@ -160,7 +160,7 @@ namespace Library
                 // Update instance
                 Utils.SetPropertyValue ( Singleton.Get.Configuration.Global, tagName, value );
             }
-            catch ( Exception )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 throw new GlobalChangedException ();
             }

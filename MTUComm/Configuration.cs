@@ -123,18 +123,16 @@ namespace MTUComm
                      DateTime.Compare ( DateTime.ParseExact ( Global.MinDate, "MM/dd/yyyy", null ), DateTime.Today ) < 0 )
                     throw new DeviceMinDateAllowedException ();
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 if ( ! avoidXmlError )
                 {
-                    if (Errors.IsOwnException(e))
+                    if ( Errors.IsOwnException ( e ) )
                         throw e;
-                    else if (e is FileNotFoundException)
-                        throw new ConfigurationFilesNotFoundException();
+                    else if ( e is FileNotFoundException )
+                        throw new ConfigurationFilesNotFoundException ();
                     else
-                    {
-                        throw new ConfigurationFilesCorruptedException();
-                    }
+                        throw new ConfigurationFilesCorruptedException ();
                 }
             }
         }

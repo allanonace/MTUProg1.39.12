@@ -256,11 +256,11 @@ namespace aclara_meters.view
                         break;
                 }
             }
-            catch (Exception e)
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
-                if (Errors.IsOwnException(e))
-                    ShowErrorAndKill(e);
-                else ShowErrorAndKill(new ConfigurationFilesCorruptedException());
+                if ( Errors.IsOwnException ( e ) )
+                     ShowErrorAndKill ( e );
+                else ShowErrorAndKill ( new ConfigurationFilesCorruptedException () );
 
                 return false;
             }
@@ -350,9 +350,9 @@ namespace aclara_meters.view
                     });
                 }
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Console.WriteLine($"-----  {ex.Message}");
+                Console.WriteLine($"-----  {e.Message}");
             }
         }
 

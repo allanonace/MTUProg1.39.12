@@ -437,17 +437,17 @@ namespace ble_library
                 
                 Utils.PrintDeep ( "BlePort.WriteCharacteristic.. Already writen" );
             }
-            catch (GattException ex)
+            catch ( GattException e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
-                Utils.PrintDeep ( "BlePort.WriteCharacteristic -> ERROR: " + ex.Message + " ( GattException )" );
+                Utils.PrintDeep ( "BlePort.WriteCharacteristic -> ERROR: " + e.Message + " ( GattException )" );
                 
-                throw ex;
+                throw e;
             }
-            catch ( Exception exg )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
-                Utils.PrintDeep ( "BlePort.WriteCharacteristic -> ERROR: " + exg.Message );
+                Utils.PrintDeep ( "BlePort.WriteCharacteristic -> ERROR: " + e.Message );
                 
-                throw exg;
+                throw e;
             }
         }
 
@@ -498,7 +498,7 @@ namespace ble_library
                 
                 //Utils.Print("Rx buffer updated");
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 Utils.PrintDeep ( "BlePort.UpdateBuffer -> ERROR: " + e.Message );
                 
@@ -557,9 +557,9 @@ namespace ble_library
                     // e.g., "Error connecting to device. result=ConnectionAttemptCancelled"
                 }
             }
-            catch (Exception e)
+            catch ( Exception e )
             {
-                Utils.Print(e);
+                Utils.Print ( e );
                 
                 await this.DisconnectDevice ();
             }
@@ -858,25 +858,24 @@ namespace ble_library
         
             try
             {
-
-            using (MemoryStream ms = new MemoryStream())
-            {
-                using (RijndaelManaged AES = new RijndaelManaged())
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    AES.KeySize = 256;
-                    AES.BlockSize = 128;
-                    AES.Padding = PaddingMode.None;
-                    AES.Key = passwordBytes;
-                    AES.Mode = CipherMode.ECB;
-
-                    using (var cs = new CryptoStream(ms, AES.CreateDecryptor(), CryptoStreamMode.Write))
+                    using (RijndaelManaged AES = new RijndaelManaged())
                     {
-                        cs.Write(bytesToBeDecrypted, 0, bytesToBeDecrypted.Length);
-                        cs.Close();
+                        AES.KeySize = 256;
+                        AES.BlockSize = 128;
+                        AES.Padding = PaddingMode.None;
+                        AES.Key = passwordBytes;
+                        AES.Mode = CipherMode.ECB;
+
+                        using (var cs = new CryptoStream(ms, AES.CreateDecryptor(), CryptoStreamMode.Write))
+                        {
+                            cs.Write(bytesToBeDecrypted, 0, bytesToBeDecrypted.Length);
+                            cs.Close();
+                        }
+                        decryptedBytes = ms.ToArray();
                     }
-                    decryptedBytes = ms.ToArray();
                 }
-            }
             }
             catch ( Exception e )
             {

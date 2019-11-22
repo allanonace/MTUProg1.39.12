@@ -338,9 +338,10 @@ namespace MTUComm.MemoryMap
                             // filtered to only recover modified registers
                             this.registersObjs.Add(xmlRegister.Id, memoryRegister);
                         }
-                        catch ( Exception e )
+                        catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
                         {
-                            Utils.PrintDeep("ERROR! " + xmlRegister.Id + " -> " + e.Message + " " + e.InnerException);
+                            Utils.PrintDeep ( "ERROR! " + xmlRegister.Id + " -> " + e.Message + " " + e.InnerException );
+
                             throw new MemoryMapParseXmlException ( xmlRegister.Id );
                         }
                     }
@@ -352,53 +353,51 @@ namespace MTUComm.MemoryMap
                 if ( list.Overloads != null )
                     foreach ( MemOverload xmlOverload in list.Overloads )
                     {
-                        try {
-
-                        RegType type = ( RegType )Enum.Parse ( typeof( RegType ), xmlOverload.Type.ToUpper () );
-                        Type SysType = typeof(System.Object);
-
-                        switch ( type )
+                        try
                         {
-                            case RegType.INT   : SysType = typeof ( int    ); break;
-                            case RegType.UINT  : SysType = typeof ( uint   ); break;
-                            case RegType.ULONG : SysType = typeof ( ulong  ); break;
-                            case RegType.BOOL  : SysType = typeof ( bool   ); break;
-                            case RegType.CHAR  : SysType = typeof ( char   ); break;
-                            case RegType.STRING: SysType = typeof ( string ); break;
+                            RegType type = ( RegType )Enum.Parse ( typeof( RegType ), xmlOverload.Type.ToUpper () );
+                            Type SysType = typeof(System.Object);
+
+                            switch ( type )
+                            {
+                                case RegType.INT   : SysType = typeof ( int    ); break;
+                                case RegType.UINT  : SysType = typeof ( uint   ); break;
+                                case RegType.ULONG : SysType = typeof ( ulong  ); break;
+                                case RegType.BOOL  : SysType = typeof ( bool   ); break;
+                                case RegType.CHAR  : SysType = typeof ( char   ); break;
+                                case RegType.STRING: SysType = typeof ( string ); break;
+                            }
+
+                            // Creates an instance of the generic class
+                            dynamic memoryOverload = Activator.CreateInstance(typeof(MemoryOverload<>).MakeGenericType(SysType),
+                                xmlOverload.Id,
+                                type,
+                                xmlOverload.Description,
+                                xmlOverload.Registers.Select ( o => o.Id ).ToArray (),
+                                xmlOverload.CustomGet );
+
+                            this.CreateOverload_Get ( memoryOverload );
+
+                            dynamic get = base.registers[ METHODS_GET_PREFIX + memoryOverload.id ];
+                            TypeCode tc = Type.GetTypeCode ( SysType.GetType() );
+                            switch (type)
+                            {
+                                case RegType.INT   : memoryOverload.funcGet = (Func<Task<int>>   )get; break;
+                                case RegType.UINT  : memoryOverload.funcGet = (Func<Task<uint>>  )get; break;
+                                case RegType.ULONG : memoryOverload.funcGet = (Func<Task<ulong>> )get; break;
+                                case RegType.BOOL  : memoryOverload.funcGet = (Func<Task<bool>>  )get; break;
+                                case RegType.CHAR  : memoryOverload.funcGet = (Func<Task<char>>  )get; break;
+                                case RegType.STRING: memoryOverload.funcGet = (Func<Task<string>>)get; break;
+                            }
+
+                            AddProperty ( memoryOverload );
                         }
-
-                        // Creates an instance of the generic class
-                        dynamic memoryOverload = Activator.CreateInstance(typeof(MemoryOverload<>).MakeGenericType(SysType),
-                            xmlOverload.Id,
-                            type,
-                            xmlOverload.Description,
-                            xmlOverload.Registers.Select ( o => o.Id ).ToArray (),
-                            xmlOverload.CustomGet );
-
-                        this.CreateOverload_Get ( memoryOverload );
-
-                        dynamic get = base.registers[ METHODS_GET_PREFIX + memoryOverload.id ];
-                        TypeCode tc = Type.GetTypeCode ( SysType.GetType() );
-                        switch (type)
+                        catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
                         {
-                            case RegType.INT   : memoryOverload.funcGet = (Func<Task<int>>   )get; break;
-                            case RegType.UINT  : memoryOverload.funcGet = (Func<Task<uint>>  )get; break;
-                            case RegType.ULONG : memoryOverload.funcGet = (Func<Task<ulong>> )get; break;
-                            case RegType.BOOL  : memoryOverload.funcGet = (Func<Task<bool>>  )get; break;
-                            case RegType.CHAR  : memoryOverload.funcGet = (Func<Task<char>>  )get; break;
-                            case RegType.STRING: memoryOverload.funcGet = (Func<Task<string>>)get; break;
-                        }
+                            Utils.PrintDeep ( "ERROR! " + xmlOverload.Id + " -> " + e.Message + " " + e.InnerException );
 
-                        AddProperty ( memoryOverload );
-                        
-
-                        }
-                        catch ( Exception e )
-                        {
-                            Utils.PrintDeep("ERROR! " + xmlOverload.Id + " -> " + e.Message + " " + e.InnerException);
                             throw new MemoryMapParseXmlException ( xmlOverload.Id );
                         }
-                        
                     }
 
                 #endregion

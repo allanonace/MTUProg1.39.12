@@ -859,9 +859,9 @@ namespace aclara_meters.view
                 });
 
             }
-            catch (Exception ex)
+            catch ( Exception ex ) when ( Data.SaveIfDotNetAndContinue ( ex ) )
             {
-                await Errors.ShowAlert(new CameraException());
+                await Errors.ShowAlert ( new CameraException () );
             }
 
         }

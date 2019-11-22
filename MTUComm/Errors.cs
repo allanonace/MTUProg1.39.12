@@ -244,6 +244,8 @@ namespace MTUComm
             { new MemoryOverloadsAreReadOnly (),                907 },
             // Preparing values to generate the log.\nPlease, check Puck position over the MTU and try again
             { new PreparingLogInterfaceException (),            908 },
+            // Setting value to a Memory Register
+            { new MemoryRegisterSetValueException (),           909 },
         };
 
         #endregion
@@ -489,6 +491,7 @@ namespace MTUComm
             bool kill = false )
         {
             Error error = this.AddErrorByException ( e, portIndex );
+
             PageLinker.ShowAlert ( ERROR_INFO, error, kill );
             
             // Method can be invoked when Configuration is not instantiated yet

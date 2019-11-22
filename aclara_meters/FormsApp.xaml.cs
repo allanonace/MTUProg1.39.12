@@ -30,9 +30,7 @@ namespace aclara_meters
 {
     public partial class FormsApp : Application
     {
-
         #region Attributes
-
         private string DateCheck;
 
         public static CredentialsService credentialsService { get; private set; }
@@ -110,7 +108,18 @@ namespace aclara_meters
         {
             // Catch unhandled exceptions
             AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
-            TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
+            TaskScheduler.UnobservedTaskException      += TaskSchedulerOnUnobservedTaskException;
+
+            /*
+            Not implemented in Xamarin
+            AppDomain.CurrentDomain.FirstChanceException += ( sender, eventArgs ) =>
+            {
+                Exception e = eventArgs.Exception;
+
+                if ( ! Errors.IsOwnException ( e ) )
+                    Data.Set ( "LastException", e );
+            };
+            */
 
             Utils.Print("FormsApp: Interactive [ " + Data.Get.IsFromScripting + " ]");
 

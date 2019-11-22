@@ -314,7 +314,7 @@ namespace Library
             {
                 DeserializeXml_Logic ( deserialize, typeXml.GetProperties () );
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 // Capture validation error with element name and launch a new exception
                 throw new MemoryMapXmlValidationException ( e.Message );

@@ -367,9 +367,9 @@ namespace Lexi
                         return output;
                     }
                 }
-                catch ( Exception )
+                catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
                 {
-                    // only for testing
+                    //...
                 }
             }
             
@@ -471,7 +471,7 @@ namespace Lexi
                 // Validates CRC and if everything is ok, returns recovered data
                 return validateReadResponse ( response, bytesToRead );
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 throw new LexiReadingException ();
             }
@@ -553,9 +553,9 @@ namespace Lexi
 
                     return new LexiWriteResult ( response, inputStream.Length );
                 }
-                catch ( Exception )
+                catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
                 {
-                    // only for testing
+                    //...
                 }
             }
 
@@ -592,7 +592,7 @@ namespace Lexi
 
                     break;
                 }
-                catch ( Exception e )
+                catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
                 {
                     // NOTE: Avoiding ACK is due to the special case related to the new encryption process, where
                     // NOTE: STAR Programmer does not take into account whether LExI commands work or not ( correct ACK = 0x06 )
@@ -742,7 +742,7 @@ namespace Lexi
                         }
                     });
                 }
-                catch ( Exception e )
+                catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
                 {
                     // NOTE: Avoiding ACK is due to the special case related to the new encryption process, where
                     // NOTE: STAR Programmer does not take into account whether LExI commands work or not (correct ACK = 0x06)
@@ -792,7 +792,7 @@ namespace Lexi
                     return new LexiWriteResult ( rawBuffer, responseOffset );
                 }
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 if ( e is LexiWritingEncryptionException<LexiWriteResult> ||
                      e is LexiWritingAckException )

@@ -1387,7 +1387,7 @@ namespace aclara_meters.view
 
                 #endregion
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 if ( ! Errors.IsOwnException ( e ) )
                      Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
@@ -4689,9 +4689,9 @@ namespace aclara_meters.view
                 };
                 await Navigation.PushAsync(scanPage);
             }
-            catch (Exception ex)
+            catch ( Exception ex ) when ( Data.SaveIfDotNetAndContinue ( ex ) )
             {
-                await Errors.ShowAlert(new CameraException () );
+                await Errors.ShowAlert ( new CameraException () );
             }
         }
 
@@ -4739,11 +4739,10 @@ namespace aclara_meters.view
  
                     file.Dispose();
                 });
-
             }
-            catch (Exception)
+            catch ( Exception ex ) when ( Data.SaveIfDotNetAndContinue ( ex ) )
             {
-                await Errors.ShowAlert(new CameraException());
+                await Errors.ShowAlert ( new CameraException () );
             }   
 
         }

@@ -105,11 +105,11 @@ namespace MTUComm
 
 
                 }
-                catch (Exception e)
+                catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
                 {
-                    if (Errors.IsOwnException(e))
-                        throw e;
-                    else throw new CertificateInstalledNotValidException();
+                    if ( Errors.IsOwnException ( e ) )
+                         throw e;
+                    else throw new CertificateInstalledNotValidException ();
                 }
             }
 
@@ -150,11 +150,11 @@ namespace MTUComm
                     }
                     return true;
                 }
-                catch (Exception e)
+                catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
                 {
-                    if (Errors.IsOwnException(e))
-                        throw e;
-                    else throw new CertificateInstalledNotValidException();
+                    if ( Errors.IsOwnException ( e ) )
+                         throw e;
+                    else throw new CertificateInstalledNotValidException ();
                 }
             }
 
@@ -186,11 +186,11 @@ namespace MTUComm
 
                     return true;
                 }
-                catch (Exception e)
+                catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
                 {
-                    if (Errors.IsOwnException(e))
-                        throw e;
-                    else throw new CertificateInstalledNotValidException();
+                    if ( Errors.IsOwnException ( e ) )
+                         throw e;
+                    else throw new CertificateInstalledNotValidException ();
                 }
             }
 
@@ -240,7 +240,7 @@ namespace MTUComm
                     if (DateTime.Compare(this.certificate.NotAfter, DateTime.Today) < 0)
                         throw new CertificateInstalledExpiredException();
                 }
-                catch ( Exception e )
+                catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
                 {
                     if ( Errors.IsOwnException ( e ) )
                          throw e;

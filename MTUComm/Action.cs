@@ -892,7 +892,7 @@ namespace MTUComm
             {
                 await this.OnFinish ( this );
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 if ( ! Errors.IsOwnException ( e ) )
                      Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
@@ -926,7 +926,7 @@ namespace MTUComm
                 // Show result in the screen
                 await this.OnFinish ( this, new Delegates.ActionFinishArgs (result, args.Mtu ) );
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 if ( ! Errors.IsOwnException ( e ) )
                      Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
@@ -980,7 +980,7 @@ namespace MTUComm
 
                 //args.Map.LogFullMemory ();
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 if ( ! Errors.IsOwnException ( e ) )
                      Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
@@ -1011,7 +1011,7 @@ namespace MTUComm
                 // Show result in the screen
                 await this.OnFinish ( this, new Delegates.ActionFinishArgs ( resultBasic ) );
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 if ( ! Errors.IsOwnException ( e ) )
                      Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
@@ -1068,7 +1068,7 @@ namespace MTUComm
                 // Show only the ReadMTU result in the screen
                 await this.OnFinish ( this, new Delegates.ActionFinishArgs ( readMtu_allParamsFromInterface, args.Mtu ) );
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 if ( ! Errors.IsOwnException ( e ) )
                      Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
@@ -1093,7 +1093,7 @@ namespace MTUComm
                 // Show only the ReadMTU result in the screen
                 await this.OnFinish ( this, new Delegates.ActionFinishArgs ( readMtu_allParamsFromInterface, args.Mtu ) );
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 if ( ! Errors.IsOwnException ( e ) )
                      Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
@@ -1145,7 +1145,7 @@ namespace MTUComm
                      result != NodeDiscoveryResult.EXCEPTION )
                     logger.NodeDiscovery ( nodeList, args.Mtu );
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 if ( ! Errors.IsOwnException ( e ) )
                      Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
@@ -1360,7 +1360,7 @@ namespace MTUComm
                         }
                     }
                 }
-                catch ( Exception )
+                catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
                 {
                     Utils.Print ( "Error: Interface parameter '" + parameter.Name + "'" +
                         ( ( string.IsNullOrEmpty ( sourceWhere ) ? string.Empty : " [ Source: " + sourceWhere + " ]" ) ) );
@@ -1573,10 +1573,10 @@ namespace MTUComm
                                                        break;
                                 }
                             }
-                            catch ( Exception )
+                            catch ( Exception e )
                             {
                                 Utils.Print ( "Interface: Map Error: " + sourceProperty );
-                                throw new Exception ();
+                                throw e;
                             }
                             
                             if ( ! string.IsNullOrEmpty ( value ) )

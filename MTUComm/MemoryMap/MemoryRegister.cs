@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Library;
+using Library.Exceptions;
 using Xml;
 
 using REGISTER_TYPE = MTUComm.MemoryMap.AMemoryMap.REGISTER_TYPE;
@@ -596,10 +597,14 @@ namespace MTUComm.MemoryMap
                     // Flag is used to know what registers should be written in the MTU
                     this.modified = true;
                 }
-                catch ( Exception e )
+                catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
                 {
-                     Console.WriteLine ( "Register -> SetValue [ ERROR ]: " + e.Message );
-                     Console.WriteLine ( e.StackTrace );
+                    Console.WriteLine ( "Register -> SetValue [ ERROR ]: " + e.Message );
+
+                    // Is not own exception
+                    if ( ! Errors.IsOwnException ( e ) )
+                         throw new MemoryRegisterSetValueException ();
+                    else throw e;
                 }
             }
             // Register is readonly

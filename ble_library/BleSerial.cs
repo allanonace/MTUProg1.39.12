@@ -89,7 +89,7 @@ namespace ble_library
                     }
                 }
             }
-            catch (Exception e)
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 Utils.PrintDeep ( "BleSerial.Read -> ERROR: " + e.Message );
             
@@ -147,7 +147,7 @@ namespace ble_library
                 }
                 while ( totalBytesToWrite > 0 );
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 Utils.PrintDeep ( "BleSerial.Write -> ERROR: " + e.Message );
             

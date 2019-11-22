@@ -62,4 +62,9 @@
     {
         public SetMemoryTypeLimitException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
     }
+
+    public class MemoryRegisterSetValueException : OwnExceptionsBase
+    {
+        public MemoryRegisterSetValueException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
 }
