@@ -524,7 +524,7 @@ namespace MTUComm.actions
 
         public void AddParameter ( FIELD fieldType, dynamic value, int port = 0 )
         {
-            string[] texts = Texts[ fieldType ];
+            string[]  texts = Texts[ fieldType ];
             Parameter param = AddParameter ( texts[ 0 ], texts[ 1 ], texts[ 2 ], value, port ); // base method
             
             if ( ! this.dictionary.ContainsKey ( fieldType ) )
@@ -535,11 +535,12 @@ namespace MTUComm.actions
 
         public void UpdateParameter ( FIELD fieldType, dynamic value, int port = 0 )
         {
-            if (this.dictionary.ContainsKey(fieldType))
+            if ( this.dictionary.ContainsKey ( fieldType ) )
             {
-                string[] texts = Texts[fieldType];
-                Parameter param = AddParameter(texts[0], texts[1], texts[2], value, port); // base method
-                this.dictionary[fieldType].Value = param;
+                string[]  texts = Texts[ fieldType ];
+                Parameter param = AddParameter ( texts[ 0 ], texts[ 1 ], texts[ 2 ], value, port ); // base method
+
+                this.dictionary[ fieldType ].Value = param;
             }
         }
 

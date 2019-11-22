@@ -2589,7 +2589,7 @@ namespace MTUComm
                         else if ( ! port.IsThisMeterSupported ( meterPort2 ) )
                             throw new ScriptingAutoDetectNotSupportedException ( string.Empty, 2 );
                         
-                        form.UpdateParameter( FIELD.METER_TYPE_2, meterPort2 );
+                        form.UpdateParameter ( FIELD.METER_TYPE_2, meterPort2 );
                     }
                 }
 
@@ -3108,8 +3108,6 @@ namespace MTUComm
                     // Check if selected Meter is supported for current MTU
                     if ( this.mtu.Port1.IsForEncoderOrEcoder )
                     {
-                        var met = Data.Get.Meter;
-
                         // Updates the port information without fear, since it was only used to fill the meter list
                         this.mtu.Port1.MeterProtocol   = ( ( Meter )Data.Get.Meter ).EncoderType;
                         this.mtu.Port1.MeterLiveDigits = ( ( Meter )Data.Get.Meter ).LiveDigits;
