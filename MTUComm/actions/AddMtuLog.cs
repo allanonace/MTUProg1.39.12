@@ -223,9 +223,8 @@ namespace MTUComm
 
             #region Port 1
 
-            Meter meter = ( ! Data.Get.IsFromScripting ) ?
-                ( Meter )form.Meter.Value :
-                this.config.getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter.Value ) );
+            Meter meter = (Meter)form.Meter.Value;
+         
 
             XElement port = new XElement("Port");
             Logger.AddAtrribute(port, "display", "Port 1");
@@ -296,9 +295,7 @@ namespace MTUComm
 
             if ( form.UsePort2 )
             {
-                Meter meter2 = ( ! Data.Get.IsFromScripting ) ?
-                    ( Meter )form.Meter_2.Value :
-                    this.config.getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter_2.Value ) );
+                Meter meter2 = (Meter)form.Meter_2.Value;
 
                 port = new XElement ( "Port");
                 Logger.AddAtrribute ( port, "display", "Port 2" );

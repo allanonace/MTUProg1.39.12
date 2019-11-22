@@ -535,8 +535,12 @@ namespace MTUComm.actions
 
         public void UpdateParameter ( FIELD fieldType, dynamic value, int port = 0 )
         {
-            if ( this.dictionary.ContainsKey ( fieldType ) )
-                this.dictionary[ fieldType ].Value = value;
+            if (this.dictionary.ContainsKey(fieldType))
+            {
+                string[] texts = Texts[fieldType];
+                Parameter param = AddParameter(texts[0], texts[1], texts[2], value, port); // base method
+                this.dictionary[fieldType].Value = param;
+            }
         }
 
         public void AddParameterTranslatingAclaraXml ( Parameter parameter )
