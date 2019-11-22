@@ -1389,8 +1389,8 @@ namespace aclara_meters.view
             }
             catch ( Exception e )
             {
-                if ( ! Errors.IsOwnException ( e ) )
-                     Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                if (!Errors.IsOwnException(e))
+                    Errors.LogErrorNowAndContinue( new PuckCantCommWithMtuException () );
                 else Errors.LogErrorNowAndContinue ( e );
 
                 // Return to main menu

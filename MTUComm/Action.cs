@@ -928,8 +928,8 @@ namespace MTUComm
             }
             catch ( Exception e )
             {
-                if ( ! Errors.IsOwnException ( e ) )
-                     Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                if (!Errors.IsOwnException(e))
+                    Errors.LogErrorNowAndContinue(new PuckCantCommWithMtuException () );
                 else Errors.LogErrorNowAndContinue ( e );
 
                 this.OnError ();
@@ -982,8 +982,8 @@ namespace MTUComm
             }
             catch ( Exception e )
             {
-                if ( ! Errors.IsOwnException ( e ) )
-                     Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                if (!Errors.IsOwnException(e))
+                    Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
                 else Errors.LogErrorNowAndContinue ( e );
 
                 this.OnError ();
@@ -1013,8 +1013,8 @@ namespace MTUComm
             }
             catch ( Exception e )
             {
-                if ( ! Errors.IsOwnException ( e ) )
-                     Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                if (!Errors.IsOwnException(e))
+                    Errors.LogErrorNowAndContinue (new PuckCantCommWithMtuException () );
                 else Errors.LogErrorNowAndContinue ( e );
 
                 this.OnError ();
@@ -1070,8 +1070,8 @@ namespace MTUComm
             }
             catch ( Exception e )
             {
-                if ( ! Errors.IsOwnException ( e ) )
-                     Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                if (!Errors.IsOwnException(e))
+                    Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
                 else Errors.LogErrorNowAndContinue ( e );
 
                 this.OnError ();
@@ -1095,8 +1095,8 @@ namespace MTUComm
             }
             catch ( Exception e )
             {
-                if ( ! Errors.IsOwnException ( e ) )
-                     Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                if (!Errors.IsOwnException(e))
+                    Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
                 else Errors.LogErrorNowAndContinue ( e );
 
                 this.OnError ();
@@ -1147,8 +1147,8 @@ namespace MTUComm
             }
             catch ( Exception e )
             {
-                if ( ! Errors.IsOwnException ( e ) )
-                     Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                if (!Errors.IsOwnException(e))
+                    Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
                 else Errors.LogErrorNowAndContinue ( e );
 
                 this.OnError ();

@@ -572,8 +572,8 @@ namespace MTUComm
             catch ( Exception e )
             {
                 // Is not own exception
-                if ( ! Errors.IsOwnException ( e ) )
-                     throw new PuckCantCommWithMtuException ();
+                if (!Errors.IsOwnException(e))
+                    throw new PuckCantCommWithMtuException ();
                 else throw e;
             }
         }
@@ -1104,8 +1104,8 @@ namespace MTUComm
             catch ( Exception e )
             {
                 // Is not own exception
-                if ( ! Errors.IsOwnException ( e ) )
-                     throw new PuckCantCommWithMtuException ();
+                if (!Errors.IsOwnException(e))
+                    throw new PuckCantCommWithMtuException ();
                 else throw e;
             }
         }
@@ -1232,7 +1232,7 @@ namespace MTUComm
                     catch ( Exception e )
                     {
                         // Is not own exception
-                        if ( ! Errors.IsOwnException ( e ) )
+                        if (!Errors.IsOwnException(e))
                             throw new PuckCantCommWithMtuException ();
 
                         // Finish without perform the action
@@ -1332,8 +1332,8 @@ namespace MTUComm
             catch ( Exception e )
             {
                 // Is not own exception
-                if ( ! Errors.IsOwnException ( e ) )
-                     throw new PuckCantCommWithMtuException ();
+                if (!Errors.IsOwnException(e))
+                    throw new PuckCantCommWithMtuException ();
                 else throw e;
             }
         }
@@ -1462,8 +1462,8 @@ namespace MTUComm
                 // Finish
                 else
                 {
-                    if ( ! wasNotAboutPuck )
-                         Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                    if (!wasNotAboutPuck)
+                        Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
                     else Errors.LogErrorNowAndContinue ( e );
 
                     return IC_EXCEPTION;
@@ -1895,8 +1895,8 @@ namespace MTUComm
             }
             catch ( Exception e )
             {
-                if ( ! Errors.IsOwnException ( e ) )
-                     Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                if (!Errors.IsOwnException(e))
+                    Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
                 else Errors.LogErrorNowAndContinue ( new ActionNotAchievedNodeDiscoveryException ( attemptsLeft + "" ) );
                 
                 result = NodeDiscoveryResult.EXCEPTION;
@@ -1928,8 +1928,8 @@ namespace MTUComm
             catch ( Exception e )
             {
                 // Is not own exception
-                if ( ! Errors.IsOwnException ( e ) )
-                     throw new PuckCantCommWithMtuException ();
+                if (!Errors.IsOwnException(e))
+                    throw new PuckCantCommWithMtuException ();
                 else throw e;
             }
         }
@@ -2136,8 +2136,8 @@ namespace MTUComm
                 else
                 {
                     // Is not own exception
-                    if ( ! Errors.IsOwnException ( e ) )
-                         throw new PuckCantCommWithMtuException ();
+                    if (!Errors.IsOwnException(e))
+                        throw new PuckCantCommWithMtuException ();
                     else throw e;
                 }
             }
@@ -2225,9 +2225,9 @@ namespace MTUComm
             // System.IO.IOException = Puck is not well placed or is off
             catch ( Exception e )
             {
-                if ( Errors.IsOwnException ( e ) )
-                    Errors.AddError ( e );
-                
+                if (Errors.IsOwnException(e))
+                    Errors.AddError(e);
+
                 // Finish
                 else throw new PuckCantCommWithMtuException ();
                 
@@ -2281,7 +2281,7 @@ namespace MTUComm
 
                 await OnReadFabric ();
             }
-            catch ( Exception )
+            catch ( Exception e )
             {
                 Errors.LogErrorNow ( new PuckCantCommWithMtuException () );
             }
@@ -2322,8 +2322,8 @@ namespace MTUComm
             catch ( Exception e )
             {
                 // Is not own exception
-                if ( ! Errors.IsOwnException ( e ) )
-                     throw new PuckCantCommWithMtuException ();
+                if (!Errors.IsOwnException(e))
+                    throw new PuckCantCommWithMtuException ();
                 else throw e;
             }
         }
@@ -2514,7 +2514,7 @@ namespace MTUComm
         
                         // At least one Meter was found
                         if ( meters.Count > 0 )
-                            form.AddParameter ( FIELD.METER_TYPE, ( meterPort1 = meters[ 0 ] ).Id.ToString () );
+                            form.AddParameter ( FIELD.METER_TYPE, ( meterPort1 = meters[ 0 ] ) );
                         
                         // No meter was found using the selected parameters
                         else throw new ScriptingAutoDetectMeterException ();
@@ -2535,10 +2535,8 @@ namespace MTUComm
                     // Check if current MTU supports the selected Meter
                     else if ( ! port.IsThisMeterSupported ( meterPort1 ) )
                         throw new ScriptingAutoDetectNotSupportedException ();
-                    
-                    // Set values for the Meter selected InterfaceTamper the script
-                    this.mtu.Port1.MeterProtocol   = meterPort1.EncoderType;
-                    this.mtu.Port1.MeterLiveDigits = meterPort1.LiveDigits;
+
+                    form.AddParameter(FIELD.METER_TYPE, meterPort1);
                 }
     
                 // Port 2
@@ -2569,7 +2567,7 @@ namespace MTUComm
                             
                             // At least one Meter was found
                             if ( meters.Count > 0 )
-                                form.AddParameter ( FIELD.METER_TYPE_2, ( meterPort2 = meters[ 0 ] ).Id.ToString () );
+                                form.AddParameter ( FIELD.METER_TYPE_2, ( meterPort2 = meters[ 0 ] ) );
                                 
                             // No meter was found using the selected parameters
                             else throw new ScriptingAutoDetectMeterException ( string.Empty, 2 );
@@ -2590,19 +2588,28 @@ namespace MTUComm
                         // Current MTU does not support selected Meter
                         else if ( ! port.IsThisMeterSupported ( meterPort2 ) )
                             throw new ScriptingAutoDetectNotSupportedException ( string.Empty, 2 );
-                            
-                        // Set values for the Meter selected InterfaceTamper the script
-                        this.mtu.Port2.MeterProtocol   = meterPort2.EncoderType;
-                        this.mtu.Port2.MeterLiveDigits = meterPort2.LiveDigits;
+                        form.AddParameter(FIELD.METER_TYPE_2, (meterPort2));
+
                     }
                 }
+                //// Set values for the Meter selected InterfaceTamper the script
+                //this.mtu.Port1.MeterProtocol = meterPort1.EncoderType;
+                //this.mtu.Port1.MeterLiveDigits = meterPort1.LiveDigits;
+
+                //if (this.mtu.TwoPorts &&
+                //     port2IsActivated)
+                //{
+                //    // Set values for the Meter selected InterfaceTamper the script
+                //    this.mtu.Port2.MeterProtocol = meterPort2.EncoderType;
+                //    this.mtu.Port2.MeterLiveDigits = meterPort2.LiveDigits;
+                //}
 
                 #endregion
-    
+
                 #region Validation
 
                 #region Methods
-    
+
                 dynamic Empty = new Func<string,bool> ( ( v ) =>
                                         string.IsNullOrEmpty ( v ) );
     
@@ -3042,8 +3049,8 @@ namespace MTUComm
             catch ( Exception e )
             {
                 // Is not own exception
-                if ( ! Errors.IsOwnException ( e ) )
-                     throw new PuckCantCommWithMtuException ();
+                if (!Errors.IsOwnException(e))
+                    throw new PuckCantCommWithMtuException ();
                 else throw e;
             }
         }
@@ -3159,17 +3166,14 @@ namespace MTUComm
                 Meter selectedMeter  = null;
                 Meter selectedMeter2 = null;
                 
-                if ( ! Data.Get.IsFromScripting )
-                     selectedMeter = (Meter)Data.Get.Meter;
-                else selectedMeter = this.configuration.getMeterTypeById ( Convert.ToInt32 ( ( string )Data.Get.Meter ) );
+                selectedMeter = (Meter)Data.Get.Meter;
+              
                 map.P1MeterType = selectedMeter.Id;
 
                 if ( form.UsePort2 &&
                      form.ContainsParameter ( FIELD.METER_TYPE_2 ) )
                 {
-                    if ( ! Data.Get.IsFromScripting )
-                         selectedMeter2 = (Meter)Data.Get.Meter_2;
-                    else selectedMeter2 = this.configuration.getMeterTypeById ( Convert.ToInt32 ( ( string )Data.Get.Meter_2 ) );
+                    selectedMeter2 = (Meter)Data.Get.Meter_2;
                     map.P2MeterType = selectedMeter2.Id;
                 }
 
@@ -3457,6 +3461,54 @@ namespace MTUComm
 
                 await this.CheckIsTheSameMTU ();
 
+                #region Valve Operation ( prev. Remote Disconnect )
+
+                Utils.Print("--------RDD_START--------");
+
+                if (!Data.Get.UNIT_TEST && // Avoid this subprocess during the unit test because the RemoteDisconnect has its own test
+                     (this.mtu.Port1.IsSetFlow ||
+                       this.mtu.TwoPorts && this.mtu.Port2.IsSetFlow))
+                {
+                    // If the Remote Disconnect fails, it cancels the installation
+                    await this.RemoteDisconnect_Logic(true);
+
+                    await this.CheckIsTheSameMTU();
+                }
+
+                Utils.Print("-------RDD_FINISH--------");
+
+                #endregion
+
+                #region Verifying data 
+
+                Utils.Print("----FINAL_READ_START-----");
+
+                OnProgress(this, new Delegates.ProgressArgs("Verifying data..."));
+
+                // Checks if all data was write ok, and then generate the final log
+                // without read again from the MTU the registers already read
+                if ((await map.GetModifiedRegistersDifferences(this.GetMemoryMap(true))).Length > 0)
+                    throw new PuckCantCommWithMtuException();
+
+                // It is necessary for Encoders and E-coders, which should read the reading from the the meter
+                // NOTE: This flag should be activated after the the previous map comparison, to avoid
+                // NOTE: false positive error when comparing the meter reading and the value not inserted by the user ( zero )
+                if (this.mtu.Port1.IsForEncoderOrEcoder)
+                {
+                    // Reset register cache
+                    map.P1MeterReading.readedFromMtu = false;
+                    map.P2MeterReading.readedFromMtu = false;
+
+                    // Activates flag to read Meter
+                    await map.ReadMeter.SetValueToMtu(true, LEXI_ATTEMPTS_N * 2);
+
+                    await Task.Delay(WAIT_BEFORE_READ_MTU);
+                }
+
+                Utils.Print("----FINAL_READ_FINISH----");
+
+                #endregion
+
                 #region Turn On MTU
 
                 Utils.Print ( "------TURN_ON_START------" );
@@ -3485,25 +3537,7 @@ namespace MTUComm
                 }
 
                 #endregion
-
-                #region Valve Operation ( prev. Remote Disconnect )
-
-                Utils.Print ( "--------RDD_START--------" );
-
-                if ( ! Data.Get.UNIT_TEST && // Avoid this subprocess during the unit test because the RemoteDisconnect has its own test
-                     ( this.mtu.Port1.IsSetFlow ||
-                       this.mtu.TwoPorts && this.mtu.Port2.IsSetFlow ) )
-                {
-                    // If the Remote Disconnect fails, it cancels the installation
-                    await this.RemoteDisconnect_Logic ( true );
-
-                    await this.CheckIsTheSameMTU ();
-                }
-
-                Utils.Print ( "-------RDD_FINISH--------" );
-
-                #endregion
-
+                 
                 #region RFCheck ( prev. Install Confirmation, also for RDD )
 
                 // After TurnOn has to be performed an InstallConfirmation
@@ -3538,36 +3572,6 @@ namespace MTUComm
 
                 #endregion
 
-                #region Read MTU
-
-                Utils.Print ( "----FINAL_READ_START-----" );
-                
-                OnProgress ( this, new Delegates.ProgressArgs ( "Verifying data..." ) );
-                
-                // Checks if all data was write ok, and then generate the final log
-                // without read again from the MTU the registers already read
-                if ( ( await map.GetModifiedRegistersDifferences ( this.GetMemoryMap ( true ) ) ).Length > 0 )
-                    throw new PuckCantCommWithMtuException ();
-
-                // It is necessary for Encoders and E-coders, which should read the reading from the the meter
-                // NOTE: This flag should be activated after the the previous map comparison, to avoid
-                // NOTE: false positive error when comparing the meter reading and the value not inserted by the user ( zero )
-                if ( this.mtu.Port1.IsForEncoderOrEcoder )
-                {
-                    // Reset register cache
-                    map.P1MeterReading.readedFromMtu = false;
-                    map.P2MeterReading.readedFromMtu = false;
-                
-                    // Activates flag to read Meter
-                    await map.ReadMeter.SetValueToMtu ( true, LEXI_ATTEMPTS_N * 2 );
-                    
-                    await Task.Delay ( WAIT_BEFORE_READ_MTU );
-                }
-
-                Utils.Print ( "----FINAL_READ_FINISH----" );
-
-                #endregion
-
                 await this.CheckIsTheSameMTU ();
 
                 OnProgress ( this, new Delegates.ProgressArgs ( "Reading MTU..." ) );
@@ -3578,8 +3582,8 @@ namespace MTUComm
             catch ( Exception e )
             {
                 // Is not own exception
-                if ( ! Errors.IsOwnException ( e ) )
-                     throw new PuckCantCommWithMtuException ();
+                if (!Errors.IsOwnException(e))
+                    throw new PuckCantCommWithMtuException ();
                 else throw e;
             }
         }
@@ -4043,7 +4047,7 @@ namespace MTUComm
             catch ( Exception e )
             {
                 //if ( ! isAfterWriting )
-                     Errors.LogErrorNow ( new PuckCantCommWithMtuException () );
+                Errors.LogErrorNow ( new PuckCantCommWithMtuException () );
                 //else Errors.LogErrorNow ( new PuckCantReadFromMtuAfterWritingException () );
                 
                 return false;
@@ -4082,7 +4086,7 @@ namespace MTUComm
             {
                 read = await lexi.Read ( SAME_MTU_ADDRESS, SAME_MTU_DATA );
             }
-            catch ( Exception )
+            catch ( Exception e )
             {
                 throw new PuckCantCommWithMtuException ();
             }
