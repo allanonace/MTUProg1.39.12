@@ -2594,11 +2594,11 @@ namespace MTUComm
                 }
 
                 #endregion
-    
+
                 #region Validation
 
                 #region Methods
-    
+
                 dynamic Empty = new Func<string,bool> ( ( v ) =>
                                         string.IsNullOrEmpty ( v ) );
     
@@ -3449,6 +3449,54 @@ namespace MTUComm
 
                 await this.CheckIsTheSameMTU ();
 
+                #region Valve Operation ( prev. Remote Disconnect )
+
+                Utils.Print("--------RDD_START--------");
+
+                if (!Data.Get.UNIT_TEST && // Avoid this subprocess during the unit test because the RemoteDisconnect has its own test
+                     (this.mtu.Port1.IsSetFlow ||
+                       this.mtu.TwoPorts && this.mtu.Port2.IsSetFlow))
+                {
+                    // If the Remote Disconnect fails, it cancels the installation
+                    await this.RemoteDisconnect_Logic(true);
+
+                    await this.CheckIsTheSameMTU();
+                }
+
+                Utils.Print("-------RDD_FINISH--------");
+
+                #endregion
+
+                #region Verifying data 
+
+                Utils.Print("----FINAL_READ_START-----");
+
+                OnProgress(this, new Delegates.ProgressArgs("Verifying data..."));
+
+                // Checks if all data was write ok, and then generate the final log
+                // without read again from the MTU the registers already read
+                if ((await map.GetModifiedRegistersDifferences(this.GetMemoryMap(true))).Length > 0)
+                    throw new PuckCantCommWithMtuException();
+
+                // It is necessary for Encoders and E-coders, which should read the reading from the the meter
+                // NOTE: This flag should be activated after the the previous map comparison, to avoid
+                // NOTE: false positive error when comparing the meter reading and the value not inserted by the user ( zero )
+                if (this.mtu.Port1.IsForEncoderOrEcoder)
+                {
+                    // Reset register cache
+                    map.P1MeterReading.readedFromMtu = false;
+                    map.P2MeterReading.readedFromMtu = false;
+
+                    // Activates flag to read Meter
+                    await map.ReadMeter.SetValueToMtu(true, LEXI_ATTEMPTS_N * 2);
+
+                    await Task.Delay(WAIT_BEFORE_READ_MTU);
+                }
+
+                Utils.Print("----FINAL_READ_FINISH----");
+
+                #endregion
+
                 #region Turn On MTU
 
                 Utils.Print ( "------TURN_ON_START------" );
@@ -3477,25 +3525,7 @@ namespace MTUComm
                 }
 
                 #endregion
-
-                #region Valve Operation ( prev. Remote Disconnect )
-
-                Utils.Print ( "--------RDD_START--------" );
-
-                if ( ! Data.Get.UNIT_TEST && // Avoid this subprocess during the unit test because the RemoteDisconnect has its own test
-                     ( this.mtu.Port1.IsSetFlow ||
-                       this.mtu.TwoPorts && this.mtu.Port2.IsSetFlow ) )
-                {
-                    // If the Remote Disconnect fails, it cancels the installation
-                    await this.RemoteDisconnect_Logic ( true );
-
-                    await this.CheckIsTheSameMTU ();
-                }
-
-                Utils.Print ( "-------RDD_FINISH--------" );
-
-                #endregion
-
+                 
                 #region RFCheck ( prev. Install Confirmation, also for RDD )
 
                 // After TurnOn has to be performed an InstallConfirmation
@@ -3527,36 +3557,6 @@ namespace MTUComm
 
                     await this.CheckIsTheSameMTU ();
                 }
-
-                #endregion
-
-                #region Read MTU
-
-                Utils.Print ( "----FINAL_READ_START-----" );
-                
-                OnProgress ( this, new Delegates.ProgressArgs ( "Verifying data..." ) );
-                
-                // Checks if all data was write ok, and then generate the final log
-                // without read again from the MTU the registers already read
-                if ( ( await map.GetModifiedRegistersDifferences ( this.GetMemoryMap ( true ) ) ).Length > 0 )
-                    throw new PuckCantCommWithMtuException ();
-
-                // It is necessary for Encoders and E-coders, which should read the reading from the the meter
-                // NOTE: This flag should be activated after the the previous map comparison, to avoid
-                // NOTE: false positive error when comparing the meter reading and the value not inserted by the user ( zero )
-                if ( this.mtu.Port1.IsForEncoderOrEcoder )
-                {
-                    // Reset register cache
-                    map.P1MeterReading.readedFromMtu = false;
-                    map.P2MeterReading.readedFromMtu = false;
-                
-                    // Activates flag to read Meter
-                    await map.ReadMeter.SetValueToMtu ( true, LEXI_ATTEMPTS_N * 2 );
-                    
-                    await Task.Delay ( WAIT_BEFORE_READ_MTU );
-                }
-
-                Utils.Print ( "----FINAL_READ_FINISH----" );
 
                 #endregion
 
@@ -4035,7 +4035,7 @@ namespace MTUComm
             catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 //if ( ! isAfterWriting )
-                     Errors.LogErrorNow ( new PuckCantCommWithMtuException () );
+                Errors.LogErrorNow ( new PuckCantCommWithMtuException () );
                 //else Errors.LogErrorNow ( new PuckCantReadFromMtuAfterWritingException () );
                 
                 return false;

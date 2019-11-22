@@ -194,7 +194,7 @@ namespace MTUComm
                     // Using certificate with public key
                     if ( data.IsCertLoaded )
                     {
-                        Utils.Print ( "Using certificate creating activity log" );
+                        Utils.PrintDeep ( "Using certificate creating activity log" );
                         
                         Logger.AddParameter ( this.addMtuAction, new Parameter ( "MtuSymKey",            "MtuSymKey",             data.RandomKeyAndShaEncryptedInBase64 ) );
                         Logger.AddParameter ( this.addMtuAction, new Parameter ( "HeadendCertThumb",     "HeadendCertThumb",      data.certificate.Thumbprint ) );
@@ -204,7 +204,7 @@ namespace MTUComm
                     // No certificate present
                     else
                     {
-                        Utils.Print ( "Not using certificate creating activity log" );
+                        Utils.PrintDeep ( "Not using certificate creating activity log" );
                     
                         Logger.AddParameter ( this.addMtuAction, new Parameter ( "MtuSymKey", "MtuSymKey", data.RandomKeyAndShaInBase64 ) );
                     }

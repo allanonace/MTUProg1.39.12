@@ -164,17 +164,17 @@ namespace MTUComm.MemoryMap
             if ( ( val = await MemoryRegisters.PCBSupplierCode.GetValue () ) >= 65 && val <= 90 )
                 tempString = tempString + Convert.ToChar ( val ) + "-";
 
-            Utils.Print ( "PCB Supplier Code: " + val );
+            Utils.PrintDeep ( "PCB Supplier Code: " + val );
             
             if ( ( val = await MemoryRegisters.PCBCoreNumber.GetValue () ) >= 0 )
                 tempString += string.Format ( PCBFORMAT, val );
             
-            Utils.Print ( "PCB Core Number: " + val );
+            Utils.PrintDeep ( "PCB Core Number: " + val );
 
             if ( ( val = await MemoryRegisters.PCBProductRevision.GetValue () ) >= 65 && val <= 90 )
                 tempString = tempString + "-" + Convert.ToChar ( val );
             
-            Utils.Print ( "PCB Product Revision: " + val );
+            Utils.PrintDeep ( "PCB Product Revision: " + val );
 
             string result = ( string.IsNullOrEmpty ( tempString ) ) ? NTAVAILABLE : tempString;
 

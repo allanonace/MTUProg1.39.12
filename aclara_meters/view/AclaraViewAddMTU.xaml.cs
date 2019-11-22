@@ -1389,8 +1389,8 @@ namespace aclara_meters.view
             }
             catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
-                if ( ! Errors.IsOwnException ( e ) )
-                     Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                if (!Errors.IsOwnException(e))
+                    Errors.LogErrorNowAndContinue( new PuckCantCommWithMtuException () );
                 else Errors.LogErrorNowAndContinue ( e );
 
                 // Return to main menu
@@ -3863,7 +3863,7 @@ namespace aclara_meters.view
         {
             if ( ! this.waitOnClickLogic )
             {
-                Utils.Print ( "CLICK!" );
+                Utils.PrintDeep ( "CLICK!" );
             
                 this.waitOnClickLogic = true;
                 

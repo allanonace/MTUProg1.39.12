@@ -168,7 +168,7 @@ namespace aclara_meters
                                         
                                         progress.PercentComplete = ( int )( NumFilesUploaded * 100 / filesToUpload.Count );
                                         
-                                        Utils.Print ( "- " + file.Directory.Name + " uploaded" );
+                                        Utils.PrintDeep ( "- " + file.Directory.Name + " uploaded" );
                                     }
                                 }
                             }
