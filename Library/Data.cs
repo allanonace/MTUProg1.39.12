@@ -92,14 +92,12 @@ namespace Library
         public static bool SaveIfDotNetAndContinue (
             Exception e )
         {
-            Utils.Print ( "Set Last Exception: " + e.Message );
-
-            if ( ! string.IsNullOrEmpty ( e.StackTrace ) )
-                Utils.Print ( e.StackTrace );
+            //if ( ! string.IsNullOrEmpty ( e.StackTrace ) )
+            //    Utils.Print ( e.StackTrace );
 
             if ( e.IsSystemException () ) // Only cache .NET errors
             {
-                Utils.Print ( "Set Last Exception: Save!" );
+                Utils.Print ( "Set Last Exception: " + e.Message );
 
                 Data.Set ( "LastException", e );
             }

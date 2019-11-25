@@ -23,7 +23,7 @@ namespace Lexi
             get
             {
                 byte[] response = new byte[ Bytes.Length - ResponseOffset - 4 ]; // - ACKx2 - CRCx2
-                Array.Copy ( Bytes, ResponseOffset + 2, response, 0, response.Length - 2 );
+                Array.Copy ( Bytes, ResponseOffset + 2, response, 0, response.Length );
 
                 return response;
             }

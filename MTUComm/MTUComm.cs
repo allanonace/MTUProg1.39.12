@@ -870,7 +870,7 @@ namespace MTUComm
 
         #endregion
 
-        #region AutoDetection Encoders
+        #region AutoDetection for E-coders|Encoders
 
         /// <summary>
         /// Process performed only by MTU with ports compatible with Encoder or E-Coders,
@@ -955,13 +955,21 @@ namespace MTUComm
                     // It is usual for LiveDigits to take value 8 but only for a moment
                     // and then reset to zero before take the final/real value
                     if ( ! ( ok = ( protocol == 1 || protocol == 2 || protocol == 4 || protocol == 8 ) && liveDigits > 0 ) )
+                    {
+                        OnProgress ( this, new Delegates.ProgressArgs ( "Encoder auto-detect... " + count + "/" + max ) );
+
                         await Task.Delay ( wait * 1000 );
+                    }
                 }
                 while ( ! ok &&
                         ++count <= max );
                 
                 if ( ok )
                 {
+                    OnProgress ( this, new Delegates.ProgressArgs (
+                        "Encoder auto-detect: " + "P" + portIndex +
+                        " Pr." + protocol + " Ld." + liveDigits ) );
+
                     Port port = ( isPort1 ) ? mtu.Port1 : mtu.Port2;
                     port.MeterProtocol   = protocol;
                     port.MeterLiveDigits = liveDigits;
