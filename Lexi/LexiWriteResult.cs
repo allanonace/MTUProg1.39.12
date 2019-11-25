@@ -18,6 +18,17 @@ namespace Lexi
             }
         }
 
+        public byte[] ResponseOnlyData
+        {
+            get
+            {
+                byte[] response = new byte[ Bytes.Length - ResponseOffset - 4 ]; // - ACKx2 - CRCx2
+                Array.Copy ( Bytes, ResponseOffset + 2, response, 0, response.Length - 2 );
+
+                return response;
+            }
+        }
+
         public LexiWriteResult (
             byte[] bytes,
             int responseOffset )

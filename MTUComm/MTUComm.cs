@@ -3834,7 +3834,7 @@ namespace MTUComm
                         null,
                         LexiAction.OperationRequest );
 
-                    string clientRnd = Convert.ToBase64String ( fullResponse.Response );
+                    string clientRnd = Convert.ToBase64String ( fullResponse.ResponseOnlyData );
 
                     OnProgress ( this, new Delegates.ProgressArgs ( "Encrypt: MTU Public Key" ) );
                     
@@ -3848,7 +3848,7 @@ namespace MTUComm
                         null,
                         LexiAction.OperationRequest );
 
-                    string mtuPublicKey = Convert.ToBase64String ( fullResponse.Response );
+                    string mtuPublicKey = Convert.ToBase64String ( fullResponse.ResponseOnlyData );
 
                     // Saves data that will be use to create the activity log
                     Data.SetTemp ( "ServerRND",    serverRND );
