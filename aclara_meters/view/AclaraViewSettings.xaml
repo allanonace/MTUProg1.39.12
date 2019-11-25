@@ -107,26 +107,23 @@
                                                     TextPosition="Left" LeftImage="{Binding Icon}">
                                                     <accordion:AccordionItemView.ItemContent>
                                                         <StackLayout BackgroundColor="#6aa2b8" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
-                                                            <ListView x:Name="Lista"   
-                                                                      SeparatorVisibility="None"
+                                                            <StackLayout 
+                                                                      x:Name="Lista"   
+                                                                      BindableLayout.ItemsSource="{Binding .ListaDatos}"
                                                                       IsVisible="{Binding HayLista}" 
-                                                                      Margin="0,5,0,5" 
-                                                                      HasUnevenRows="true"
-                                                                      ItemsSource="{Binding .ListaDatos}" 
-                                                                      HeightRequest="{Binding HeightList}" 
+                                                                      Margin="0,5,0,5"
+                                                                      VerticalOptions="FillAndExpand"
                                                                       BackgroundColor="#6aa2b8"
                                                                       IsEnabled="False">
-                                                                <ListView.ItemTemplate>
+                                                                <BindableLayout.ItemTemplate>
                                                                     <DataTemplate>
-                                                                        <ViewCell>
-                                                                            <StackLayout Margin="5,0,5,0" Orientation="Horizontal">
-                                                                                <Label Text="{Binding Descripcion}" MaxLines="1" FontAttributes="Bold" TextColor="White" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
-                                                                                <Label Text="{Binding Valor}" LineBreakMode="TailTruncation" TextColor="White" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
-                                                                            </StackLayout>
-                                                                        </ViewCell>
+                                                                        <StackLayout Margin="5,0,5,0" Orientation="Horizontal">
+                                                                            <Label Text="{Binding Descripcion}" MaxLines="1" FontAttributes="Bold" TextColor="White" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
+                                                                            <Label Text="{Binding Valor}" LineBreakMode="TailTruncation" TextColor="White" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
+                                                                        </StackLayout>
                                                                     </DataTemplate>
-                                                                </ListView.ItemTemplate>
-                                                            </ListView>
+                                                                </BindableLayout.ItemTemplate>
+                                                            </StackLayout>
                                                             <accordion:AccordionRepeaterView IsVisible="{Binding HayAcciones}" x:Name="Acordeon" Spacing="0" Padding="0,0,0,0" 
                                                                        Margin="0,10,0,10" KeepOnlyOneItemOpen="True" ItemsSource="{Binding .SubItemsLog}">
                                                                 <accordion:AccordionRepeaterView.AccordionItemTemplate>
@@ -137,25 +134,22 @@
                                                                             TextPosition="Left" LeftImage="{Binding Icon}">
                                                                             <accordion:AccordionItemView.ItemContent>
                                                                                 <StackLayout Margin="0,0,0,0"  BackgroundColor="#6aa2b8" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
-                                                                                    <ListView x:Name="Lista1" 
-                                                                                              SeparatorVisibility="None"
-                                                                                              Margin="0,5,0,5" 
-                                                                                              HasUnevenRows="true"
-                                                                                              ItemsSource="{Binding .ListaDatos}" 
-                                                                                              HeightRequest="{Binding HeightList}" 
-                                                                                              BackgroundColor="#6aa2b8"
-                                                                                              IsEnabled="false" >
-                                                                                        <ListView.ItemTemplate>
+                                                                                    <StackLayout 
+                                                                                            x:Name="Lista1"   
+                                                                                            BindableLayout.ItemsSource="{Binding .ListaDatos}"
+                                                                                            Margin="0,5,0,5" 
+                                                                                            VerticalOptions="FillAndExpand"
+                                                                                            BackgroundColor="#6aa2b8"
+                                                                                            IsEnabled="false">
+                                                                                        <BindableLayout.ItemTemplate>
                                                                                             <DataTemplate>
-                                                                                                <ViewCell>
-                                                                                                    <StackLayout Margin="10,0,5,0" Orientation="Horizontal">
-                                                                                                        <Label Text="{Binding Descripcion}" MaxLines="1" FontAttributes="Bold" TextColor="White" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
-                                                                                                        <Label Text="{Binding Valor}" LineBreakMode="TailTruncation" TextColor="White" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
-                                                                                                    </StackLayout>
-                                                                                                </ViewCell>
+                                                                                                <StackLayout Margin="10,0,5,0" Orientation="Horizontal">
+                                                                                                    <Label Text="{Binding Descripcion}" MaxLines="1" FontAttributes="Bold" TextColor="White" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
+                                                                                                    <Label Text="{Binding Valor}" LineBreakMode="TailTruncation" TextColor="White" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
+                                                                                                </StackLayout>
                                                                                             </DataTemplate>
-                                                                                        </ListView.ItemTemplate>
-                                                                                    </ListView>
+                                                                                        </BindableLayout.ItemTemplate>
+                                                                                    </StackLayout>
                                                                                 </StackLayout>
                                                                             </accordion:AccordionItemView.ItemContent>
                                                                         </accordion:AccordionItemView>

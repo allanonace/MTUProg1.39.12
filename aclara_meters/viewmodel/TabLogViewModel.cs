@@ -155,7 +155,7 @@ namespace aclara.ViewModels
                                             Icon = sIcon
                                         };
                                         Item1.ListaDatos = ListaDatos;
-                                        Item1.HeightList = Item1.ListaDatos.Count > 5 ? (Item1.ListaDatos.Count * HEIGH_TEXT_LIST) : 100;
+                                        //Item1.HeightList = Item1.ListaDatos.Count > 5 ? (Item1.ListaDatos.Count * HEIGH_TEXT_LIST) : 100;
                                         Item.SubItemsLog = new List<ItemsLog>();
                                         Item.SubItemsLog.Add(Item1);
                                         Item.SubItemsLog.AddRange(SubItemLogs);
@@ -164,7 +164,7 @@ namespace aclara.ViewModels
                                     else
                                     {
                                         Item.ListaDatos = ListaDatos;
-                                        Item.HeightList= Item.ListaDatos.Count>5?(Item.ListaDatos.Count * HEIGH_TEXT_LIST) : 100;
+                                        //Item.HeightList= Item.ListaDatos.Count>5?(Item.ListaDatos.Count * HEIGH_TEXT_LIST) : 100;
                                     }
                                     ItemsLog.Add(Item);
                                     sAccion = String.Empty;
@@ -179,7 +179,7 @@ namespace aclara.ViewModels
                                     };
 
                                     Item.ListaDatos = SubListaDatos;
-                                    Item.HeightList = Item.ListaDatos.Count > 5 ? (Item.ListaDatos.Count * HEIGH_TEXT_LIST) : 100;
+                                    //Item.HeightList = Item.ListaDatos.Count > 5 ? (Item.ListaDatos.Count * HEIGH_TEXT_LIST) : 100;
                                     SubItemLogs.Add(Item);
                                     sSubAccion = String.Empty;
                                 }
@@ -194,7 +194,7 @@ namespace aclara.ViewModels
                                 };
                                 Item.HayLista = true;
                                 Item.ListaDatos = ListaDatos;
-                                Item.HeightList = 100;
+                                //Item.HeightList = 100;
                                 ItemsLog.Add(Item);
                             }
                             if (xReader.Name == "Port")

@@ -1141,7 +1141,6 @@ namespace aclara_meters.view
 
             #endregion
             
-            string txtNoAction = string.Empty;
             switch ( await base.ValidateNavigation ( actionTarget ) )
             {
                 case ValidationResult.EXCEPTION:
