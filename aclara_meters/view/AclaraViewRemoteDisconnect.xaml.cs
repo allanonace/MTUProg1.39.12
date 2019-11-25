@@ -403,6 +403,7 @@ namespace aclara_meters.view
                     dialog_open_bg.IsVisible = true;
                     turnoff_mtu_background.IsVisible = true;
                     dialogView.CloseDialogs();
+                    dialogView.UpdateNoActionText ();
                     dialogView.OpenCloseDialog("dialog_NoAction", true);
                     return;
             }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Library;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -22,7 +23,24 @@ namespace aclara_meters.view
             StackLayout dialog = (StackLayout)this.FindByName(dialogName);
             dialog.IsVisible = visible;
         }
-            
+
+        public void ChangeTextLabel (
+            string id,
+            string text )
+        {
+            if ( string.IsNullOrEmpty ( id ) ||
+                 string.IsNullOrEmpty ( text ) )
+                return;
+
+            Label dialog = ( Label )this.FindByName ( id );
+            dialog.Text = text;
+        }
+
+        public void UpdateNoActionText ()
+        {
+            this.ChangeTextLabel ( "lb_NoAction", Data.Get.ValidationError );
+        }
+
         public StackLayout GetStackLayoutElement(string name)
         {
             return (StackLayout)this.FindByName(name);

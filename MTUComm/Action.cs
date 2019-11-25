@@ -540,8 +540,7 @@ namespace MTUComm
             },
         };
 
-
-        LogDisplays = new Dictionary<ActionType,String> ()
+            LogDisplays = new Dictionary<ActionType,String> ()
             {
                 {ActionType.BasicRead,                      "Basic Read" },
                 {ActionType.ReadMtu,                        "Read MTU" },
@@ -638,15 +637,20 @@ namespace MTUComm
                     InterfaceAux.ResetInfo ();
                 }
             }
-            else
-                if (! alreadyInDataMainAction )
-                {
-                    alreadyInDataMainAction = true;
+            else if ( ! alreadyInDataMainAction )
+            {
+                alreadyInDataMainAction = true;
 
-                    Singleton.Set = this;
+                Singleton.Set = this;
 
-                    this.currentMtu = this.config.GetMtuTypeById ( ( int )Data.Get.MtuBasicInfo.Type );
-                }
+                this.currentMtu = this.config.GetMtuTypeById ( ( int )Data.Get.MtuBasicInfo.Type );
+            }
+        }
+
+        public void LinkOnProgressEvents ()
+        {
+            this.mtucomm.OnProgress -= OnProgress;
+            this.mtucomm.OnProgress += OnProgress;
         }
         
         #endregion
@@ -762,8 +766,7 @@ namespace MTUComm
                 this.mtucomm.OnError -= OnError;
                 this.mtucomm.OnError += OnError;
 
-                this.mtucomm.OnProgress -= OnProgress;
-                this.mtucomm.OnProgress += OnProgress;
+                this.LinkOnProgressEvents ();
 
                 // Can be used in all writing actions ( Add/Replace ), reading and IC,
                 // and for that reason it is easier and clearer to always register this event

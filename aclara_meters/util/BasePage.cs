@@ -141,11 +141,11 @@ namespace aclara_meters.util
         {
             try
             {
-                MTUComm.Action basicRead = new MTUComm.Action(
+                MTUComm.Action basicRead = new MTUComm.Action (
                    FormsApp.ble_interface,
-                   ActionType.BasicRead);
+                   ActionType.BasicRead );
 
-                return await basicRead.RunNavValidation(typeTarget);
+                return await basicRead.RunNavValidation ( typeTarget );
             }
             catch ( Exception )
             {

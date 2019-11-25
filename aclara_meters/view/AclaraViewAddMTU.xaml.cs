@@ -247,6 +247,10 @@ namespace aclara_meters.view
                 this.actionType,
                 FormsApp.credentialsService.UserName);
 
+            this.add_mtu.OnProgress -= OnProgress;
+            this.add_mtu.OnProgress += OnProgress;
+            this.add_mtu.LinkOnProgressEvents ();
+
             isCancellable = false;
 
             PicturesMTU = new List<FileInfo>();
@@ -2865,6 +2869,7 @@ namespace aclara_meters.view
                     dialog_open_bg.IsVisible = true;
                     turnoff_mtu_background.IsVisible = true;
                     dialogView.CloseDialogs();
+                    dialogView.UpdateNoActionText ();
                     dialogView.OpenCloseDialog("dialog_NoAction", true);
                     return;
             }
@@ -4320,9 +4325,6 @@ namespace aclara_meters.view
             #endregion
 
             #region Events
-
-            this.add_mtu.OnProgress -= OnProgress;
-            this.add_mtu.OnProgress += OnProgress;
 
             this.add_mtu.OnFinish -= OnFinish;
             this.add_mtu.OnFinish += OnFinish;

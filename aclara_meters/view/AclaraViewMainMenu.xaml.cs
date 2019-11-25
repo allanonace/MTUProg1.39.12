@@ -1141,6 +1141,7 @@ namespace aclara_meters.view
 
             #endregion
             
+            string txtNoAction = string.Empty;
             switch ( await base.ValidateNavigation ( actionTarget ) )
             {
                 case ValidationResult.EXCEPTION:
@@ -1151,7 +1152,8 @@ namespace aclara_meters.view
                     dialog_open_bg.IsVisible = true;
                     turnoff_mtu_background.IsVisible = true;
                     dialogView.CloseDialogs();
-                    dialogView.OpenCloseDialog("dialog_NoAction", true);
+                    dialogView.UpdateNoActionText ();
+                    dialogView.OpenCloseDialog ( "dialog_NoAction", true );
                     return;
             }
 

@@ -360,6 +360,7 @@ namespace MTUComm
             ActionType type )
         {
             bool ok = false;
+            string textError = string.Empty;
 
             try
             {
@@ -373,14 +374,12 @@ namespace MTUComm
                     case ActionType.ReplaceMtuReplaceMeter     :
                     case ActionType.ReadFabric                 :
                     case ActionType.ReadMtu                    :
-                    case ActionType.TurnOffMtu                 :
-                    case ActionType.TurnOnMtu                  :
                     case ActionType.BasicRead                  : ok = true; break;
-                    case ActionType.DataRead                   : ok = await Task.Run ( () => Validate_DataRead () ); break;
-                    case ActionType.MtuInstallationConfirmation: ok = await Task.Run ( () => Validate_InstallConfirmation () ); break;
-                    case ActionType.ValveOperation             : ok = await Task.Run ( () => Validate_RemoteDisconnect () ); break;
-                   // case ActionType.TurnOffMtu                 : ok = await Task.Run ( () => Validate_TurnOff () ); break;
-                   // case ActionType.TurnOnMtu                  : ok = await Task.Run ( () => Validate_TurnOn () ); break;
+                    case ActionType.TurnOffMtu                 : ok = await Task.Run ( () => Validate_TurnOff             ( out textError ) ); break;
+                    case ActionType.TurnOnMtu                  : ok = await Task.Run ( () => Validate_TurnOn              ( out textError ) ); break;
+                    case ActionType.DataRead                   : ok = await Task.Run ( () => Validate_DataRead            ( out textError ) ); break;
+                    case ActionType.MtuInstallationConfirmation: ok = await Task.Run ( () => Validate_InstallConfirmation ( out textError ) ); break;
+                    case ActionType.ValveOperation             : ok = await Task.Run ( () => Validate_RemoteDisconnect    ( out textError ) ); break;
                 }
             }
             // MTUComm.Exceptions.MtuTypeIsNotFoundException
@@ -388,10 +387,13 @@ namespace MTUComm
             {
                 Errors.LogRemainExceptions ( e );
                 
-                this.OnError ();
+                Data.SetTemp ( "ValidationError", "The selected action is not compatible with the current MTU" );
 
                 return ValidationResult.EXCEPTION;
             }
+
+            if ( ! ok )
+                Data.SetTemp ( "ValidationError", textError );
 
             return ( ok ) ? ValidationResult.OK : ValidationResult.FAIL;
         }
@@ -434,7 +436,6 @@ namespace MTUComm
                 // because an action can be launched multiple times because of exceptions
                 // that cancel the action but not move to the main menu and could be happen
                 // that perform the basic read with a different MTU
-                //if ( ! this.basicInfoLoaded )
                 if ( ! Data.Contains ( "MtuBasicInfo" ) ||
                      type == ActionType.ReadMtu ||
                      type == ActionType.MtuInstallationConfirmation )
@@ -500,38 +501,78 @@ namespace MTUComm
 
         #region Launch Validations
 
-        private bool Validate_InstallConfirmation ()
+        private bool Validate_InstallConfirmation (
+            out string textError )
         {
-            // MTU not turned off and that supports the IC process
-            return ! Data.Get.MtuBasicInfo.Shipbit &&
-                   this.global.TimeToSync ||
-                   this.mtu.TimeToSync;
+            if ( Data.Get.MtuBasicInfo.Shipbit )
+            {
+                textError = "The MTU is turned Off";
+                return false;
+            }
+            else if ( ! this.global.TimeToSync ||
+                      ! this.mtu.TimeToSync )
+            {
+                textError = "The MTU does not support for two-way or tag TimeToSync is false in Globa.xml";
+                return false;
+            }
+
+            textError = string.Empty;
+            return true;
         }
 
-        private bool Validate_RemoteDisconnect ()
+        private bool Validate_RemoteDisconnect (
+            out string textError )
         {
-            // Some port of the MTU is for a RDD device
-            return this.mtu.Port1.IsSetFlow ||
-                   this.mtu.TwoPorts && this.mtu.Port2.IsSetFlow;
+            if ( ! this.mtu.Port1.IsSetFlow &&
+                 ( ! this.mtu.TwoPorts || ! this.mtu.Port2.IsSetFlow ) )
+            {
+                textError = "The MTU has not port for an RDD device";
+                return false;
+            }
+            
+            textError = string.Empty;
+            return true;
         }
 
-        private bool Validate_DataRead ()
+        private bool Validate_DataRead (
+            out string textError )
         {
             // MTU should supports OnDemand features
-            return this.mtu.MtuDemand &&
-                   this.mtu.DataRead;
+            if ( ! this.mtu.MtuDemand ||
+                 ! this.mtu.DataRead )
+            {
+                textError = "The MTU is not an OnDemand 1.2 compatible device";
+                return false;
+            }
+
+            textError = string.Empty;
+            return true;
         }
 
-        private bool Validate_TurnOff ()
+        private bool Validate_TurnOff (
+            out string textError )
         {
-            // MTU should not be turned off already
-            return ! Data.Get.MtuBasicInfo.Shipbit;
+            if ( Data.Get.MtuBasicInfo.Shipbit )
+            {
+                textError = "The MTU is already turned Off";
+                return false;
+            }
+
+            textError = string.Empty;
+            return true;
         }
 
-        private bool Validate_TurnOn ()
+        private bool Validate_TurnOn (
+            out string textError )
         {
-            // MTU should be turned off
-            return Data.Get.MtuBasicInfo.Shipbit;
+            if ( ! Data.Get.MtuBasicInfo.Shipbit )
+            {
+                textError = "The MTU is already turned On";
+                return false;
+            }
+
+            textError = string.Empty;
+            return true;
         }
 
         #endregion
