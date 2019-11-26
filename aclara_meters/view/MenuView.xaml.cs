@@ -80,7 +80,13 @@ namespace aclara_meters.view
             MenuList.Add(new PageItem() { Title = "Read MTU", Icon = "readmtu_icon.png", Color = "White", TargetType = ActionType.ReadMtu });
 
             if (Singleton.Get.Configuration.Global.ShowTurnOff)
+            {
                 MenuList.Add(new PageItem() { Title = "Turn Off MTU", Icon = "turnoff_icon.png", Color = "White", TargetType = ActionType.TurnOffMtu });
+
+                #if DEBUG
+                MenuList.Add(new PageItem() { Title = "Turn On MTU", Icon = "turnoff_icon.png", Color = "White", TargetType = ActionType.TurnOnMtu });
+                #endif
+            }
 
             if (Singleton.Get.Configuration.Global.ShowAddMTU)
                 MenuList.Add(new PageItem() { Title = "Add MTU", Icon = "addMTU.png", Color = "White", TargetType = ActionType.AddMtu });
@@ -108,10 +114,10 @@ namespace aclara_meters.view
 
             if (Singleton.Get.Configuration.Global.ShowDataRead)
                 MenuList.Add(new PageItem() { Title = "Historical Read", Icon = "data_read.png", Color = "White", TargetType = ActionType.DataRead });
-#if DEBUG
-            MenuList.Add(new PageItem() { Title = "Read Fabric", Icon = "readmtu_icon.png", Color = "White", TargetType = ActionType.ReadFabric });
-#endif
 
+            #if DEBUG
+            MenuList.Add(new PageItem() { Title = "Read Fabric", Icon = "readmtu_icon.png", Color = "White", TargetType = ActionType.ReadFabric });
+            #endif
 
             // ListView needs to be at least  elements for UI Purposes, even empty ones
             while (MenuList.Count < 9)
@@ -119,7 +125,6 @@ namespace aclara_meters.view
 
             // Setting our list to be ItemSource for ListView in MainPage.xaml
             navigationDrawerList.ItemsSource = MenuList;
-
         }
 
         private void LoadPhoneUI()

@@ -123,7 +123,6 @@ namespace aclara_meters.view
 
             }
         }
-
     
         public AclaraViewReadMTU(IUserDialogs dialogs, ActionType page)
         {
@@ -186,7 +185,7 @@ namespace aclara_meters.view
             TopBar.GetTGRElement("back_button")        .Tapped += ReturnToMainView;
             bottomBar.GetTGRElement("bg_action_button").Tapped += ReadMTU;
 
-            dialogView.GetTGRElement("turnoffmtu_ok").Tapped += TurnOffMTUOkTapped;         
+            dialogView.GetTGRElement("turnoffmtu_ok").Tapped += TurnOnOffMTUOkTapped;         
             dialogView.GetTGRElement("turnoffmtu_no").Tapped += TurnOffMTUNoTapped;
             dialogView.GetTGRElement("turnoffmtu_ok_close").Tapped += dialog_cancelTapped;
             dialogView.GetTGRElement("replacemeter_ok").Tapped += dialog_OKBasicTapped;
@@ -215,7 +214,6 @@ namespace aclara_meters.view
             
             dialogView.GetTGRElement("dialog_AddMTU_ok").Tapped += dialog_OKBasicTapped;
             dialogView.GetTGRElement("dialog_AddMTU_cancel").Tapped += dialog_cancelTapped;
-
         }
 
         private async void LogOffOkTapped(object sender, EventArgs e)
@@ -246,6 +244,7 @@ namespace aclara_meters.view
             turnoff_mtu_background.IsVisible = false;
             Navigation.PopToRootAsync(false);
         }
+
         private void dialog_OKBasicTapped(object sender, EventArgs e)
         {
             Label obj = (Label)sender;
@@ -302,49 +301,55 @@ namespace aclara_meters.view
             Navigation.PopToRootAsync(false);
         }
 
-        private void TurnOffMTUOkTapped(object sender, EventArgs e)
-        {
-            CallLoadViewTurnOff();
-         }
+        private bool turnOnOffIsOn;
 
-        private async Task TurnOffMethod()
+        private void TurnOnOffMTUOkTapped ( object sender, EventArgs e )
         {
+            CallLoadViewTurnOnOff ();
+        }
+
+        private async Task TurnOnOffMethod ()
+        {
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                Label lb = ( Label )dialogView.FindByName ( "lb_TurnOnOff_Wait" );
+                lb.Text = $"Turning {(( turnOnOffIsOn ) ? "On" : "Off")} MTU";
+            });
 
             MTUComm.Action turnOffAction = new MTUComm.Action (
                 FormsApp.ble_interface,
-                MTUComm.Action.ActionType.TurnOffMtu,
+                ( turnOnOffIsOn ) ? MTUComm.Action.ActionType.TurnOnMtu : MTUComm.Action.ActionType.TurnOffMtu,
                 FormsApp.credentialsService.UserName );
 
-            turnOffAction.OnFinish -= TurnOff_OnFinish;
-            turnOffAction.OnFinish += TurnOff_OnFinish;
+            turnOffAction.OnFinish -= TurnOff_OnOffFinish;
+            turnOffAction.OnFinish += TurnOff_OnOffFinish;
 
-            turnOffAction.OnError  -= TurnOff_OnError;
-            turnOffAction.OnError  += TurnOff_OnError;
+            turnOffAction.OnError  -= TurnOff_OnOffError;
+            turnOffAction.OnError  += TurnOff_OnOffError;
 
-            await turnOffAction.Run();
+            await turnOffAction.Run ();
         }
 
-        public async Task TurnOff_OnFinish ( object sender, Delegates.ActionFinishArgs args )
+        public async Task TurnOff_OnOffFinish ( object sender, Delegates.ActionFinishArgs args )
         {
-          
             await Task.Delay(2000).ContinueWith(t =>
                 Device.BeginInvokeOnMainThread(() =>
                 {
                     Label textResult = (Label)dialogView.FindByName("dialog_turnoff_text");
-                    textResult.Text = "MTU turned off Successfully";
+                    textResult.Text = $"MTU turned {(( turnOnOffIsOn ) ? "On" : "Off")} Successfully";
 
                     dialogView.OpenCloseDialog("dialog_turnoff_two", false);
                     dialogView.OpenCloseDialog("dialog_turnoff_three", true);
                 }));
         }
 
-        public void TurnOff_OnError ()
+        public void TurnOff_OnOffError ()
         {
             Task.Delay(2000).ContinueWith(t =>
                 Device.BeginInvokeOnMainThread(() =>
                 {
                     Label textResult = (Label)dialogView.FindByName("dialog_turnoff_text");
-                    textResult.Text = "MTU turned off Unsuccessfully";
+                    textResult.Text = $"MTU turned {(( turnOnOffIsOn ) ? "On" : "Off")} Unsuccessfully";
 
                     dialogView.OpenCloseDialog("dialog_turnoff_two", false);
                     dialogView.OpenCloseDialog("dialog_turnoff_three", true);
@@ -456,11 +461,8 @@ namespace aclara_meters.view
                     );
 
                     #endregion
-
                     break;
-
                 case ActionType.ReadMtu:
-
                     #region ReadMTU  
                     await Task.Delay(200).ContinueWith(t =>
 
@@ -472,24 +474,25 @@ namespace aclara_meters.view
                     );
 
                     #endregion
-
                     break;
-
-                 case ActionType.TurnOffMtu:
-
-                    #region Turn Off Controller
+                case ActionType.TurnOffMtu:
+                case ActionType.TurnOnMtu:
+                    #region Turn On|Off Controller
 
                     await Task.Delay(200).ContinueWith(t =>
-
                         Device.BeginInvokeOnMainThread(() =>
                         {
-
-                            dialogView.CloseDialogs();
+                            dialogView.CloseDialogs ();
 
                             #region Check ActionVerify
 
-                            if (this.global.ActionVerify)
+                            turnOnOffIsOn = ( actionTarget == ActionType.TurnOnMtu );
+
+                            if ( this.global.ActionVerify )
                             {
+                                Label lb = ( Label )dialogView.FindByName ( "lb_TurnOnOff_Question" );
+                                lb.Text = $"Are you sure you want to turn {( ( turnOnOffIsOn ) ? "On" : "Off" )} MTU?";
+
                                 dialog_open_bg.IsVisible = true;
                                 turnoff_mtu_background.IsVisible = true;
                                 dialogView.OpenCloseDialog("dialog_turnoff_one", true);
@@ -497,19 +500,16 @@ namespace aclara_meters.view
                             else
                             {
                                 this.actionType = this.actionTypeNew;
-                                CallLoadViewTurnOff();
+                                CallLoadViewTurnOnOff();
                             }
-                            #endregion
 
+                            #endregion
                         })
                     );
 
                     #endregion
-
                     break;
-
                 case ActionType.MtuInstallationConfirmation:
-
                     #region Install Confirm Controller
 
                     this.actionType = this.actionTypeNew;
@@ -525,9 +525,7 @@ namespace aclara_meters.view
                     );
 
                     #endregion
-
                     break;
-
                 case ActionType.AddMtu:
                     #region AddMTU
                     await ControllerAction(actionTarget, "dialog_AddMTU");
@@ -535,55 +533,39 @@ namespace aclara_meters.view
 
                     #endregion
                     break;
-
                 case ActionType.ReplaceMTU:
-
                     #region Replace Mtu Controller
                     await ControllerAction(actionTarget, "dialog_replacemeter_one");
 
 
                     #endregion
-
                     break;
-
                 case ActionType.ReplaceMeter:
-
                     #region Replace Meter Controller
                     await ControllerAction(actionTarget, "dialog_meter_replace_one");
 
                     #endregion
-
                     break;
-
                 case ActionType.AddMtuAddMeter:
-
                     #region Add Mtu | Add Meter Controller
                     await ControllerAction(actionTarget, "dialog_AddMTUAddMeter");
 
                     #endregion
-
                     break;
-
                 case ActionType.AddMtuReplaceMeter:
-
                     #region Add Mtu | Replace Meter Controller
                     await ControllerAction(actionTarget, "dialog_AddMTUReplaceMeter");
 
                     #endregion
-
                     break;
-
                 case ActionType.ReplaceMtuReplaceMeter:
-
                     #region Replace Mtu | Replace Meter Controller
 
                     await ControllerAction(actionTarget, "dialog_ReplaceMTUReplaceMeter");
 
 
                     #endregion
-
                     break;
-
             }
         }
 
@@ -615,14 +597,13 @@ namespace aclara_meters.view
                 })
             );
         }
-
         
-        private void CallLoadViewTurnOff()
+        private void CallLoadViewTurnOnOff ()
         {
             dialogView.OpenCloseDialog("dialog_turnoff_one", false);
             dialogView.OpenCloseDialog("dialog_turnoff_two", true);
 
-            Task.Factory.StartNew(TurnOffMethod);
+            Task.Factory.StartNew ( TurnOnOffMethod );
         }
 
         private async Task ThreadProcedureMTUCOMMAction()
@@ -771,7 +752,6 @@ namespace aclara_meters.view
             listaMTUread.IsVisible = true;
         }
 
-
         private async Task ThreadProcedureMTUReadFabric ()
         {
             //Create Ation when opening Form
@@ -815,6 +795,7 @@ namespace aclara_meters.view
                 EnableInteraction();
             });
         }
+
         private async void TakePicture(object sender, EventArgs e)
         {
             try

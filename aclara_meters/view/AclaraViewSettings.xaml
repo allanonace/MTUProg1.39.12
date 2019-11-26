@@ -55,24 +55,24 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <Image x:Name="btnPrevious" Margin="0,0,0,0" HeightRequest="56" Scale="1" Source="prev_icon.png"  
+                                <Image x:Name="btnPrevious" Margin="5,0,0,0" HeightRequest="45" Scale="1" Source="prev_icon.png"  
                                        Grid.Row="0" Grid.Column="0" HorizontalOptions="Start">
                                     <Image.GestureRecognizers>
                                         <TapGestureRecognizer x:Name="TabPrevious" NumberOfTapsRequired="1" />
                                     </Image.GestureRecognizers>
                                 </Image>
                                 <Label x:Name="file_name" Grid.Row="0" Grid.Column="1" HorizontalOptions="Center" 
-                                       Margin="0,14,0,0" FontSize="18" TextColor="#6aa2b8" Text="Activity Log:" />
-                                <Image x:Name="btnNext" Margin="0,0,0,0" HeightRequest="56" Scale="1" Source="next_icon.png"  
+                                       VerticalOptions="Center" FontSize="18" TextColor="#6aa2b8" Text="Activity Log: ..." />
+                                <Image x:Name="btnNext" Margin="0,0,5,0" HeightRequest="45" Scale="1" Source="next_icon.png"  
                                        Grid.Row="0" Grid.Column="2" HorizontalOptions="End">
                                     <Image.GestureRecognizers>
                                         <TapGestureRecognizer x:Name="TabNext" NumberOfTapsRequired="1" />
                                     </Image.GestureRecognizers>
                                 </Image>
-                                </Grid>
-                                <Image Margin="-16,4,-16,8" WidthRequest="380" HeightRequest="2" BackgroundColor="#6aa2b8" />
-                            
-                            </StackLayout>
+                            </Grid>
+
+                            <Image Margin="-16,4,-16,8" WidthRequest="380" HeightRequest="2" BackgroundColor="#6aa2b8" />
+                        </StackLayout>
                             
                         <ScrollView Margin="0,-6,0,-6" x:Name="scrollSettings" IsEnabled="true">
                         <StackLayout Orientation="Vertical"    VerticalOptions="StartAndExpand">

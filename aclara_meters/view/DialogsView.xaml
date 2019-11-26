@@ -24,7 +24,7 @@
                 </StackLayout>
             </StackLayout>
             <StackLayout x:Name="dialog_turnoff_one" IsVisible="false" Margin="0" Opacity="1">
-                <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" FontSize="20" Text="Are you sure you want to turn off MTU?">
+                <Label x:Name="lb_TurnOnOff_Question" Margin="12,12,12,12" HorizontalTextAlignment="Center" FontSize="20" Text="Are you sure you want to turn Off MTU?">
                 </Label>
                 <StackLayout Margin="0,12,0,0" IsVisible="true" Orientation="Horizontal">
                     <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" TextColor="#6aa2b8" FontSize="20" Text="Yes">
@@ -40,7 +40,7 @@
                 </StackLayout>
             </StackLayout>
             <StackLayout x:Name="dialog_turnoff_two" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" Margin="0" Opacity="1">
-                <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" TextColor="#6aa2b8" FontSize="20" Text="Turning off MTU">
+                <Label x:Name="lb_TurnOnOff_Wait" Margin="12,12,12,12" HorizontalTextAlignment="Center" TextColor="#6aa2b8" FontSize="20" Text="Turning Off MTU">
                 </Label>
                 <StackLayout Margin="0,12,0,0" Orientation="Horizontal">
                     <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" FontSize="18" Text="Please, wait...">
@@ -48,7 +48,7 @@
                 </StackLayout>
             </StackLayout>
             <StackLayout x:Name="dialog_turnoff_three" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" Margin="0" Opacity="1">
-                <Label x:Name="dialog_turnoff_text" Margin="12,12,12,12" HorizontalTextAlignment="Center" FontSize="20" Text="MTU turned off Successfully">
+                <Label x:Name="dialog_turnoff_text" Margin="12,12,12,12" HorizontalTextAlignment="Center" FontSize="20" Text="MTU turned Off Successfully">
                 </Label>
                 <StackLayout Margin="0,12,0,0" Orientation="Horizontal">
                     <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" TextColor="#6aa2b8" FontSize="20" Text="OK">
