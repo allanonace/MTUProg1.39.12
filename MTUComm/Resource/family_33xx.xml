@@ -903,6 +903,26 @@
   </Register>
   -->
   <Register> <!-- OK -->
+    <Id>P1DigitsToDrop</Id>
+    <Description>P1 Encoder Digits to drop</Description>
+    <Type>int</Type>
+    <Address>230</Address>
+    <Size>1</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>P2DigitsToDrop</Id>
+    <Description>P2 Encoder Digits to drop</Description>
+    <Type>int</Type>
+    <Address>231</Address>
+    <Size>1</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
     <Id>PCBSupplierCode</Id>
     <Description>PCB Number Supplier Code. Range ASCII [65,90]</Description>
     <Type>int</Type>

@@ -581,6 +581,7 @@ namespace Xml
             this.TimeToSync                   = false;                // Enable MTU time sync
             this.TimeToSyncHR                 = 0;                    // [0-23] Hour at which MTU listens for time sync
             this.TimeToSyncMin                = 0;                    // [0-59] Minute at which MTU listens for time sync
+            this.ArtificialTimeSync           = false;                // Force to indicate that the IC was successful and simulate it
 
             // Node Discovery
             this.AutoRFCheck                  = false;                // It is used within the condition that allows to perform the Node Discovery process with OnDemand 1.2 MTUs
@@ -695,6 +696,9 @@ namespace Xml
 
         [XmlElement("AllowDailyReads")]
         public bool AllowDailyReads { get; set; }
+
+        [XmlElement("ArtificialTimeSync")]
+        public bool ArtificialTimeSync { get; set; }
 
         [XmlElement("AutoRegisterRecording")]
         public bool AutoRegisterRecording { get; set; }

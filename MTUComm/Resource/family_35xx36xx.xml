@@ -1547,6 +1547,16 @@
     <CustomSet/>
   </Register>
   <Register> <!-- OK -->
+    <Id>InstallConfirmationReceived</Id>
+    <Description>Time Sync was received. Set when any Time Sync rxd ever and clear when put in Ship Mode</Description>
+    <Type>bool</Type>
+    <Address>70</Address>
+    <Size>7</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
     <Id>MtuDatetime_Seconds</Id>
     <Description>New MTU time after Time Sync</Description>
     <Type>int</Type>
@@ -1735,6 +1745,26 @@
     <Write>true</Write>
     <CustomGet/>
 	  <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>P1DigitsToDrop</Id>
+    <Description>P1 Encoder Digits to drop</Description>
+    <Type>int</Type>
+    <Address>204</Address>
+    <Size>1</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>P2DigitsToDrop</Id>
+    <Description>P2 Encoder Digits to drop</Description>
+    <Type>int</Type>
+    <Address>205</Address>
+    <Size>1</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register> <!-- OK -->
     <Id>MtuSoftBuildNumber</Id>

@@ -410,6 +410,7 @@
 			<Parameter 	name="VSWR" 						display="VSWR" 							log="true" 	interface="true" 	source="Data.VSWR"			format="F3"				conditional="Data.VSWR gt -1"/> <!-- MemoryMap.Shipbit=false + MemoryMap.InstallConfirmationNotSynced=false -->
 			<Parameter 	name="NodeDiscoveryResult" 			display="NodeDiscoveryResult" 			log="true" 	interface="true" 	source="Data.ProcessResultND"						conditional="MemoryMap.InstallConfirmationNotSynced=false + Mtu.MtuDemand=true + Mtu.NodeDiscovery=true"/>
 			<Parameter 	name="NodeDiscoveryFile" 			display="NodeDiscoveryFile" 			log="true" 	interface="true" 	source="Data.ProcessResultFileND"					conditional="MemoryMap.InstallConfirmationNotSynced=false + Mtu.MtuDemand=true + Mtu.NodeDiscovery=true"/>
+			<Parameter 	name="ArtificialTimeSync" 			display="ArtificialTimeSync" 			log="true" 	interface="true" 	source="Data.ArtificialInstallConfirmation"			conditional="Data.ArtificialInstallConfirmation=true"/>
 			<Parameter 	name="InstallationConfirmationStatus" display="Installation" 				log="true" 	interface="true" 	source="MemoryMap.InstallConfirmationStatus"		conditional="MemoryMap.Shipbit=false"/>
 			<Parameter 	name="DcuId" 						display="DCU ID" 						log="true" 	interface="true"	source="Data.DcuId" 								conditional="MemoryMap.Shipbit=false + MemoryMap.InstallConfirmationNotSynced=false + Data.DcuId gt 0"/>
 			<Parameter 	name="RSSI" 						display="RSSI" 							log="true" 	interface="true" 	source="MemoryMap.RSSIStatus"						conditional="MemoryMap.Shipbit=false + MemoryMap.InstallConfirmationNotSynced=false"/>

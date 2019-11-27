@@ -35,7 +35,11 @@ namespace Xml
     ///   <description></description>
     /// </item>
     /// <item>
-    ///   <term>IsForGa</term>
+    ///   <term>IsForGas</term>
+    ///   <description></description>
+    /// </item>
+    /// <item>
+    ///   <term>IsForWater</term>
     ///   <description></description>
     /// </item>
     /// <item>
@@ -67,46 +71,6 @@ namespace Xml
     ///   <description></description>
     /// </item>
     /// <item>
-    ///   <term>Prescaler</term>
-    ///   <description></description>
-    /// </item>
-    /// <item>
-    ///   <term>ImmediateAlarmTransmit</term>
-    ///   <description></description>
-    /// </item>
-    /// <item>
-    ///   <term>DcuUrgentAlarm</term>
-    ///   <description></description>
-    /// </item>
-    /// <item>
-    ///   <term>ExternalTamper</term>
-    ///   <description></description>
-    /// </item>
-    /// <item>
-    ///   <term>InternalTamper</term>
-    ///   <description></description>
-    /// </item>
-    /// <item>
-    ///   <term>ProvingHandFactor</term>
-    ///   <description></description>
-    /// </item>
-    /// <item>
-    ///   <term>WdtPrescalerFollowingEdge</term>
-    ///   <description></description>
-    /// </item>
-    /// <item>
-    ///   <term>MinimumPulseLength</term>
-    ///   <description></description>
-    /// </item>
-    /// <item>
-    ///   <term>EdgePolarity</term>
-    ///   <description></description>
-    /// </item>
-    /// <item>
-    ///   <term>ReadingType</term>
-    ///   <description></description>
-    /// </item>
-    /// <item>
     ///   <term>EncoderType</term>
     ///   <description></description>
     /// </item>
@@ -120,10 +84,6 @@ namespace Xml
     /// </item>
     /// <item>
     ///   <term>HiResScaling</term>
-    ///   <description></description>
-    /// </item>
-    /// <item>
-    ///   <term>PHF</term>
     ///   <description></description>
     /// </item>
     /// <item>
@@ -161,19 +121,168 @@ namespace Xml
     /// <seealso cref="MeterTypes"/>
     public class Meter
     {
+        public Meter ()
+        {
+            this.Display             = string.Empty;
+            this.DummyDigits         = 0;
+            this.EncoderDigitsToDrop = 0x0;
+            this.EncoderType         = 0x0;
+            this.Flow                = 0;
+            this.HiResScaling        = 0m;
+            this.Id                  = 0;
+            this.LeadingDummy        = 0;
+            this.LiveDigits          = 0;
+            this.MeterMask           = string.Empty;
+            this.Model               = string.Empty;
+            this.MtuMode             = 0;
+            this.PaintedDigits       = 0;
+            this.PulseLowTime        = 0x0;
+            this.PulseHiTime         = 0x0;
+            this.Scale               = 0;
+            this.Type                = string.Empty;
+            this.Utility             = string.Empty;
+            this.Vendor              = string.Empty;
+        }
+
+        #region Properties
+
+        [XmlElement("Display")]
+        public string Display { get; set; }
+
+        private int dummyDigits;
+
+        [XmlElement("DummyDigits")]
+        public int DummyDigits
+        {
+            get { return this.dummyDigits; }
+            set { this.dummyDigits = ( value >= 0 ) ? value : 0; }
+        }
+
+        private byte encoderDigitsToDrop;
+
+        [XmlAttribute("EncoderDigitsToDrop")]
+        public byte EncoderDigitsToDrop
+        {
+            get { return this.encoderDigitsToDrop; }
+            set { this.encoderDigitsToDrop = ( value >= 0 && value <= 255 ) ? value : ( byte )0; }
+        }
+
+        private byte encoderType;
+
+        [XmlElement("EncoderType")]
+        public byte EncoderType
+        {
+            get { return this.encoderType; }
+            set { this.encoderType = ( value >= 0 && value <= 255 ) ? value : ( byte )0; }
+        }
+
+        private int flow;
+
+        [XmlElement("Flow")]
+        public int Flow
+        {
+            get { return this.flow; }
+            set { this.flow = ( value >= 0 && value <= 1 ) ? value : 0; }
+        }
+
+        private decimal hiResScaling;
+
+        [XmlElement("HiResScaling")]
+        public decimal HiResScaling
+        {
+            get { return this.hiResScaling; }
+            set { this.hiResScaling = ( value >= 0 ) ? value : 0m; }
+        }
+
+        private int id;
+
+        [XmlAttribute("ID")]
+        public int Id
+        {
+            get { return this.id; }
+            set { this.id = ( value >= 0 ) ? value : 0; }
+        }
+
+        private int leadingDummy;
+
+        [XmlElement("LeadingDummy")]
+        public int LeadingDummy
+        {
+            get { return this.leadingDummy; }
+            set { this.leadingDummy = ( value >= 0 ) ? value : 0; }
+        }
+
+        private int liveDigits;
+
+        [XmlElement("LiveDigits")]
+        public int LiveDigits
+        {
+            get { return this.liveDigits; }
+            set { this.liveDigits = ( value >= 0 ) ? value : 0; }
+        }
+
+        [XmlElement("MeterMask")]
+        public string MeterMask { get; set; }
+
+        [XmlElement("Model")]
+        public string Model { get; set; }
+
+        [XmlElement("MtuMode")]
+        public int MtuMode { get; set; }
+
+        private int paintedDigits;
+
+        [XmlElement("PaintedDigits")]
+        public int PaintedDigits
+        {
+            get { return this.paintedDigits; }
+            set { this.paintedDigits = ( value >= 0 ) ? value : 0; }
+        }
+
+        private byte pulseLowTime;
+
+        [XmlElement("PulseLowTime")]
+        public byte PulseLowTime
+        {
+            get { return this.pulseLowTime; }
+            set { this.pulseLowTime = ( value >= 0 && value <= 255 ) ? value : ( byte )0; }
+        }
+
+        private byte pulseHiTime;
+
+        [XmlElement("PulseHiTime")]
+        public byte PulseHiTime
+        {
+            get { return this.pulseHiTime; }
+            set { this.pulseHiTime = ( value >= 0 && value <= 255 ) ? value : ( byte )0; }
+        }
+
+        private int scale;
+
+        [XmlElement("Scale")]
+        public int Scale
+        {
+            get { return this.scale; }
+            set { this.scale = ( value >= 0 ) ? value : 0; }
+        }
+
+        [XmlElement("Type")]
+        public string Type { get; set; }
+
+        [XmlElement("Utility")]
+        public string Utility { get; set; }
+
+        [XmlElement("Vendor")]
+        public string Vendor { get; set; }
+
+        #endregion
+
+        #region Logic
+
         public bool IsEmpty
         {
             get { return this.LiveDigits <= 0; }
         }
-
-        [XmlAttribute("ID")]
-        public int Id { get; set; }
-
-        [XmlElement("Display")]
-        public string Display { get; set; }
- 
-        [XmlElement("Type")]
-        public string Type { get; set; }
         
         [XmlIgnore]
         public bool IsForEncoderOrEcoder
@@ -181,171 +290,63 @@ namespace Xml
             get { return Type.Equals ( "E" ); }
         }
 
-        [XmlElement("MeterMask")]
-        public string MeterMask { get; set; }
-
-        [XmlElement("Utility")]
-        public string Utility { get; set; }
-
         [XmlIgnore]
         public bool IsForGas
         {
-            get
-            {
-                return ! string.IsNullOrEmpty ( this.Utility ) &&
-                         this.Utility.ToLower ().Equals ( "gas" );
-            }
+            get { return this.IsFor ( "Gas" ); }
         }
 
         [XmlIgnore]
         public bool IsForWater
         {
-            get
-            {
-                return ! string.IsNullOrEmpty ( this.Utility ) &&
-                         this.Utility.ToLower ().Equals ( "water" );
-            }
+            get { return this.IsFor ( "Water" ); }
         }
 
-        [XmlElement("Vendor")]
-        public string Vendor { get; set; }
-
-        [XmlElement("Model")]
-        public string Model { get; set; }
-
-        [XmlElement("LiveDigits")]
-        public int LiveDigits { get; set; }
-
-        [XmlElement("DummyDigits")]
-        public int DummyDigits { get; set; }
-
-        [XmlElement("PaintedDigits")]
-        public int PaintedDigits { get; set; }
-
-        [XmlElement("LeadingDummy")]
-        public int LeadingDummy { get; set; }
-
-        [XmlElement("Scale")]
-        public int Scale { get; set; }
-
-        [XmlElement("Prescaler")]
-        public int Prescaler { get; set; }
-
-        [XmlElement("ImmediateAlarmTransmit")]
-        public int ImmediateAlarmTransmit { get; set; }
-
-        [XmlElement("DcuUrgentAlarm")]
-        public int DcuUrgentAlarm { get; set; }
-
-        [XmlElement("ExternalTamper")]
-        public int ExternalTamper { get; set; }
-
-        [XmlElement("InternalTamper")]
-        public int InternalTamper { get; set; }
-
-        [XmlElement("ProvingHandFactor")]
-        public int ProvingHandFactor { get; set; }
-
-        [XmlElement("WdtPrescalerFollowingEdge")]
-        public int WdtPrescalerFollowingEdge { get; set; }
-
-        [XmlElement("MinimumPulseLength")]
-        public int MinimumPulseLength { get; set; }
-
-        [XmlElement("EdgePolarity")]
-        public int EdgePolarity { get; set; }
-
-        [XmlElement("ReadingType")]
-        public int ReadingType { get; set; }
-
-        [XmlElement("EncoderType")]
-        public int EncoderType { get; set; }
-
-        [XmlElement("PulseLowTime")]
-        public int PulseLowTime { get; set; }
-
-        [XmlElement("PulseHiTime")]
-        public int PulseHiTime { get; set; }
-
-        [XmlElement("HiResScaling")]
-        public decimal HiResScaling { get; set; }
-
-        [XmlElement("PHF")]
-        public int PHF { get; set; }
-
-        [XmlElement("MtuMode")]
-        public int MtuMode { get; set; }
-
-        [XmlElement("Flow")]
-        public int Flow { get; set; }
-
-        [XmlIgnore]
-        public string MeterTypeFlow {
-            get
-            {
-                Match match = Regex.Match ( this.Display,
-                               @"(\w+) (\d+)D PF(\d+) (\w+)",
-                               RegexOptions.IgnoreCase | RegexOptions.Singleline |
-                               RegexOptions.CultureInvariant | RegexOptions.Compiled );
-                               
-                if ( match.Success )
-                    return match.Groups[1].Value;
-                return string.Empty;
-            }
+        private bool IsFor (
+            string type )
+        {
+            return ! string.IsNullOrEmpty ( this.Utility ) &&
+                   ! string.IsNullOrEmpty ( type ) &&
+                   this.Utility.ToLower ().Equals ( type.ToLower () );
         }
 
         [XmlIgnore]
-        public int NumberOfDials {
-            get
-            {
-                Match match = Regex.Match ( this.Display,
-                               @"(\w+) (\d+)D PF(\d+) (\w+)",
-                               RegexOptions.IgnoreCase | RegexOptions.Singleline |
-                               RegexOptions.CultureInvariant | RegexOptions.Compiled );
-                               
-                if ( match.Success )
-                    return int.Parse ( match.Groups[2].Value );
-                return -1;
-            }
+        public string MeterTypeFlow
+        {
+            get { return GetDisplayData<string> ( 1 ); }
+        }
+
+        [XmlIgnore]
+        public int NumberOfDials
+        {
+            get { return GetDisplayData<int> ( 2, -1 ); }
         }
 
         [XmlIgnore]
         public int DriveDialSize
         {
-            get
-            {
-                Match match = Regex.Match(this.Display,
-                               @"(\w+) (\d+)D PF(\d+) (\w+)",
-                               RegexOptions.IgnoreCase | RegexOptions.Singleline |
-                               RegexOptions.CultureInvariant | RegexOptions.Compiled);
-                if (match.Success)
-                {
-                    return int.Parse ( match.Groups[3].Value );
-                }
-                return -1;
-            }
+            get { return GetDisplayData<int> ( 3, -1 ); }
         }
 
         [XmlIgnore]
         public string UnitOfMeasure
         {
-            get
-            {
-                Match match = Regex.Match(this.Display,
-                               @"(\w+) (\d+)D PF(\d+) (\w+)",
-                               RegexOptions.IgnoreCase | RegexOptions.Singleline |
-                               RegexOptions.CultureInvariant | RegexOptions.Compiled);
-                if (match.Success)
-                {
-                    return match.Groups[4].Value;
-                }
-                return string.Empty;
-            }
+            get { return GetDisplayData<string> ( 4 ); }
         }
 
-        public String GetProperty(String Name)
+        private T GetDisplayData<T> (
+            int groupIndex,
+            T defValue = default ( T ) )
         {
-            return this.GetType().GetProperty(Name).GetValue(this, null).ToString();
+            Match match = Regex.Match (
+                            this.Display,
+                            @"(\w+) (\d+)D PF(\d+) (\w+)",
+                            RegexOptions.IgnoreCase | RegexOptions.Singleline |
+                            RegexOptions.CultureInvariant | RegexOptions.Compiled );
+
+            if ( match.Success )
+                return ( T )Convert.ChangeType ( match.Groups[ groupIndex ].Value, typeof( T ) );
+            return defValue;
         }
         
         public string ApplyReadingMask (
@@ -374,9 +375,23 @@ namespace Xml
         }
         
         public string FillLeftNumberOfDials (
-            string value )
+            string value = "" )
         {
             return value.PadLeft ( this.NumberOfDials, '0' );
         }
+
+        public String GetProperty (
+            string name )
+        {
+            if ( string.IsNullOrEmpty ( name ) )
+                return string.Empty;
+
+            return this.GetType ()
+                       .GetProperty ( name )
+                       .GetValue ( this, null )
+                       .ToString ();
+        }
+
+        #endregion
     }
 }

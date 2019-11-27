@@ -1012,7 +1012,7 @@ namespace MTUComm
                         " Pr." + protocol + " Ld." + liveDigits ) );
 
                     Port port = ( isPort1 ) ? mtu.Port1 : mtu.Port2;
-                    port.MeterProtocol   = protocol;
+                    port.MeterProtocol   = ( byte )protocol;
                     port.MeterLiveDigits = liveDigits;
                 
                     return true;
@@ -1056,7 +1056,7 @@ namespace MTUComm
             dynamic map = this.GetMemoryMap ();
             
             Port port = ( portIndex == 1 ) ? this.mtu.Port1 : this.mtu.Port2;
-            int protocol   = port.MeterProtocol;
+            int protocol   = ( int )port.MeterProtocol;
             int liveDigits = port.MeterLiveDigits;
             
             try
@@ -1453,6 +1453,8 @@ namespace MTUComm
             try
             {
                 Utils.Print ( "InstallConfirmation trigger start" );
+                
+                OnProgress ( this, new Delegates.ProgressArgs ( "RF-Check..." ) );
 
                 await map.DcuId.SetValueToMtu ( 0 );
 
@@ -1497,11 +1499,33 @@ namespace MTUComm
                         ++count <= max );
                 
                 if ( fail )
+                {
+                    /*
+                    // It is easier to validate only one value than not to search for
+                    // all conditions for RFCheck and artificial timesync in the interface
+                    Data.SetTemp ( "ArtificialInstallConfirmation",
+                        global.ArtificialTimeSync && mtu.FastMessageConfig );
+
+                    // Simulated
+                    if ( Data.Get.ArtificialInstallConfirmation )
+                    {
+                        OnProgress ( this, new Delegates.ProgressArgs ( "RF-Check: Artificial..." ) );
+
+                        // TODO: PERFORM DURING RFCHECK AND AS PART OF THE INSTALLATIONS?
+                        // TODO: EXECUTE THE NODE DISCOVERY?
+                        // TODO: AVOID SOME TAGS IN THE FINAL LOG? ( VSWR, DCU ID, RSSI, DEVIATION AND NODEDISCOVERY... )
+
+                        await this.ArtificialInstallConfirmation ( map );
+
+                        return IC_OK;
+                    }
+                    */
+
                     throw new AttemptNotAchievedICException ();
+                }
 
                 int DcuId = await map.DcuId.GetValueFromMtu();
-                Data.SetTemp("DcuId", DcuId);
-                            
+                Data.SetTemp ( "DcuId", DcuId );
             }
             catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
@@ -1959,6 +1983,23 @@ namespace MTUComm
             return result;
         }
 
+        private async Task ArtificialInstallConfirmation (
+            dynamic map )
+        {
+            DateTime currDate = DateTime.Now.ToUniversalTime ();
+            await map.MtuDatetime_Year   .SetValueToMtu ( currDate.Year - 2000 ); // Get just the last two digits
+            await map.MtuDatetime_Month  .SetValueToMtu ( currDate.Month  );
+            await map.MtuDatetime_Day    .SetValueToMtu ( currDate.Day    );
+            await map.MtuDatetime_Hour   .SetValueToMtu ( currDate.Hour   );
+            await map.MtuDatetime_Minutes.SetValueToMtu ( currDate.Minute );
+            await map.MtuDatetime_Seconds.SetValueToMtu ( currDate.Second );
+
+            await map.InstallConfirmationNotSynced.SetValueToMtu ( false );
+            await map.InstallConfirmationReceived .SetValueToMtu ( true  );
+
+            await map.FastMessagingConfigMode.SetValueToMtu ( global.FastMessageConfig );
+        }
+
         #endregion
 
         #region Valve Operation ( prev. Remote Disconnect )
@@ -2414,6 +2455,9 @@ namespace MTUComm
             
                 await Task.Delay ( WAIT_BEFORE_READ_MTU );
             }
+
+            // TODO: FULL READ OF THE MTU MEMORY BEFORE PREPARE THE FINAL LOGS
+            //await map.ReadAllMtu ();
 
             return map;
         }
@@ -3311,6 +3355,25 @@ namespace MTUComm
 
                 #endregion
 
+                #region Digits to Drop ( also for RDD )
+
+                // TODO: DOES FAMILY 31XX32XX THE RELATED BYTES IN THE MEMORY MAP?
+                // TODO: DOES FAMILY 33XX THE RELATED BYTES IN THE MEMORY MAP?
+
+                /*
+                if ( mtu.DigitsToDrop )
+                {
+                    if ( selectedMeter.IsForEncoderOrEcoder )
+                        map.P1DigitsToDrop = ( int )selectedMeter.EncoderDigitsToDrop;
+
+                    if ( form.UsePort2 &&
+                         selectedMeter2.IsForEncoderOrEcoder )
+                        map.P2DigitsToDrop = ( int )selectedMeter2.EncoderDigitsToDrop;
+                }
+                */
+
+                #endregion
+
                 #region Alarm ( also for RDD )
 
                 if ( mtu.RequiresAlarmProfile )
@@ -3590,9 +3653,7 @@ namespace MTUComm
                        Data.Get.ForceTimeSync ) )
                 {
                     Utils.Print ( "--------IC_START---------" );
-                
-                    OnProgress ( this, new Delegates.ProgressArgs ( "RF-Check..." ) );
-                
+
                     // Force to execute Install Confirmation avoiding problems
                     // with MTU shipbit, because MTU is just turned on
                     if ( await this.InstallConfirmation_Logic ( true ) > IC_OK )

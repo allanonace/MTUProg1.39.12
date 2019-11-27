@@ -70,8 +70,8 @@ namespace Xml
         }
 
         public List<Meter> FindByEncoderTypeAndLiveDigits (
-            int encoderType,
-            int liveDigits )
+            byte encoderType,
+            int  liveDigits )
         {
             // Filter by protocol and livedigits
             List<Meter> meters = Meters.FindAll ( x => (
