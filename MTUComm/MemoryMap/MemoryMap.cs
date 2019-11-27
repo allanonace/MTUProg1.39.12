@@ -138,16 +138,6 @@ namespace MTUComm.MemoryMap
 
         #endregion
 
-        public int Length
-        {
-            get { return this.memory.Length; }
-        }
-        
-        public string Family
-        {
-            get { return this.family; }
-        }
-
         #region Attributes
 
         public static bool isUnityTest { get; private set; }
@@ -157,6 +147,20 @@ namespace MTUComm.MemoryMap
         private Lexi.Lexi lexi;
         private bool readFromMtuOnlyOnce;
         private string family;
+
+        #endregion
+
+        #region Properties
+
+        public int Length
+        {
+            get { return this.memory.Length; }
+        }
+        
+        public string Family
+        {
+            get { return this.family; }
+        }
 
         #endregion
 
@@ -202,7 +206,7 @@ namespace MTUComm.MemoryMap
 
             // Prepares the memory buffer with the length indicates in the interface
             if ( memory == null )
-                memory = new byte[ config.Interfaces.GetMemoryLengthByFamily ( family ) ];
+                 memory = new byte[ config.Interfaces.GetMemoryLengthByFamily ( family ) ];
             this.memory = memory;
 
             this.registersObjs = new Dictionary<string, dynamic>();
@@ -462,9 +466,15 @@ namespace MTUComm.MemoryMap
                                         " -> " + ( ( ! memoryRegister.write ) ? "Readonly" : "Not loaded" ) );
                 
                     // Read current value from the MTU
-                    byte[] read = await lexi.Read ( ( uint )memoryRegister.address, ( uint )memoryRegister.sizeGet );
+                    byte[] read = default ( byte[] );
                     
-                    memoryRegister.lastRead = read;
+                    if ( ! memoryRegister.finalRead )
+                         read = await lexi.Read ( ( uint )memoryRegister.address, ( uint )memoryRegister.sizeGet );
+                    else read = this.memory.Skip ( memoryRegister.address ).Take ( memoryRegister.sizeGet ).ToArray ();
+
+                    memoryRegister.finalRead = false;
+
+                    memoryRegister.lastRead  = read;
                     
                     Utils.PrintDeep ( "Map -> From MTU value: " + memoryRegister.id + " = " + Utils.ByteArrayToString ( read ) + " [ " + read + " ]" );
                     
@@ -1167,7 +1177,7 @@ namespace MTUComm.MemoryMap
             int numBytes,
             int offset = 0 )
         {
-            if ( address + numBytes < this.memory.Length )
+            if ( address + numBytes <= this.memory.Length )
             {
                 Utils.Print ( "Read " + numBytes + " from MTU and add to memory map buffer" );
                 
@@ -1177,6 +1187,41 @@ namespace MTUComm.MemoryMap
                 throw new Exception ();
         }
         
+        public async Task ReadAllMtu ()
+        {
+            // NOTE: Trying to read the full memory of the MTU only retrieves a few bytes before
+            // NOTE: launching a timeout exception, and working with CoilCmd the only option to read
+            // NOTE: several bytes is command 101 ( Read Addresses 0x00 to 0xFF ) to to read 255 bytes
+            int bytesLeft   = this.Length;
+            int bytesToRead = 255;
+            int from        = 0;
+
+            do
+            {
+                bytesLeft -= bytesToRead;
+                if ( bytesLeft < 0 )
+                    bytesToRead += bytesLeft;
+
+                await this.ReadFromMtu ( from, bytesToRead );
+
+                from += bytesToRead;
+            }
+            while ( bytesLeft > 0 );
+
+            // Forces not to retrieve bytes from the MTU but use cached data
+            foreach ( dynamic register in this.registersObjs.Values )
+            {
+                register.readedFromMtu = false;
+                register.finalRead     = true;
+            }
+
+            bool   sb  = await base[ "Shipbit"         ].GetValue (); // On/True
+            int    f1  = await base[ "Frequency1WayHz" ].GetValue ();
+            string f1s = await base[ "Frequency1Way"   ].GetValue (); // 456.1875
+
+            Utils.Print ( sb + " | " + f1 + " | " + f1s );
+        }
+
         #endregion
 
         #region Get register

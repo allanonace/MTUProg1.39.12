@@ -142,6 +142,7 @@ namespace MTUComm.MemoryMap
         /// Indicates whether the memory register has obtained its value from the MTU at least once or not.
         /// </summary>
         public bool readedFromMtu;
+        public bool finalRead;
         private Lexi.Lexi lexi;
         public byte[] lastRead;
 

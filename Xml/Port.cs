@@ -143,7 +143,7 @@ namespace Xml
         }
         
         [XmlIgnore]
-        public int MeterProtocol { get; set; }
+        public byte MeterProtocol { get; set; }
         
         [XmlIgnore]
         public int MeterLiveDigits { get; set; }
