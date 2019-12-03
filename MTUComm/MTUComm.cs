@@ -1837,7 +1837,7 @@ namespace MTUComm
 
                                 case NodeDiscoveryQueryResult.Empty:
                                     OnProgress ( this, new Delegates.ProgressArgs (
-                                        "ND: The Are No Nodes" ) );
+                                        "ND: No Nodes Found" ) );
 
                                     await Task.Delay ( WAIT_BTW_NODE_NEXT_STEP );
                                     goto BREAK_OK; // Exit from switch + infinite while

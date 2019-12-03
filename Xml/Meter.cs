@@ -313,7 +313,7 @@ namespace Xml
         [XmlIgnore]
         public string MeterTypeFlow
         {
-            get { return GetDisplayData<string> ( 1 ); }
+            get { return GetDisplayData<string> ( 1, String.Empty ); }
         }
 
         [XmlIgnore]
@@ -331,12 +331,12 @@ namespace Xml
         [XmlIgnore]
         public string UnitOfMeasure
         {
-            get { return GetDisplayData<string> ( 4 ); }
+            get { return GetDisplayData<string> ( 4, string.Empty ); }
         }
 
         private T GetDisplayData<T> (
             int groupIndex,
-            T defValue = default ( T ) )
+            T defValue )
         {
             Match match = Regex.Match (
                             this.Display,
