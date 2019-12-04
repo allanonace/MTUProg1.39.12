@@ -44,6 +44,11 @@ namespace MTUComm
     {
         #region Constants
 
+        /* Enum: ValidationResult
+            OK        - The result of the initial validation process was affirmative for the current MTU and configuration files
+            FAIL      - The result of the initial validation process was negative for the current MTU and configuration files
+            EXCEPTION - The result of the initial validation process was negative for the current MTU and configuration files, due to an exception
+        */
         public enum ValidationResult
         {
             OK,
@@ -77,7 +82,7 @@ namespace MTUComm
         private const int TIMES_TURNOFF            = 3;
 
         /* Constants: LExI Read
-            WAIT_BEFORE_PREPARE_MTU - Waiting time before preparing the MTU to perform the final reading
+            WAIT_BEFORE_PREPARE_MTU - Waiting time before preparing the MTU to perform the final reading = 1s
             WAIT_BEFORE_READ_MTU    - Waiting time after setting the ReadMeter flag before starting to read the MTU = 1s
         */
         private const int WAIT_BEFORE_PREPARE_MTU  = 1000;
@@ -106,11 +111,11 @@ namespace MTUComm
             WAIT_BEFORE_LOGS      - Waiting time before start retrieving the logs stored in the MTU = 10s
             CMD_NEXT_EVENT_LOG    - Request code of the LExI command "GET NEXT EVENT LOG RESPONSE" = 0x14 = 20
             CMD_REPE_EVENT_LOG    - Request code of the LExI command "GET REPEAT LAST EVENT LOG RESPONSE" = 0x15 = 21
-            CMD_NEXT_EVENT_RES_1  - Number of bytes when the response, trying to request logs, includes data = 25
-            CMD_NEXT_EVENT_RES_2  - Number of bytes when the response, trying to request logs, does not include data = 5
-            CMD_NEXT_EVENT_DATA   - Value of the result byte when trying to request logs, the response includes data = 0
-            CMD_NEXT_EVENT_EMPTY  - Value of the result byte when trying to request logs, the response does not contain data = 1
-            CMD_NEXT_EVENT_BUSY   - Value of the result byte when trying to request logs, the MTU is busy = 2
+            CMD_NEXT_EVENT_RES_1  - Number of bytes when the response, attempting to request logs, includes data = 25
+            CMD_NEXT_EVENT_RES_2  - Number of bytes when the response, attempting to request logs, does not include data = 5
+            CMD_NEXT_EVENT_DATA   - Value of the result byte when attempting to request logs and the response includes data = 0
+            CMD_NEXT_EVENT_EMPTY  - Value of the result byte when attempting to request logs and the response does not contain data = 1
+            CMD_NEXT_EVENT_BUSY   - Value of the result byte when attempting to request logs and the MTU is busy = 2
             WAIT_BTW_LOG_ERROR    - Waiting time between attempts to retrieve all logs stored in the MTU = 1s
             WAIT_BTW_LOGS         - Waiting time between after retrieving one record and requesting the next one = 0.1s
             WAIT_AFTER_EVENT_LOGS - Waiting time after having finished retrieving all logs stored in the MTU = 1s
@@ -128,7 +133,7 @@ namespace MTUComm
         private const int WAIT_BTW_LOGS            = 100;
         private const int WAIT_AFTER_EVENT_LOGS    = 1000;
 
-        /* Constants: RF-Check
+        /* Constants: RF-Check ( prev. Install Confirmation )
             WAIT_BTW_IC_ERROR   - Waiting time between attempts to perform the Install Confirmation process = 1s
             IC_OK               - The Install Confirmation process has been completed successfully = 0
             IC_NOT_ACHIEVED     - The Install Confirmation process has not completed successfully = 1
@@ -142,28 +147,35 @@ namespace MTUComm
         private const int WAIT_AFTER_IC_ERROR      = 4000;
 
         /* Constants: Node Discovery
-            CMD_VSWR                 - ... = 0x23 = 35
-            CMD_VSWR_RES             - ... = 6
-            WAIT_BEFORE_NODE_INIT    - ... = 1s
-            CMD_NODE_INIT            - ... = 0x18 = 24
-            CMD_NODE_INIT_RES        - ... = 5
-            CMD_NODE_INIT_NOT        - ... = 0
-            CMD_NODE_INIT_OK         - ... = 1
-            WAIT_BEFORE_NODE_START   - ... = 3s
-            CMD_NODE_QUERY           - ... = 0x19 = 25
-            CMD_NODE_QUERY_RES       - ... = 5
-            CMD_NODE_QUERY_BUSY      - ... = 0
-            CMD_NODE_QUERY_OK        - ... = 1
-            WAIT_BEFORE_NODE_NEXT    - ... = 1s
-            CMD_NODE_NEXT            - ... = 0x1A = 26
-            CMD_NODE_NEXT_RES_1      - ... = 10
-            CMD_NODE_NEXT_RES_2      - ... = 26
-            CMD_NODE_NEXT_RES_3      - ... = 5
-            CMD_NODE_NEXT_DATA       - ... = 0
-            CMD_NODE_NEXT_EMPTY      - ... = 1
-            WAIT_BTW_NODE_NEXT_ERROR - ... = 1s
-            WAIT_BTW_NODE_NEXT       - ... = 0.1s
-            WAIT_BTW_NODE_ERROR      - ... = 1s
+            CMD_VSWR                 - Request code of the LExI command "VSWR TEST" = 0x23 = 35
+            CMD_VSWR_RES             - Number of bytes expected when attempting to perform the VSWR test = 6
+            WAIT_BEFORE_NODE_INIT    - Waiting time before initiating the Node Discovery process = 1s
+            CMD_NODE_INIT_TYPE       - Type of the target node to filter the results of the Node Discovery process = NodeType.DCU = 1
+            CMD_NODE_INIT_TARGET     - Target node ID, that if the target is a DCU, all bytes will be zero = 0
+            CMD_NODE_INIT_MAXDITHER  - Dither time for response in seconds = 0x0A = 10s
+            CMD_NODE_INIT_MINREQTIME - The minimum number of seconds that the requestor node must wait before transmitting its Node Discovery request = 0
+            CMD_NODE_INIT_RFCHANNELS - Bit map containing up to 8 channels that the Node Disocery request shall be transmited on = 3 ( 00000011 = channels 1 and 2 )
+            CMD_NODE_OVERHEAD_TIME   - Slack time required because the TOS ( Top Of the Second ) in the MTU may not occur at the same time as the TOS in the Star Programmer and the TOS in the DCUs = 2
+            CMD_NODE_INIT            - Request code of the LExI command "NODE DISCOVERY INITIATION COMMAND" = 0x18 = 24
+            CMD_NODE_INIT_RES        - Number of bytes expected when attempting to initiate the Node Discovery = 5
+            CMD_NODE_INIT_NOT        - Value of the result byte when attempting to request nodes and the Node Discovery hasn't been initiated = 0
+            CMD_NODE_INIT_OK         - Value of the result byte when attempting to request nodes and the Node Discovery has been initiated = 1
+            WAIT_BEFORE_NODE_START   - Waiting time before starting/resetting the Node Discovery process = 3s
+            CMD_NODE_QUERY           - Request code of the LExI command "START/RESET NODE DISCOVERY RESPONSE QUERY" = 0x19 = 25
+            CMD_NODE_QUERY_RES       - Number of bytes expected when attempting to start/reset the Node Discovery process = 5
+            CMD_NODE_QUERY_BUSY      - Value of the result byte when attempting to request logs and the DCU is busy = 0
+            CMD_NODE_QUERY_OK        - Value of the result byte when attempting to request logs and the DCU is ready for query = 1
+            WAIT_BEFORE_NODE_NEXT    - Waiting time before start retrieving the DCU nodes = 1s
+            CMD_NODE_NEXT            - Request code of the LExI command "GET NEXT NODE DISCOVERY RESPONSE" = 0x1A = 26
+            CMD_NODE_NEXT_RES_1      - Number of bytes when the response, attempting to request nodes, includes the general information = 10
+            CMD_NODE_NEXT_RES_2      - Number of bytes when the response, attempting to request nodes, includes data = 26
+            CMD_NODE_NEXT_RES_3      - Number of bytes when the response, attempting to request nodes, does not include data = 5
+            CMD_NODE_NEXT_DATA       - Value of the result byte when attempting to request logs and the response includes data = 0
+            CMD_NODE_NEXT_EMPTY      - Value of the result byte when attempting to request logs and the response includes data = 1
+            WAIT_BTW_NODE_NEXT_ERROR - Waiting time between attempts to retrieve all DCU nodes = 1s
+            WAIT_BTW_NODE_NEXT       - Waiting time before attempting to retrieve the next node = 0.1s
+            WAIT_BTW_NODE_NEXT_STEP  - Waiting time before continuing the Node Discovery process after retrieving all DCU nodes = 1.5s
+            WAIT_BTW_NODE_ERROR      - Waiting time between attempts to perform the Node Discovery process, due to an exception or not getting an excellent result = 1s
         */
         private const int CMD_VSWR                 = 0x23;  // 35 VSWR Test
         private const int CMD_VSWR_RES             = 6;
@@ -196,14 +208,14 @@ namespace MTUComm
         private const int WAIT_BTW_NODE_ERROR      = 1000;
 
         /* Constants: Encryption
-            CMD_ENCRYP_MAX         - ... = 3
-            CMD_ENCRYP_OLD_MAX     - ... = 5
-            CMD_ENCRYP_LOAD        - ... = 0x1B = 27
-            CMD_ENCRYP_KEYS        - ... = 0x1D = 29
-            WAIT_AFTER_ENCRYP_KEYS - ... = 1s
-            CMD_ENCRYP_READ        - ... = 0x1C = 28
-            CMD_ENCRYP_READ_RES_2  - ... = 68
-            CMD_ENCRYP_READ_RES_3  - ... = 36
+            CMD_ENCRYP_MAX         - Maximum number of attempts to perform the new encryption process for OnDemand 1.2 MTUs = 3
+            CMD_ENCRYP_OLD_MAX     - Maximum number of attempts to perform the new encryption process for legacy MTUs = 5
+            CMD_ENCRYP_LOAD        - Request code of the LExI command "LOAD ENCRUPTION ITEM" = 0x1B = 27
+            CMD_ENCRYP_KEYS        - Request code of the LExI command "GENERATE ENCRYPTION KEYS" = 0x1D = 29
+            WAIT_AFTER_ENCRYP_KEYS - Waiting time before checking if the MTU was encrypted correctly = 1s
+            CMD_ENCRYP_READ        - Request code of the LExI command "READ ENCRYPTION ITEM" = 0x1C = 28
+            CMD_ENCRYP_READ_RES_2  - Number of bytes when the response, attempting to encrypt an MTU, includes an MTU public key = 68 ( ACK + ACK Info Size + Datax64 + CRCx2 )
+            CMD_ENCRYP_READ_RES_3  - Number of bytes when the response, attempting to encrypt an MTU, includes an MTU random number = 36 ( ACK + ACK Info Size + Datax32 + CRCx2 )
         */
         private const int CMD_ENCRYP_MAX          = 3;
         private const int CMD_ENCRYP_OLD_MAX      = 5;
@@ -214,24 +226,19 @@ namespace MTUComm
         private const int CMD_ENCRYP_READ_RES_2   = 68; // ACK + 64 + CRC = 2 + 64 + 2 = 68
         private const int CMD_ENCRYP_READ_RES_3   = 36; // ACK + 32 + CRC = 2 + 32 + 2 = 36
 
-        /* Constants: Remote Disconnect
-            RDD_MAX_ATTEMPTS   - ... = 5
-            RDD_DISABLED       - ... = 0
-            RDD_BUSY           - ... = 1
-            RDD_ERROR          - ... = 2
-            RDD_IDLE           - ... = 3
-            WAIT_BTW_RDD       - ... = 2s
-            CMD_RDD_ACTION     - ... = 0x21 = 33
-            WAIT_RDD_MAX       - ... = 45s
-            CMD_RDD_STATUS     - ... = 0x22 = 34
-            CMD_RDD_STATUS_RES - ... = 18
-            WAIT_BTW_CMD_RDD   - ... = 1s
+        /* Constants: Valve Operation  ( prev. Remote Disconnect )
+            RDD_MAX_ATTEMPTS   - Maximum number of attempts to check if the valve is in the resired state = 5
+            WAIT_BTW_RDD       - Waiting time between attempts to verify that the MTU is in the desired initial state = 2s
+            CMD_RDD_ACTION     - Request code of the LExI command "REQUEST RDD ACTION" = 0x21 = 33
+            WAIT_RDD_MAX       - Maximum time allowed to attempt the Remote Disconnection process = 45s
+            CMD_RDD_STATUS     - Request code of the LExI command "REQUEST RDD STATUS" = 0x22 = 34
+            CMD_RDD_STATUS_RES - Number of bytes of the response attempting to change the status of the valve = 18
+            WAIT_BTW_CMD_RDD   - Waiting time between attempts to change the valve status to the desired one = 1s
+            RDD_OK             - Indicates that the Remote Disconnect process has completed successfully = 0
+            RDD_NOT_ACHIEVED   - Indicates that the Remote Disconnect process hasn't completed successfully = 1
+            RDD_EXCEPTION      - Indicates that the Remote Disconnect process hasn't completed successfully due to an exception = 2
         */
         private const int RDD_MAX_ATTEMPTS        = 5;
-        private const int RDD_DISABLED            = 0;
-        private const int RDD_BUSY                = 1;
-        private const int RDD_ERROR               = 2;
-        private const int RDD_IDLE                = 3;
         private const int WAIT_BTW_RDD            = 2000;
         private const int CMD_RDD_ACTION          = 0x21; // 33
         private const int WAIT_RDD_MAX            = 45000;
@@ -356,6 +363,25 @@ namespace MTUComm
 
         #region Launch Actions
 
+        /// <summary>
+        /// Before switching to a different scene/window, some actions require validation
+        /// to know if the current MTU and configuration files allow them to be performed.
+        /// <para>
+        /// See <see cref="Action.ActionType"/> for the full list of available actions.
+        /// </para>
+        /// </summary>
+        /// <param name="type">Action to be performed</param>
+        /// <returns>Indicates whether the action can be executed or not.</returns>
+        /// <seealso cref="AddMtu(Action)"/>
+        /// <seealso cref="AddMtu(dynamic, string, Action)"/>
+        /// <seealso cref="DataRead(Action)"/>
+        /// <seealso cref="DataRead"/>
+        /// <seealso cref="InstallConfirmation"/>
+        /// <seealso cref="RemoteDisconnect(Action)"/>
+        /// <seealso cref="RemoteDisconnect"/>
+        /// <seealso cref="ReadFabric"/>
+        /// <seealso cref="ReadMtu"/>
+        /// <seealso cref="TurnOnOffMtu(bool)"/>
         public async Task<ValidationResult> LaunchValidationThread (
             ActionType type )
         {
@@ -416,9 +442,10 @@ namespace MTUComm
         /// <param name="args">Arguments required for some actions</param>
         /// <seealso cref="AddMtu(Action)"/>
         /// <seealso cref="AddMtu(dynamic, string, Action)"/>
-        /// <seealso cref="DataRead"/>
         /// <seealso cref="DataRead(Action)"/>
+        /// <seealso cref="DataRead"/>
         /// <seealso cref="InstallConfirmation"/>
+        /// <seealso cref="RemoteDisconnect(Action)"/>
         /// <seealso cref="RemoteDisconnect"/>
         /// <seealso cref="ReadFabric"/>
         /// <seealso cref="ReadMtu"/>
@@ -501,6 +528,14 @@ namespace MTUComm
 
         #region Launch Validations
 
+        /// <summary>
+        /// Validation method for the RF-Check process, executed before switching to its scene/window.
+        /// <para>
+        /// See <see cref="InstallConfirmation"/> for the RF-Check ( Install Confirmation + Node Discovery ) logic.
+        /// </para>
+        /// </summary>
+        /// <param name="textError">Text of the error detected, for the pop-up message.</param>
+        /// <returns>Indicates whether the action can be executed or not.</returns>
         private bool Validate_InstallConfirmation (
             out string textError )
         {
@@ -520,6 +555,14 @@ namespace MTUComm
             return true;
         }
 
+        /// <summary>
+        /// Validation method for the RF-Check process, executed before switching to its scene/window.
+        /// <para>
+        /// See <see cref="RemoteDisconnect(Action)"/> and <see cref="RemoteDisconnect"/> for the Remote Disconnect logic.
+        /// </para>
+        /// </summary>
+        /// <param name="textError">Text of the error detected, for the pop-up message.</param>
+        /// <returns>Indicates whether the action can be executed or not.</returns>
         private bool Validate_RemoteDisconnect (
             out string textError )
         {
@@ -534,6 +577,14 @@ namespace MTUComm
             return true;
         }
 
+        /// <summary>
+        /// Validation method for the RF-Check process, executed before switching to its scene/window.
+        /// <para>
+        /// See <see cref="DataRead(Action)"/> and <see cref="DataRead()"/> for the Historical Read logic.
+        /// </para>
+        /// </summary>
+        /// <param name="textError">Text of the error detected, for the pop-up message.</param>
+        /// <returns>Indicates whether the action can be executed or not.</returns>
         private bool Validate_DataRead (
             out string textError )
         {
@@ -549,6 +600,14 @@ namespace MTUComm
             return true;
         }
 
+        /// <summary>
+        /// Validation method for the RF-Check process, executed before switching to its scene/window.
+        /// <para>
+        /// See <see cref="TurnOnOffMtu(bool)"/> for the Turn Off logic.
+        /// </para>
+        /// </summary>
+        /// <param name="textError">Text of the error detected, for the pop-up message.</param>
+        /// <returns>Indicates whether the action can be executed or not.</returns>
         private bool Validate_TurnOff (
             out string textError )
         {
@@ -562,6 +621,14 @@ namespace MTUComm
             return true;
         }
 
+        /// <summary>
+        /// Validation method for the RF-Check process, executed before switching to its scene/window.
+        /// <para>
+        /// See <see cref="TurnOnOffMtu(bool)"/> for the Turn On logic.
+        /// </para>
+        /// </summary>
+        /// <param name="textError">Text of the error detected, for the pop-up message.</param>
+        /// <returns>Indicates whether the action can be executed or not.</returns>
         private bool Validate_TurnOn (
             out string textError )
         {
@@ -581,6 +648,21 @@ namespace MTUComm
 
         #region Scripting Validations
 
+        /// <summary>
+        /// Process of validation of the parameters in scripting mode, translating them
+        /// first from the Aclara's nomenclatory to the one we use, and then verifying
+        /// if each of them is necessary and, if so, if the value is allowed or incorrect.
+        /// <para>
+        /// See <see cref="Action.ActionType"/> for the full list of available actions.
+        /// </para>
+        /// </summary>
+        /// <param name="action">Instance of the Action class to retrieve script parameters</param>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.
+        /// <para>
+        /// Instance of a dynamic memory map for current MTU.
+        /// </para>
+        /// </returns>
         private async Task<dynamic> ValidateParams (
             Action action )
         {
@@ -1111,10 +1193,10 @@ namespace MTUComm
         /// the app terminology and validate their values, removing unnecessary ones
         /// to avoid headaches.
         /// <para>
-        /// See <see cref="DataRead"/> for the DataRead logic.
+        /// See <see cref="DataRead()"/> for the DataRead logic.
         /// </para>
         /// </summary>
-        /// <param name="action">Current action type ( AddMtu, ReplaceMeter,.. )</param>
+        /// <param name="action">Instance of the Action class to retrieve script parameters</param>
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.</returns>
         /// <exception cref="ScriptForOnePortButTwoEnabledException">( From ScriptAux.ValidateParams )</exception>
@@ -1427,8 +1509,8 @@ namespace MTUComm
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.
         /// <para>
-        /// Integer value that indicates if the Installation
-        /// Confirmation has worked ( 0 ) or not ( 1 Not achieved, 2 Error )
+        /// Integer value that indicates if the Installation Confirmation
+        /// has worked ( 0 ) or not ( 1 Not achieved, 2 Error )
         /// </para>
         /// </returns>
         /// <exception cref="MemoryMapParseXmlException">( From GetMemoryMap )</exception>
@@ -2004,6 +2086,19 @@ namespace MTUComm
 
         #region Valve Operation ( prev. Remote Disconnect )
 
+        /// <summary>
+        /// In scripted mode this method overload is called before the main method,
+        /// because it is necessary to translate the script parameters from Aclara into
+        /// the app terminology and validate their values, removing unnecessary ones
+        /// to avoid headaches.
+        /// <para>
+        /// See <see cref="RemoteDisconnect"/> and <see cref="RemoteDisconnect_Logic"/>
+        /// for the Remote Disconnect entry point and logic.
+        /// </para>
+        /// </summary>
+        /// <param name="action">Instance of the Action class to retrieve script parameters</param>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
         private async Task RemoteDisconnect (
             Action action )
         {
@@ -2024,6 +2119,17 @@ namespace MTUComm
             }
         }
 
+        /// <summary>
+        /// This method is called only executing the Installation Confirmation action but
+        /// the logic is in a different method, which allows to reuse it from the writing
+        /// logic without mixing the processing of the result of the process.
+        /// <para>
+        /// See <see cref="RemoteDisconnect_Logic"/> for the Remote Disconnect logic.
+        /// </para>
+        /// </summary>
+        /// <param name="throwExceptions"></param>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
         public async Task RemoteDisconnect (
             bool throwExceptions = false )
         {
@@ -2037,6 +2143,21 @@ namespace MTUComm
             else this.OnError ();
         }
 
+        /// <summary>
+        /// The logic for the Remote Disconnection process, also known as Valve Operation.
+        /// <para>
+        /// See <see cref="RemoteDisconnect(Action)"/> and <see cref="RemoteDisconnect()"/>
+        /// for the entry points of the Remote Disconnect process executed directly.
+        /// </para>
+        /// </summary>
+        /// <param name="throwExceptions"></param>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.
+        /// <para>
+        /// Integer value that indicates if the Remote Disconnect
+        /// has worked ( 0 ) or not ( 1 Not achieved, 2 Error )
+        /// </para>
+        /// </returns>
         private async Task<int> RemoteDisconnect_Logic (
             bool throwExceptions = false )
         {
@@ -2482,7 +2603,7 @@ namespace MTUComm
         /// installations and should be replaced by the generic methods inside
         /// <see cref="MTUComm.ScriptAux"/> class, using all actions the same unique validation logic.
         /// </remarks>
-        /// <param name="action">Current action type ( AddMtu, ReplaceMeter,.. )</param>
+        /// <param name="action">Instance of the Action class to retrieve script parameters</param>
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.</returns>
         /// <exception cref="ScriptForOnePortButTwoEnabledException"></exception>
@@ -3145,6 +3266,9 @@ namespace MTUComm
         /// See <see cref="AddMtu(Action)"/> for the entry point of the DataRead process in scripted mode.
         /// </para>
         /// </summary>
+        /// <param name="dynamic">Intermediate data store used only during installations</param>
+        /// <param name="string">User ID</param>
+        /// <param name="action">Instance of the Action class to retrieve script parameters</param>
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.</returns>
         /// <exception cref="SelectedAlarmForCurrentMtuException"></exception>
@@ -3688,6 +3812,12 @@ namespace MTUComm
 
         #region Encryption
 
+        /// <summary>
+        /// Encryption process for legacy MTUs.
+        /// </summary>
+        /// <param name="map">Instance of a dynamic memory map for current MTU</param>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
         private async Task Encrypt_Old (
             dynamic map )
         {
@@ -3800,6 +3930,12 @@ namespace MTUComm
             Utils.Print ( "----ENCRYPTION_FINISH----" );
         }
 
+        /// <summary>
+        /// New encryption process for OnDemand 1.2 MTUs.
+        /// </summary>
+        /// <param name="map">Instance of a dynamic memory map for current MTU</param>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
         private async Task Encrypt_OnDemand12 (
             dynamic map )
         {
