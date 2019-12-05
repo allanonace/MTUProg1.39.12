@@ -75,7 +75,7 @@ namespace MTUComm
             Logger.AddAtrribute(this.turnOffAction, "display", Action.LogDisplays[ActionType.TurnOffMtu]);
             Logger.AddAtrribute(this.turnOffAction, "type", Action.LogTypes[ActionType.TurnOffMtu]);
 
-            Logger.AddParameter(this.turnOffAction, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss") ));
+            Logger.AddParameter(this.turnOffAction, new Parameter("Date", "Date/Time", DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss") ));
 
             if (!string.IsNullOrEmpty(this.user))
                 Logger.AddParameter(this.turnOffAction, new Parameter("User", "User", this.user));
@@ -88,7 +88,7 @@ namespace MTUComm
             Logger.AddAtrribute(this.turnOnAction, "display", Action.LogDisplays[ActionType.TurnOnMtu]);
             Logger.AddAtrribute(this.turnOnAction, "type", Action.LogTypes[ActionType.TurnOnMtu]);
 
-            Logger.AddParameter(this.turnOnAction, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
+            Logger.AddParameter(this.turnOnAction, new Parameter("Date", "Date/Time", DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss")));
 
             if (!string.IsNullOrEmpty(this.user))
                 Logger.AddParameter(this.turnOnAction, new Parameter("User", "User", this.user));
@@ -124,7 +124,7 @@ namespace MTUComm
             Logger.AddAtrribute(this.addMtuAction, "type", Action.LogTypes[this.action.Type]);
             Logger.AddAtrribute(this.addMtuAction, "reason", Action.LogReasons[this.action.Type]);
 
-            Logger.AddParameter ( this.addMtuAction, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
+            Logger.AddParameter ( this.addMtuAction, new Parameter("Date", "Date/Time", DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss")));
 
             if ( ! string.IsNullOrEmpty ( this.user ) )
                 Logger.AddParameter(this.addMtuAction, new Parameter("User", "User", this.user ) );

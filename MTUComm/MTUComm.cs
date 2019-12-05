@@ -1216,7 +1216,7 @@ namespace MTUComm
                 OnProgress ( this, new Delegates.ProgressArgs ( "HR: Requesting logs..." ) );
 
                 // NOTE: When performing unit tests, the date must be a fixed value
-                DateTime end   = ( ! Data.Get.UNIT_TEST ) ? DateTime.UtcNow : new DateTime ( 2019, 10, 15 );
+                DateTime end   = ( ! Data.Get.UNIT_TEST ) ? DateTime.Now : new DateTime ( 2019, 10, 15 );
                 end = new DateTime ( end.Year, end.Month, end.Day, 23, 59, 59 );
                 DateTime start = end.Subtract ( new TimeSpan ( int.Parse ( Data.Get.NumOfDays ), 0, 0, 0 ) );
                 start = new DateTime ( start.Year, start.Month, start.Day, 0, 0, 0 );
