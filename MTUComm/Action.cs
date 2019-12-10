@@ -717,7 +717,7 @@ namespace MTUComm
             {
                 case "User": return user;
                 case "Date": return ( ( ! Data.Get.UNIT_TEST ) ?
-                                DateTime.UtcNow : new DateTime () ) // 01/01/0001 00:00:00
+                                DateTime.Now : new DateTime () ) // 01/01/0001 00:00:00
                                 .ToString ( "MM/dd/yyyy HH:mm:ss" );
                 case "Type": return type.ToString();
                 default    : return "";

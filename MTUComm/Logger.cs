@@ -76,7 +76,7 @@ namespace MTUComm
                 base_stream += "    <AppInfo>";
                 base_stream += "        <AppName>"   + config.getApplicationName() + "</AppName>";
                 base_stream += "        <Version>"   + config.GetApplicationVersion() + "</Version>";
-                base_stream += "        <Date>"      + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss") + "</Date>";
+                base_stream += "        <Date>"      + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss") + "</Date>";
                 base_stream += "        <UTCOffset>" + TimeZoneInfo.Local.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
                 base_stream += "        <UnitId>"    + config.GetDeviceUUID() + "</UnitId>";
                 base_stream += "        <AppType>"   + ( Data.Get.IsFromScripting ? "Scripted" : "Interactive" ) + "</AppType>";
@@ -93,7 +93,7 @@ namespace MTUComm
                 base_stream += "    <AppName>"   + config.getApplicationName() + "</AppName>";
                 base_stream += "    <Version>"   + config.GetApplicationVersion() + "</Version>";
                 base_stream += "    <MtuId />";
-                base_stream += "    <Date>"      + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss") + "</Date>";
+                base_stream += "    <Date>"      + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss") + "</Date>";
                 base_stream += "    <UTCOffset>" + TimeZoneInfo.Local.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
                 base_stream += "    <UnitId>"    + config.GetDeviceUUID() + "</UnitId>";
                 base_stream += "    <AppType>"   + ( Data.Get.IsFromScripting ? "Scripted" : "Interactive" ) + "</AppType>";
@@ -106,7 +106,7 @@ namespace MTUComm
                 base_stream += "        <AppName>"   + config.getApplicationName() + "</AppName>";
                 base_stream += "        <Version>"   + config.GetApplicationVersion() + "</Version>";
                 base_stream += "        <MtuId />";
-                base_stream += "        <Date>"      + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss") + "</Date>";
+                base_stream += "        <Date>"      + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss") + "</Date>";
                 base_stream += "        <UTCOffset>" + TimeZoneInfo.Local.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
                 base_stream += "        <UnitId>"    + config.GetDeviceUUID() + "</UnitId>";
                 base_stream += "        <AppType>"   + ( Data.Get.IsFromScripting ? "Scripted" : "Interactive" ) + "</AppType>";
