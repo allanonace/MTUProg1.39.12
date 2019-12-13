@@ -92,8 +92,8 @@ namespace MTUComm
             LEXI_ATTEMPTS_N        - Number of attempts to perform an LExI write before returning an error = 2
             WAIT_BTW_LEXI_ATTEMPTS - Waiting time before making a new LExI write attempt after an error = 1
         */
-        public  const int LEXI_ATTEMPTS_N          = 2;
-        public  const int WAIT_BTW_LEXI_ATTEMPTS   = 1;
+        public  const int LEXI_ATTEMPTS_N          = 3;
+        public  const int WAIT_BTW_LEXI_ATTEMPTS   = 2;
         
         /* Constants: LExI commands
             CMD_ATTEMPTS_ONE      - LExI commands that return a list of items should not have multiple attempts = 1
@@ -1410,11 +1410,9 @@ namespace MTUComm
                         // Try one more time to recover an event log
                         case EventLogQueryResult.Busy:
                             if ( ++countAttempts > maxAttempts )
-                                throw new ActionNotAchievedGetEventsLogException ();
+                                throw new MtuIsBusyToGetEventsLogException ();
                             else
                             {
-                                //Errors.AddError ( new MtuIsBusyToGetEventsLogException () );
-
                                 await Task.Delay ( WAIT_BTW_LOG_ERROR );
 
                                 // Try again, using this time Get Repeat Last Event Log Response command
@@ -1565,7 +1563,8 @@ namespace MTUComm
                 int  count = 1;
                 int  wait  = 3;
                 int  max   = ( int )( global.TimeSyncCountDefault / wait ); // Seconds / Seconds = Rounded max number of iterations
-                
+                //int max    = ( int )( 10 / wait ); // NOTE: DEBUG
+
                 do
                 {
                     // Update interface text to look the progress
@@ -1577,33 +1576,35 @@ namespace MTUComm
                     fail = await regICNotSynced.GetValueFromMtu ();
                 }
                 // Is MTU not synced with DCU yet?
-                while ( fail &&
-                        ++count <= max );
-                
+                while ( fail && ++count <= max );
+                //while ( fail && ++count < 0 ); // NOTE: DEBUG
+
                 if ( fail )
                 {
-                    /*
                     // It is easier to validate only one value than not to search for
                     // all conditions for RFCheck and artificial timesync in the interface
                     Data.SetTemp ( "ArtificialInstallConfirmation",
-                        global.ArtificialTimeSync && mtu.FastMessageConfig );
+                        global.ArtificialTimeSync &&
+                        mtu.FastMessageConfig &&
+                        mtu.MtuDemand );
 
                     // Simulated
                     if ( Data.Get.ArtificialInstallConfirmation )
                     {
                         OnProgress ( this, new Delegates.ProgressArgs ( "RF-Check: Artificial..." ) );
 
-                        // TODO: PERFORM DURING RFCHECK AND AS PART OF THE INSTALLATIONS?
-                        // TODO: EXECUTE THE NODE DISCOVERY?
-                        // TODO: AVOID SOME TAGS IN THE FINAL LOG? ( VSWR, DCU ID, RSSI, DEVIATION AND NODEDISCOVERY... )
-
                         await this.ArtificialInstallConfirmation ( map );
 
+                        // Does not execute the Node Discovery
                         return IC_OK;
                     }
-                    */
 
                     throw new AttemptNotAchievedICException ();
+                }
+                else
+                {
+                    // Not necessary to perform an artificial process when the IC has worked
+                    Data.SetTemp ( "ArtificialInstallConfirmation", false );
                 }
 
                 int DcuId = await map.DcuId.GetValueFromMtu();
@@ -1611,16 +1612,14 @@ namespace MTUComm
             }
             catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
-                if ( ! ( e is PuckCantCommWithMtuException ) &&
-                     e is AttemptNotAchievedICException )
+                if ( e is AttemptNotAchievedICException )
                     Errors.AddError ( e );
+                else if ( ! wasNotAboutPuck )
+                    Errors.AddError ( new PuckCantCommWithMtuException () );
                 // Finish
                 else
                 {
-                    if ( ! wasNotAboutPuck )
-                         Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
-                    else Errors.LogErrorNowAndContinue ( e );
-
+                    Errors.LogErrorNowAndContinue ( e );
                     return IC_EXCEPTION;
                 }
 
@@ -1694,13 +1693,13 @@ namespace MTUComm
             double  vswr          = -1;
             decimal successF1     = 0m;
             decimal successF2     = 0m;
-            int attemptsLeft      = 6;
+            //int attemptsLeft      = 6;
+            int timeLimitForND      = global.MaxTimeRFCheck * 1000; // seconds to ms
+            Stopwatch nodeCounter = null;
 
             try
             {
                 // Gets the radio impedance match VSWR of the MTU
-                // NOTE: It can take up to one second to return an answer with data
-                // NOTE: If the size of the data to be answered is not specified, the accepted answer will be ACK 6 and ACK Info Size 0
                 LexiWriteResult fullResponse = await this.lexi.Write (
                         CMD_VSWR,
                         null,
@@ -1735,20 +1734,32 @@ namespace MTUComm
                                   CMD_NODE_INIT_MAXDITHER  +
                                   CMD_NODE_OVERHEAD_TIME;
 
+                /*
+                // Number of attempts
+
                 attemptsLeft = ( this.global.MaxTimeRFCheck >= 10 ) ?
                     ( int )Math.Ceiling ( this.global.MaxTimeRFCheck / 10d ) :
                     this.global.MaxTimeRFCheck;
 
                 if ( attemptsLeft < 1 )
                     attemptsLeft = 6;
+                */
+
+                // Time limit
+
+                nodeCounter = new Stopwatch ();
+                nodeCounter.Start ();
 
                 int attempIndex = 0;
 
                 while ( true )
                 {
+                    attempIndex++;
+
                     #region Step 1 - Init
 
-                    OnProgress ( this, new Delegates.ProgressArgs ( "ND: Step1 Init #" + ( attempIndex + 1 ) ) );
+                    //OnProgress ( this, new Delegates.ProgressArgs ( "ND: Step1 Init #" + ( attempIndex + 1 ) ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "ND: Init #" + attempIndex + " " + ( int )( nodeCounter.ElapsedMilliseconds / 1000 ) + "s" ) );
 
                     try
                     {
@@ -1781,7 +1792,8 @@ namespace MTUComm
                     {
                         #region Delay before start
 
-                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Wait " + slackTime + "s #" + ( attempIndex + 1 ) ) );
+                        //OnProgress ( this, new Delegates.ProgressArgs ( "ND: Wait " + slackTime + "s #" + ( attempIndex + 1 ) ) );
+                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Wait " + slackTime + "s #" + attempIndex ) );
 
                         await Task.Delay ( slackTime * 1000 );
 
@@ -1789,7 +1801,8 @@ namespace MTUComm
 
                         #region Step 2 - Start/Reset
 
-                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Step2 Start/Reset #" + ( attempIndex + 1 ) ) );
+                        //OnProgress ( this, new Delegates.ProgressArgs ( "ND: Step2 Start/Reset #" + ( attempIndex + 1 ) ) );
+                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Start/Reset #" + attempIndex + " " + ( int )( nodeCounter.ElapsedMilliseconds / 1000 ) + "s" ) );
 
                         // Start/Reset node discovery response query
                         fullResponse = null;
@@ -1828,7 +1841,8 @@ namespace MTUComm
 
                         #region Step 3 - Get Next
 
-                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Step3 Get Nodes #" + ( attempIndex + 1 ) ) );
+                        //OnProgress ( this, new Delegates.ProgressArgs ( "ND: Step3 Get Nodes #" + ( attempIndex + 1 ) ) );
+                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Get Nodes #" + attempIndex + " " + ( int )( nodeCounter.ElapsedMilliseconds / 1000 ) + "s" ) );
 
                         await Task.Delay ( WAIT_BEFORE_NODE_NEXT );
 
@@ -1935,7 +1949,8 @@ namespace MTUComm
                         if ( ! nodeList.HasCurrentAttemptEntries () )
                             goto BREAK_FAIL;
 
-                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Validating nodes.. #" + ( attempIndex + 1 ) ) );
+                        //OnProgress ( this, new Delegates.ProgressArgs ( "ND: Validating nodes.. #" + ( attempIndex + 1 ) ) );
+                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Validating nodes.. #" + attempIndex + " " + ( int )( nodeCounter.ElapsedMilliseconds / 1000 ) + "s" ) );
 
                         Utils.Print ( "ND: Nodes to validate " + nodeList.CurrentAttemptEntries.Length );
 
@@ -2035,12 +2050,13 @@ namespace MTUComm
                     BREAK_FAIL:
 
                     // The max time to perform Node Discovery process has expired
-                    if ( ++attempIndex >= attemptsLeft )
+                    //if ( ++attempIndex >= attemptsLeft )
+                    if ( nodeCounter.ElapsedMilliseconds > timeLimitForND )
                     {
                         // Finish process only if the result is excellent or time is over,
                         // and it can end after consuming all time but with "good" as result
                         if ( result == NodeDiscoveryResult.NOT_ACHIEVED )
-                            Errors.LogErrorNowAndContinue ( new ActionNotAchievedNodeDiscoveryException ( attemptsLeft + "" ) );
+                            Errors.LogErrorNowAndContinue ( new ActionNotAchievedNodeDiscoveryException ( global.MaxTimeRFCheck + "" ) );
 
                         break; // Exit from infinite while
                     }
@@ -2052,9 +2068,17 @@ namespace MTUComm
             {
                 if ( ! Errors.IsOwnException ( e ) )
                      Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
-                else Errors.LogErrorNowAndContinue ( new ActionNotAchievedNodeDiscoveryException ( attemptsLeft + "" ) );
+                else Errors.LogErrorNowAndContinue ( new ActionStoppedNodeDiscoveryException () );
                 
                 result = NodeDiscoveryResult.EXCEPTION;
+            }
+            finally
+            {
+                if ( nodeCounter != null )
+                {
+                    nodeCounter.Stop ();
+                    nodeCounter = null;
+                }
             }
 
             // Generates entries for activity log and nodes log file
@@ -3355,7 +3379,7 @@ namespace MTUComm
                 dynamic map = this.GetMemoryMap ( true );
                 form.map = map;
 
-                #region Account Number ( also for RDD )
+                #region Account Number
 
                 // Uses default value fill to zeros if parameter is missing in scripting
                 // Only first 12 numeric characters are recorded in MTU memory
@@ -3367,7 +3391,7 @@ namespace MTUComm
 
                 #endregion
 
-                #region Meter Type ( also for RDD )
+                #region Meter Type
 
                 Meter selectedMeter  = null;
                 Meter selectedMeter2 = null;
@@ -3442,7 +3466,7 @@ namespace MTUComm
 
                 #endregion
 
-                #region Two-Way ( Fast Messaging , also for RDD )
+                #region Two-Way ( Fast Messaging )
 
                 if ( global.TimeToSync &&
                      this.mtu.TimeToSync &&
@@ -3466,7 +3490,7 @@ namespace MTUComm
 
                 #endregion
 
-                #region Time of day for TimeSync ( also for RDD )
+                #region Time of day for TimeSync
 
                 if ( global.TimeToSync &&
                      mtu.TimeToSync    &&
@@ -3479,13 +3503,10 @@ namespace MTUComm
 
                 #endregion
 
-                #region Digits to Drop ( also for RDD )
+                #region Digits to Drop
 
-                // TODO: DOES FAMILY 31XX32XX THE RELATED BYTES IN THE MEMORY MAP?
-                // TODO: DOES FAMILY 33XX THE RELATED BYTES IN THE MEMORY MAP?
-
-                /*
-                if ( mtu.DigitsToDrop )
+                if ( mtu.DigitsToDrop &&
+                     ! mtu.IsFamily31xx32xx )
                 {
                     if ( selectedMeter.IsForEncoderOrEcoder )
                         map.P1DigitsToDrop = ( int )selectedMeter.EncoderDigitsToDrop;
@@ -3494,11 +3515,10 @@ namespace MTUComm
                          selectedMeter2.IsForEncoderOrEcoder )
                         map.P2DigitsToDrop = ( int )selectedMeter2.EncoderDigitsToDrop;
                 }
-                */
 
                 #endregion
 
-                #region Alarm ( also for RDD )
+                #region Alarm
 
                 if ( mtu.RequiresAlarmProfile )
                 {
@@ -3584,7 +3604,7 @@ namespace MTUComm
 
                 #endregion
 
-                #region Demands ( also for RDD )
+                #region Demands
 
                 if ( this.mtu.MtuDemand &&
                      this.mtu.FastMessageConfig )
@@ -3632,7 +3652,7 @@ namespace MTUComm
 
                 #endregion
 
-                #region Frequencies ( also for RDD )
+                #region Frequencies
 
                 if ( global.AFC       &&
                      mtu.TimeToSync   &&
@@ -3649,7 +3669,7 @@ namespace MTUComm
 
                 Utils.Print ( "--------ADD_FINISH-------" );
 
-                #region Encryption ( also for RDD )
+                #region Encryption
 
                 // Only encrypt MTUs with SpecialSet set
                 if ( mtu.SpecialSet )
@@ -3711,22 +3731,22 @@ namespace MTUComm
 
                 // Checks if all data was write ok, and then generate the final log
                 // without read again from the MTU the registers already read
-                if ((await map.GetModifiedRegistersDifferences(this.GetMemoryMap(true))).Length > 0)
-                    throw new PuckCantCommWithMtuException();
+                if ( ( await map.GetModifiedRegistersDifferences ( this.GetMemoryMap ( true ) ) ).Length > 0 )
+                    throw new PuckCantCommWithMtuException ();
 
                 // It is necessary for Encoders and E-coders, which should read the reading from the the meter
                 // NOTE: This flag should be activated after the the previous map comparison, to avoid
                 // NOTE: false positive error when comparing the meter reading and the value not inserted by the user ( zero )
-                if (this.mtu.Port1.IsForEncoderOrEcoder)
+                if ( this.mtu.Port1.IsForEncoderOrEcoder )
                 {
                     // Reset register cache
                     map.P1MeterReading.readedFromMtu = false;
                     map.P2MeterReading.readedFromMtu = false;
 
                     // Activates flag to read Meter
-                    await map.ReadMeter.SetValueToMtu(true, LEXI_ATTEMPTS_N * 2);
+                    await map.ReadMeter.SetValueToMtu ( true, LEXI_ATTEMPTS_N * 2 );
 
-                    await Task.Delay(WAIT_BEFORE_READ_MTU);
+                    await Task.Delay ( WAIT_BEFORE_READ_MTU );
                 }
 
                 Utils.Print("----FINAL_READ_FINISH----");
@@ -3748,7 +3768,7 @@ namespace MTUComm
 
                 await this.CheckIsTheSameMTU ();
 
-                #region Alarm #2 ( also for RDD )
+                #region Alarm #2
 
                 if ( mtu.RequiresAlarmProfile )
                 {
@@ -3762,7 +3782,7 @@ namespace MTUComm
 
                 #endregion
                  
-                #region RFCheck ( prev. Install Confirmation, also for RDD )
+                #region RFCheck ( prev. Install Confirmation )
 
                 // After TurnOn has to be performed an InstallConfirmation
                 // if certain tags/registers are validated/true
@@ -4143,9 +4163,51 @@ namespace MTUComm
         public async Task WriteMtuModifiedRegisters ( MemoryMap.MemoryMap map )
         {
             List<dynamic> modifiedRegisters = map.GetModifiedRegisters ().GetAllElements ();
-            
+
+            int retryIndex = 0;
+            int retryTotal = 3;
             for ( int i = 0; i < modifiedRegisters.Count; i++ )
-                await modifiedRegisters[ i ].SetValueToMtu ();
+            {
+                if ( retryIndex > 0 )
+                    i--;
+
+                var reg = modifiedRegisters[ i ];
+
+                #if DEBUG
+
+                Utils.Print ( "Write '" + reg.id + "' to MTU" );
+
+                #endif
+
+                try
+                {
+                    await reg.SetValueToMtu ();
+
+                    #if DEBUG
+                    
+                    var val = await reg.GetValue ();
+                    Utils.Print ( "Write '" + reg.id + "': " + val );
+
+                    #endif
+                }
+                catch ( Exception )
+                {
+                    Utils.Print ( "Error: Writing register '" + reg.id + "' to MTU" );
+
+                    if ( ++retryIndex < retryTotal )
+                    {
+                        Utils.Print ( "Error: Write '" + reg.id + "' to MTU #" + retryIndex );
+
+                        await Task.Delay ( WAIT_BTW_LEXI_ATTEMPTS * 1000 );
+
+                        continue;
+                    }
+
+                    throw new PuckCantCommWithMtuException ();
+                }
+
+                retryIndex = 0;
+            }
             
             //foreach ( dynamic r in modifiedRegisters )
             //    await r.SetValueToMtu ();

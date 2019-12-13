@@ -449,7 +449,7 @@ namespace Library
             object value )
         {
             Type type = value.GetType ();
-            if ( type.IsClass ||
+            if ( type.IsClass && ! ( value is string ) ||
                  type.IsArray )
             {
                 return string.Empty;

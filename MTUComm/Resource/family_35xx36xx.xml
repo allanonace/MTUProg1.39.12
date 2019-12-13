@@ -920,7 +920,7 @@
     <Type>int</Type>
     <Address>199</Address>
     <Size>1</Size>
-    <Write>false</Write>
+    <Write>true</Write>
     <CustomGet/>
     <CustomSet/>
   </Register>
@@ -1562,7 +1562,7 @@
     <Type>int</Type>
     <Address>74</Address>
     <Size>1</Size>
-    <Write>false</Write>
+    <Write>true</Write>
     <CustomGet/>
     <CustomSet/>
   </Register>
@@ -1572,7 +1572,7 @@
     <Type>int</Type>
     <Address>75</Address>
     <Size>1</Size>
-    <Write>false</Write>
+    <Write>true</Write>
     <CustomGet/>
     <CustomSet/>
   </Register>
@@ -1582,7 +1582,7 @@
     <Type>int</Type>
     <Address>76</Address>
     <Size>1</Size>
-    <Write>false</Write>
+    <Write>true</Write>
     <CustomGet/>
     <CustomSet/>
   </Register>
@@ -1592,7 +1592,7 @@
     <Type>int</Type>
     <Address>77</Address>
     <Size>1</Size>
-    <Write>false</Write>
+    <Write>true</Write>
     <CustomGet/>
     <CustomSet/>
   </Register>
@@ -1602,7 +1602,7 @@
     <Type>int</Type>
     <Address>78</Address>
     <Size>1</Size>
-    <Write>false</Write>
+    <Write>true</Write>
     <CustomGet/>
     <CustomSet/>
   </Register>
@@ -1612,7 +1612,7 @@
     <Type>int</Type>
     <Address>79</Address>
     <Size>1</Size>
-    <Write>false</Write>
+    <Write>true</Write>
     <CustomGet/>
     <CustomSet/>
   </Register>

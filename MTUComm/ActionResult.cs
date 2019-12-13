@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Xml;
 
 using ActionType = MTUComm.Action.ActionType;
@@ -50,7 +51,7 @@ namespace MTUComm
 
         public ActionResult[] getPorts ()
         {
-            return ports.ToArray();
+            return ports.ToArray ();
         }
 
         public int NumPorts

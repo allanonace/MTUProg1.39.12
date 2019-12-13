@@ -284,7 +284,7 @@ namespace Xml
         [XmlElement("BroadCast")]
         public bool BroadCast { get; set; }
 
-        // NOTE: Is the Mtu Type ( 171, 177,... ) and not the Serial Number or Mtu ID
+        // NOTE: Is the Mtu Type ( 171, 177,... ) and not the Serial Number
         [XmlAttribute("ID")]
         public int Id { get; set; }
 

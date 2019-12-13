@@ -572,14 +572,27 @@ namespace MTUComm.MemoryMap
             // Register with read and write
             if ( this.write || force )
             {
-                Utils.PrintDeep( "Register -> SetValue: " + this.id + " = " + value );
+                Utils.Print ( "Register -> SetValue: " + this.id + " = " + value );
             
                 try
                 {
                     // Method will modify passed value before set in byte array
                     // If XML custom field is "method" or "method:id"
                     if ( this.HasCustomMethod_Set )
+                    {
                         value = await this.funcSetCustom ( value );
+
+                        Utils.Print ( "Register -> Value is null? " + ( value == null || value is byte[] && value.Length == 0 ) );
+
+                        if ( value is byte[] )
+                        {
+                            System.Text.StringBuilder stb = new System.Text.StringBuilder ();
+		                    foreach ( byte b in value )
+			                    stb.Append( b.ToString("X2") );
+                            Utils.Print ( "Register -> Value customized [ Bytes ]: " + stb.ToString () );
+                        }
+                        else Utils.Print ( "Register -> Value customized: " + value );
+                    }
     
                     // Try to set string value after read form control
                     // If XML custom field is...
@@ -600,7 +613,7 @@ namespace MTUComm.MemoryMap
                 }
                 catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
                 {
-                    Console.WriteLine ( "Register -> SetValue [ ERROR ]: " + e.Message );
+                    Utils.Print ( "Register -> SetValue [ ERROR ]: " + this.id + " -> " + e.Message );
 
                     // Is not own exception
                     if ( ! Errors.IsOwnException ( e ) )

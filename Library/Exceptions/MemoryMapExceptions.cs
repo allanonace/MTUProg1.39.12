@@ -43,11 +43,6 @@
         public MemoryOverloadsAreReadOnly ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
     }
     
-    public class PreparingLogInterfaceException : OwnExceptionsBase
-    {
-        public PreparingLogInterfaceException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
-    }
-
     public class OverloadEmptyCustomException : OwnExceptionsBase
     {
         public OverloadEmptyCustomException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }

@@ -39,14 +39,20 @@ namespace MTUComm
             { new MtuQueryEventLogsException (),                104 },
             // Get next event log process has failed trying to recover data from the MTU
             { new AttemptNotAchievedGetEventsLogException (),   105 },
-            // Get next event log process has failed trying because the MTU is busy
+            // Historical Read process can't be performed because the MTU is busy
             { new MtuIsBusyToGetEventsLogException (),          106 },
-            // Get next event log can't be performed after having tried it several times
+            // Historical Read process can't be performed after having tried it several times
             { new ActionNotAchievedGetEventsLogException (),    107 },
             // The MtU is not an OnDemand device
             { new MtuIsNotOnDemandCompatibleDevice (),          108 },
             // There are no records to retrieve for the Historical Read process
             { new NoEventsLogException (),                      109 },
+            // Preparing values for the log. Check puck position and try again
+            { new PreparingLogInterfaceException (),            110 },
+            // The value to write in BCD format for the Meter ID is greater ( ... ) than the number of available bytes
+            { new NumberToBcdIsLargerThanBytesRegister (),      111 },
+            // Was not 
+            //{ new CannotWrite (),      111 },
         
             // Meter [ 2xx ]
             //------
@@ -110,7 +116,7 @@ namespace MTUComm
             // The script file used is empty
             { new ScriptEmptyException (),                      306 },
             // The script does not contain the ( Old|New ) Meter serial number parameter that is mandatory in writing actions
-            { new MandatoryMeterSerialHiddenScriptException (), 307 },
+            { new MandatoryMeterSerialHiddenScriptException (), 307 }, // NOT USED
             // The script contains the same parameter more than once
             { new SameParameterRepeatScriptException (),        308 },
             // User name missing in the script file
@@ -150,12 +156,12 @@ namespace MTUComm
             // Installation Confirmation can't be performed after having tried it several times
             { new ActionNotAchievedICException (),              603 },
             // Node Discovery not initialized correctly
-            { new NodeDiscoveryNotInitializedException (),      604 },
+            { new NodeDiscoveryNotInitializedException (),      604 }, // NOT USED
             // Node Discovery not started correctly
-            { new NodeDiscoveryNotStartedException (),          605 },
-            // Node Discovery process has failed trying to recover a node/DCU
-            { new AttemptNotAchievedNodeDiscoveryException (),  606 },
-            // Node Discovery cannot be performed after having tried it several times
+            { new NodeDiscoveryNotStartedException (),          605 }, // NOT USED
+            // Node Discovery can't be performed because it ended prematurely due to an exception
+            { new ActionStoppedNodeDiscoveryException (),       606 },
+            // Node Discovery can't be performed after having tried it for ... seconds
             { new ActionNotAchievedNodeDiscoveryException (),   607 },
 
             // Encryption [ 7xx ]
@@ -186,7 +192,7 @@ namespace MTUComm
             // Download or install a new certificate because the one that is currently used has expired
             { new CertificateInstalledExpiredException (),      804 },
             // Not all necessary permissions have been granted on the Android device.
-            { new AndroidPermissionsException (),               805 },
+            { new AndroidPermissionsException (),               805 }, // NOT USED
             // There is a problem with the FTP and configuration files could not be downloaded. Contact your IT administrator
             { new FtpDownloadException (),                      806 },
             // The Device has not internet connection
@@ -200,7 +206,7 @@ namespace MTUComm
             // Sending activity logs to the FTP has failed, only _var_ files have been uploaded
             { new FtpUpdateLogsException (),                    811 },
  		    // Changed configuration files
-            { new ConfigFilesChangedException (),               812 }, // TODO: NOT IN USE -> REMOVE?
+            { new ConfigFilesChangedException (),               812 }, // NOT USED
             // New version files corrupted
             { new ConfigurationFilesNewVersionException (),     813 },
             // Intune credentials missing
@@ -211,7 +217,6 @@ namespace MTUComm
             { new GlobalChangedException (),                    816 },
             // Exception MTU without portType
             { new PortTypeMissingMTUException (),               817 },
-            
             
             // DEBUG - Configuration Files and System [ 85x ]
             //-------------------------------
@@ -242,10 +247,8 @@ namespace MTUComm
             { new SetMemoryTypeLimitException (),               906 },
             // All overload registers are readonly members
             { new MemoryOverloadsAreReadOnly (),                907 },
-            // Preparing values to generate the log.\nPlease, check Puck position over the MTU and try again
-            { new PreparingLogInterfaceException (),            908 },
             // Setting value to a Memory Register
-            { new MemoryRegisterSetValueException (),           909 },
+            { new MemoryRegisterSetValueException (),           908 },
         };
 
         #endregion

@@ -803,7 +803,6 @@ namespace MTUComm.MemoryMap
                     difs.Add ( name );
                     continue;
                 }
-                else Utils.PrintDeep( "Equals: " + name + " -> OK" );
             }
 
             return difs.ToArray ();

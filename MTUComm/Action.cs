@@ -1231,22 +1231,23 @@ namespace MTUComm
         private void LogResult (
             ActionResult result )
         {
-            Utils.PrintDeep ( "<Results>" );
-            Utils.PrintDeep ($"\t<Result interface=\"{result.ActionType.ToString ()}\">" );
+            Utils.Print ( "<Results>" );
+            Utils.Print($"\t<Result interface=\"{result.ActionType.ToString ()}\">" );
 
             // Root properties
             foreach ( Parameter param in result.getParameters () )
-                Utils.PrintDeep (
+                Utils.Print(
                     $"\t\t<Output id=\"{param.CustomParameter}\" value=\"{param.Value}\"/>");
 
             // Port properties
             foreach ( ActionResult portResult in result.getPorts () )
-                foreach ( Parameter param in portResult.getParameters () )
-                    Utils.PrintDeep(
-                        $"\t\t<Output port=\"{param.Port}\" id=\"{param.CustomParameter}\" value=\"{param.Value}\"/>");
+                if ( portResult != null )
+                    foreach ( Parameter param in portResult.getParameters () )
+                        Utils.Print(
+                            $"\t\t<Output port=\"{param.Port}\" id=\"{param.CustomParameter}\" value=\"{param.Value}\"/>");
 
-            Utils.PrintDeep ("\t</Result>");
-            Utils.PrintDeep ( "</Results>" );
+            Utils.Print("\t</Result>");
+            Utils.Print( "</Results>" );
         }
 
         #endregion
@@ -1287,9 +1288,13 @@ namespace MTUComm
             ActionResult result = new ActionResult ( actionType );
             InterfaceParameters[] parameters = this.config.getAllParamsFromInterface ( mtu, actionType );
             
+            int retryTotal = 3;
+            int retryIndex = retryTotal;
             string sourceWhere = string.Empty;
             foreach ( InterfaceParameters parameter in parameters )
             {
+                ATTEMPT:
+
                 try
                 {
                     if ( parameter.Name.Equals ( IFACE_PORT ) )
@@ -1348,7 +1353,7 @@ namespace MTUComm
                             if ( paramToAdd != null )
                             {
                                 if ( Utils.IsBool ( paramToAdd.Value ) )
-                                     paramToAdd.Value = Utils.FirstCharToCapital ( paramToAdd.Value );
+                                    paramToAdd.Value = Utils.FirstCharToCapital ( paramToAdd.Value );
                                 else
                                 {
                                     paramToAdd.Value = this.FormatLength ( paramToAdd.Value, parameter.Length, parameter.Fill );
@@ -1366,8 +1371,18 @@ namespace MTUComm
                     Utils.Print ( "Error: Interface parameter '" + parameter.Name + "'" +
                         ( ( string.IsNullOrEmpty ( sourceWhere ) ? string.Empty : " [ Source: " + sourceWhere + " ]" ) ) );
 
-                    throw new PreparingLogInterfaceException ();
+                    if ( --retryIndex >= 0 )
+                    {
+                        Utils.Print ( "Error: Interface parameter -> RETRY #" + ( retryTotal - retryIndex ) );
+
+                        await Task.Delay ( 250 );
+                        goto ATTEMPT;
+                    }
+                    else
+                        throw new PreparingLogInterfaceException ();
                 }
+
+                retryIndex = retryTotal;
             }
             
             // Add additional parameters ( from script ) for all actions except for the Add

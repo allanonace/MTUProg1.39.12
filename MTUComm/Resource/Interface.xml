@@ -67,6 +67,7 @@
 	<!-- OnDemand 1.2 -->
 	<!-- New Encryption, DataRead, RemoteDisconnect and NodeDiscovery -->
 	<MtuInterface family="35xx36xx">
+		<!-- 345x -->
 		<Mtu id="180" />
 		<Mtu id="181" />
 		<Mtu id="182" />
@@ -83,12 +84,14 @@
 		<Mtu id="193" />
 		<Mtu id="194" />
 		<Mtu id="195" />
+		<!-- 35xx -->
 		<Mtu id="196" />
 		<Mtu id="197" />
 		<Mtu id="198" />
 		<Mtu id="199" />
 		<Mtu id="200" />
 		<Mtu id="201" />
+		<!-- 36xx -->
 		<Mtu id="213" />
 		<Mtu id="215" />
 		<Mtu id="216" />
@@ -132,7 +135,7 @@
 				<Parameter 	name="MeterType" 				display="Meter Type" 					log="true" 	interface="true" 	source="Meter.Display" 								conditional="MemoryMap.StatusFlag=true"/>
 				<Parameter 	name="MeterTypeId" 				display="Meter Type ID" 				log="true" 	interface="false" 	source="Meter.Id" 									conditional="MemoryMap.StatusFlag=true"/>
 				<Parameter 	name="NumberOfDials" 			display="Number Of Dials" 				log="true" 	interface="true" 	source="Meter.NumberOfDials" 						conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true + Meter.NumberOfDials gt -1"/>
-				<Parameter 	name="DriveDialSize" 			display="Drive Dial Size" 				log="true" 	interface="true" 	source="Meter.DriveDialSize" 						conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true + Meter.NumberOfDials gt -1"/>
+				<Parameter 	name="DriveDialSize" 			display="Drive Dial Size" 				log="true" 	interface="true" 	source="Meter.DriveDialSize" 						conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true + Meter.DriveDialSize gt -1"/>
 				<Parameter 	name="UnitOfMeasure" 			display="Unit Of Measure" 				log="true" 	interface="true" 	source="Meter.UnitOfMeasure" 						conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true"/>
 				<Parameter 	name="AcctNumber" 				display="Global.AccountLabel" 			log="true" 	interface="true" 	source="MemoryMap.MeterId" 							conditional="MemoryMap.StatusFlag=true"
 							length="Global.AccountLength" 	fill="left"/>
@@ -194,7 +197,7 @@
 				<Parameter 	name="MeterType" 				display="Meter Type" 					log="true" 	interface="true" 	source="Meter.Display" 								conditional="MemoryMap.StatusFlag=true"/>
 				<Parameter 	name="MeterTypeId" 				display="Meter Type ID" 				log="true" 	interface="false" 	source="Meter.Id" 									conditional="MemoryMap.StatusFlag=true"/>
 				<Parameter 	name="NumberOfDials" 			display="Number Of Dials" 				log="true" 	interface="true" 	source="Meter.NumberOfDials" 						conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true + Meter.NumberOfDials gt -1"/>
-				<Parameter 	name="DriveDialSize" 			display="Drive Dial Size" 				log="true" 	interface="true" 	source="Meter.DriveDialSize" 						conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true + Meter.NumberOfDials gt -1"/>
+				<Parameter 	name="DriveDialSize" 			display="Drive Dial Size" 				log="true" 	interface="true" 	source="Meter.DriveDialSize" 						conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true + Meter.DriveDialSize gt -1"/>
 				<Parameter 	name="UnitOfMeasure" 			display="Unit Of Measure" 				log="true" 	interface="true" 	source="Meter.UnitOfMeasure" 						conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true"/>
 				<!-- INIT - Ecoder -->
 				<Parameter 	name="BackFlowState" 			display="Backflow State" 				log="true" 	interface="true" 														conditional="MemoryMap.StatusFlag=true + Mtu.Ecoder=true"/>
@@ -278,10 +281,11 @@
 			<!-- END - Alarms -->
 			<Parameter 	name="DailySnap" 					display="Daily Snap" 					log="true" 	interface="true"/>
 			<Parameter 	name="DailyGMTHourRead" 			display="Daily GMT Hour Read" 			log="true" 	interface="false" 														conditional="MemoryMap.DailyGMTHourRead gt -1 + MemoryMap.DailyGMTHourRead lt 24"/>
+			<Parameter 	name="ArtificialTimeSync" 			display="ArtificialTimeSync" 			log="true" 	interface="true" 	source="Data.ArtificialInstallConfirmation"			conditional="MemoryMap.Shipbit=false + Data.ArtificialInstallConfirmation=true"/>
 			<Parameter 	name="InstallationConfirmationStatus" display="Installation" 				log="true" 	interface="true" 	source="MemoryMap.InstallConfirmationStatus"		conditional="MemoryMap.Shipbit=false"/>
-			<Parameter 	name="DcuId" 						display="DCU ID" 						log="true" 	interface="true" 	source="Data.DcuId"  								conditional="MemoryMap.Shipbit=false + MemoryMap.InstallConfirmationNotSynced=false + Data.DcuId gt 0"/>
-			<Parameter 	name="RSSI" 						display="RSSI" 							log="true" 	interface="true" 	source="MemoryMap.RSSIStatus" 						conditional="MemoryMap.Shipbit=false + MemoryMap.InstallConfirmationNotSynced=false"/>
-			<Parameter 	name="Deviation" 					display="Deviation" 					log="true" 	interface="false" 														conditional="MemoryMap.Shipbit=false + MemoryMap.InstallConfirmationNotSynced=false"/>
+			<Parameter 	name="DcuId" 						display="DCU ID" 						log="true" 	interface="true" 	source="Data.DcuId"  								conditional="MemoryMap.Shipbit=false + Data.ArtificialInstallConfirmation=false + MemoryMap.InstallConfirmationNotSynced=false + Data.DcuId gt 0"/>
+			<Parameter 	name="RSSI" 						display="RSSI" 							log="true" 	interface="true" 	source="MemoryMap.RSSIStatus" 						conditional="MemoryMap.Shipbit=false + Data.ArtificialInstallConfirmation=false + MemoryMap.InstallConfirmationNotSynced=false"/>
+			<Parameter 	name="Deviation" 					display="Deviation" 					log="true" 	interface="false" 														conditional="MemoryMap.Shipbit=false + Data.ArtificialInstallConfirmation=false + MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter 	name="MTU_DateTime" 				display="MtuGmtDateTime" 				log="true" 	interface="false" 	source="MemoryMap.MtuDatetime" 						conditional="MemoryMap.Shipbit=false + MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter 	name="Encryption" 					display="Encrypted" 					log="true" 	interface="true" 														conditional="Mtu.SpecialSet=true"/>
 			<Parameter 	name="EncryptionIndex" 				display="Encryption Index" 				log="true" 	interface="false" 														conditional="Mtu.SpecialSet=true + MemoryMap.Encrypted=true"/>
@@ -291,7 +295,7 @@
 				<Parameter 	name="MeterType" 				display="Meter Type" 					log="true" 	interface="true" 	source="Meter.Display" 								conditional="MemoryMap.StatusFlag=true"/>
 				<Parameter 	name="MeterTypeId" 				display="Meter Type ID" 				log="true" 	interface="false" 	source="Meter.Id" 									conditional="MemoryMap.StatusFlag=true"/>
 				<Parameter 	name="NumberOfDials" 			display="Number Of Dials" 				log="true" 	interface="true" 	source="Meter.NumberOfDials" 						conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true + Meter.NumberOfDials gt -1"/>
-				<Parameter 	name="DriveDialSize" 			display="Drive Dial Size" 				log="true" 	interface="true" 	source="Meter.DriveDialSize" 						conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true + Meter.NumberOfDials gt -1"/>
+				<Parameter 	name="DriveDialSize" 			display="Drive Dial Size" 				log="true" 	interface="true" 	source="Meter.DriveDialSize" 						conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true + Meter.DriveDialSize gt -1"/>
 				<Parameter 	name="UnitOfMeasure" 			display="Unit Of Measure" 				log="true" 	interface="true" 	source="Meter.UnitOfMeasure" 						conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true"/>
 				<!-- INIT - Ecoder -->
 				<Parameter 	name="BackFlowState" 			display="Backflow State" 				log="true" 	interface="true" 														conditional="MemoryMap.StatusFlag=true + Mtu.Ecoder=true"/>
@@ -350,34 +354,6 @@
 		</Action>
 	</Interface>
 	<Interface family="35xx36xx" memorysize="1024">
-		<!--
-		Differences with 31xx32xx:
-		- Add CutWireTamperStatus		-> Specific Alarm
-		- Add InsufficentMemoty			-> Specific Alarm
-		- Add LastGasp					-> Specific Alarm
-		- Add SerialComProblem			-> Specific Alarm
-		- Add SerialCutWire				-> Specific Alarm
-		- Add BackFlowState [ Port ]	-> Only for Ecoders
-		- Add DaysOfNoFlow [ Port ]		-> Only for Ecoders
-		- Add LeakDetection [ Port ]	-> Only for Ecoders
-		- Add DaysOfLeak [ Port ]		-> Only for Ecoders
-		- Add NumberOfDigits [ Port ]	-> For Encoders and Ecoders
-		- Add Fast-2-way register		-> Fast Messaging, Only for 34xx MTUs and above
-		- Add MtuMsgProtocolConfig		-> Fast Messaging
-		- Add MtuPrimaryWindowInterval	-> Fast Messaging
-		- Add MtuWindowAStart			-> Fast Messaging
-		- Add MtuWindowBStart			-> Fast Messaging
-		- Add MtuPrimaryWindowIntervalB	-> Fast Messaging
-		- Add MtuPrimaryWindowOffset	-> Fast Messaging
-		- Add MtuNumLowPriorityMsg		-> Fast Messaging
-		- Add OnDemandCount				-> Fast Messaging
-		- Add DataRequestCount			-> Fast Messaging
-		- Add FOTACount					-> Fast Messaging
-		- Add FOTCCount					-> Fast Messaging
-		- Remove F12WAYRegister1		-> Not supported
-		- Remove F12WAYRegister10		-> Not supported
-		- Remove F12WAYRegister14		-> Not supported
-		-->
 		<Action type="ReadMTU">
 			<Parameter 	name="Date" 						display="Date/Time" 					log="true" 	interface="false"	source="Action.Date"/>
 			<Parameter 	name="User" 						display="User" 							log="true" 	interface="false"	source="Action.User"/>
@@ -407,14 +383,14 @@
 			<!-- END - Alarms -->
 			<Parameter 	name="DailySnap" 					display="Daily Snap" 					log="true" 	interface="true"/>
 			<Parameter 	name="DailyGMTHourRead" 			display="Daily GMT Hour Read" 			log="true" 	interface="false"														conditional="MemoryMap.DailyGMTHourRead gt -1 + MemoryMap.DailyGMTHourRead lt 24"/>
-			<Parameter 	name="VSWR" 						display="VSWR" 							log="true" 	interface="true" 	source="Data.VSWR"			format="F3"				conditional="Data.VSWR gt -1"/> <!-- MemoryMap.Shipbit=false + MemoryMap.InstallConfirmationNotSynced=false -->
-			<Parameter 	name="NodeDiscoveryResult" 			display="NodeDiscoveryResult" 			log="true" 	interface="true" 	source="Data.ProcessResultND"						conditional="MemoryMap.InstallConfirmationNotSynced=false + Mtu.MtuDemand=true + Mtu.NodeDiscovery=true"/>
-			<Parameter 	name="NodeDiscoveryFile" 			display="NodeDiscoveryFile" 			log="true" 	interface="true" 	source="Data.ProcessResultFileND"					conditional="MemoryMap.InstallConfirmationNotSynced=false + Mtu.MtuDemand=true + Mtu.NodeDiscovery=true"/>
-			<Parameter 	name="ArtificialTimeSync" 			display="ArtificialTimeSync" 			log="true" 	interface="true" 	source="Data.ArtificialInstallConfirmation"			conditional="Data.ArtificialInstallConfirmation=true"/>
+			<Parameter 	name="VSWR" 						display="VSWR" 							log="true" 	interface="true" 	source="Data.VSWR"			format="F3"				conditional="MemoryMap.Shipbit=false + Data.ArtificialInstallConfirmation=false + MemoryMap.InstallConfirmationNotSynced=false + Data.VSWR gt -1"/>
+			<Parameter 	name="NodeDiscoveryResult" 			display="NodeDiscoveryResult" 			log="true" 	interface="true" 	source="Data.ProcessResultND"						conditional="MemoryMap.Shipbit=false + Data.ArtificialInstallConfirmation=false + MemoryMap.InstallConfirmationNotSynced=false + Mtu.MtuDemand=true + Mtu.NodeDiscovery=true"/>
+			<Parameter 	name="NodeDiscoveryFile" 			display="NodeDiscoveryFile" 			log="true" 	interface="true" 	source="Data.ProcessResultFileND"					conditional="MemoryMap.Shipbit=false + Data.ArtificialInstallConfirmation=false + MemoryMap.InstallConfirmationNotSynced=false + Mtu.MtuDemand=true + Mtu.NodeDiscovery=true"/>
+			<Parameter 	name="ArtificialTimeSync" 			display="ArtificialTimeSync" 			log="true" 	interface="true" 	source="Data.ArtificialInstallConfirmation"			conditional="MemoryMap.Shipbit=false + Data.ArtificialInstallConfirmation=true"/>
 			<Parameter 	name="InstallationConfirmationStatus" display="Installation" 				log="true" 	interface="true" 	source="MemoryMap.InstallConfirmationStatus"		conditional="MemoryMap.Shipbit=false"/>
-			<Parameter 	name="DcuId" 						display="DCU ID" 						log="true" 	interface="true"	source="Data.DcuId" 								conditional="MemoryMap.Shipbit=false + MemoryMap.InstallConfirmationNotSynced=false + Data.DcuId gt 0"/>
-			<Parameter 	name="RSSI" 						display="RSSI" 							log="true" 	interface="true" 	source="MemoryMap.RSSIStatus"						conditional="MemoryMap.Shipbit=false + MemoryMap.InstallConfirmationNotSynced=false"/>
-			<Parameter 	name="Deviation" 					display="Deviation" 					log="true" 	interface="false"														conditional="MemoryMap.Shipbit=false + MemoryMap.InstallConfirmationNotSynced=false"/>
+			<Parameter 	name="DcuId" 						display="DCU ID" 						log="true" 	interface="true"	source="Data.DcuId" 								conditional="MemoryMap.Shipbit=false + Data.ArtificialInstallConfirmation=false + MemoryMap.InstallConfirmationNotSynced=false + Data.DcuId gt 0"/>
+			<Parameter 	name="RSSI" 						display="RSSI" 							log="true" 	interface="true" 	source="MemoryMap.RSSIStatus"						conditional="MemoryMap.Shipbit=false + Data.ArtificialInstallConfirmation=false + MemoryMap.InstallConfirmationNotSynced=false"/>
+			<Parameter 	name="Deviation" 					display="Deviation" 					log="true" 	interface="false"														conditional="MemoryMap.Shipbit=false + Data.ArtificialInstallConfirmation=false + MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter 	name="MTU_DateTime" 				display="MtuGmtDateTime" 				log="true" 	interface="false" 	source="MemoryMap.MtuDatetime"						conditional="MemoryMap.Shipbit=false + MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter 	name="Encryption" 					display="Encrypted" 					log="true" 	interface="true"														conditional="Mtu.SpecialSet=true"/>
 			<Parameter 	name="EncryptionIndex" 				display="Encryption Index" 				log="true" 	interface="false"														conditional="Mtu.SpecialSet=true + MemoryMap.Encrypted=true"/>
@@ -424,7 +400,7 @@
 				<Parameter 	name="MeterType" 				display="Meter Type" 					log="true" 	interface="true" 	source="Meter.Display"								conditional="MemoryMap.StatusFlag=true"/>
 				<Parameter 	name="MeterTypeId" 				display="Meter Type ID" 				log="true" 	interface="false" 	source="Meter.Id"									conditional="MemoryMap.StatusFlag=true"/>
 				<Parameter 	name="NumberOfDials" 			display="Number Of Dials" 				log="true" 	interface="true" 	source="Meter.NumberOfDials"						conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true + Meter.NumberOfDials gt -1"/>
-				<Parameter 	name="DriveDialSize" 			display="Drive Dial Size" 				log="true" 	interface="true" 	source="Meter.DriveDialSize"						conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true + Meter.NumberOfDials gt -1"/>
+				<Parameter 	name="DriveDialSize" 			display="Drive Dial Size" 				log="true" 	interface="true" 	source="Meter.DriveDialSize"						conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true + Meter.DriveDialSize gt -1"/>
 				<Parameter 	name="UnitOfMeasure" 			display="Unit Of Measure" 				log="true" 	interface="true" 	source="Meter.UnitOfMeasure"						conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true"/>
 				<!-- INIT - Ecoder -->
 				<Parameter 	name="BackFlowState" 			display="Backflow State" 				log="true" 	interface="true"														conditional="MemoryMap.StatusFlag=true + Mtu.Ecoder=true + Port.IsSetFlow=false"/>

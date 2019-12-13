@@ -245,47 +245,74 @@ namespace aclara_meters.view
                 {
                     ActionResult[] ports = args.Result.getPorts(); 
 
-                    for (int i = 0; i < ports.Length; i++)
+                    for ( int i = 0; i < ports.Length; i++ )
                     {
-                        foreach (InterfaceParameters port_parameter in parameter.Parameters)
+                        if ( ports[ i ] != null )
                         {
-                            Parameter param = ports[i].getParameterByTag ( port_parameter.Name, port_parameter.Source, i );
-
-                            if (port_parameter.Name.Equals("Description"))
+                            foreach (InterfaceParameters port_parameter in parameter.Parameters)
                             {
-                                string description;
+                                Parameter param = ports[i].getParameterByTag ( port_parameter.Name, port_parameter.Source, i );
 
-                                // For Read action when no Meter is installed on readed MTU
-                                if ( param != null )
-                                     description = param.Value;
-                                else description = mtu.Ports[i].GetProperty(port_parameter.Name);
+                                if (port_parameter.Name.Equals("Description"))
+                                {
+                                    string description;
 
-                                FinalReadListView.Add(new ReadMTUItem()
-                                {
-                                    Title       = "Here lies the Port title...",
-                                    isDisplayed = "true",
-                                    Height      = "40",
-                                    isMTU       = "false",
-                                    isMeter     = "true",
-                                    Description = "Port " + (i+1) + ": " + description
-                                });
-                            }
-                            else
-                            {
-                                if (param != null)
-                                {
+                                    // For Read action when no Meter is installed on readed MTU
+                                    if ( param != null )
+                                        description = param.Value;
+                                    else description = mtu.Ports[i].GetProperty(port_parameter.Name);
+
                                     FinalReadListView.Add(new ReadMTUItem()
                                     {
-                                        Title         = param.getLogDisplay() + ":",
-                                        isDisplayed   = "true",
-                                        Height        = "70",
-                                        isMTU         = "false",
-                                        isDetailMeter = "true",
-                                        isMeter       = "false",
-                                        Description   = param.Value
+                                        Title       = "Here lies the Port title...",
+                                        isDisplayed = "true",
+                                        Height      = "40",
+                                        isMTU       = "false",
+                                        isMeter     = "true",
+                                        Description = "Port " + (i+1) + ": " + description
                                     });
                                 }
+                                else
+                                {
+                                    if (param != null)
+                                    {
+                                        FinalReadListView.Add(new ReadMTUItem()
+                                        {
+                                            Title         = param.getLogDisplay() + ":",
+                                            isDisplayed   = "true",
+                                            Height        = "70",
+                                            isMTU         = "false",
+                                            isDetailMeter = "true",
+                                            isMeter       = "false",
+                                            Description   = param.Value
+                                        });
+                                    }
+                                }
                             }
+                        }
+                        // Port incorrectly configured
+                        else
+                        {
+                            FinalReadListView.Add(new ReadMTUItem()
+                            {
+                                Title       = "Here lies the Port title...",
+                                isDisplayed = "true",
+                                Height      = "40",
+                                isMTU       = "false",
+                                isMeter     = "true",
+                                Description = "Port " + ( i + 1 ) + ": ..."
+                            });
+
+                            FinalReadListView.Add(new ReadMTUItem()
+                            {
+                                Title = "Status:",
+                                isDisplayed = "true",
+                                Height = "70",
+                                isMTU = "false",
+                                isDetailMeter = "true",
+                                isMeter = "false",
+                                Description = "Information Not Available"
+                            });
                         }
                     }
                 }

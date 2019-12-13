@@ -425,7 +425,7 @@ namespace Lexi
 
                 // Whait untill the response buffer data is available or timeout limit is reached
                 long timeout_limit = DateTimeOffset.Now.ToUnixTimeMilliseconds() + (timeout);
-                await Task.Run(() =>
+                await Task.Run ( async () =>
                 {
                     while ( checkResponseOk ( serial, rawBuffer ) )
                     {
@@ -441,7 +441,8 @@ namespace Lexi
 
                             throw new TimeoutException ();
                         }
-                        Thread.Sleep ( 10 );
+
+                        await Task.Delay ( 10 );
                     }
                 });
     
@@ -674,7 +675,7 @@ namespace Lexi
                 long timeout_limit = DateTimeOffset.Now.ToUnixTimeMilliseconds () + timeout;
                 try
                 {
-                    await Task.Run ( () =>
+                    await Task.Run ( async () =>
                     {
                         while ( ( bytesRead = serial.BytesReadCount () ) < rawBuffer.Length - 1 )
                         {
@@ -738,7 +739,7 @@ namespace Lexi
                                 throw new TimeoutException ();
                             }
 
-                            Thread.Sleep ( 10 );
+                            await Task.Delay ( 10 );
                         }
                     });
                 }

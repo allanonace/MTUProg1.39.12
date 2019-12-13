@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Threading.Tasks;
 using Library;
+using Library.Exceptions;
 using Xml;
 
 using RDDStatus        = MTUComm.RDDStatusResult.RDDStatus;
@@ -567,6 +568,9 @@ namespace MTUComm.MemoryMap
 
         public byte[] ULongToBcd_Logic ( string value, int size )
         {
+            if ( size < Math.Ceiling( value.Length / 2d ) )
+                throw new NumberToBcdIsLargerThanBytesRegister ( Math.Ceiling( value.Length / 2d ) + "/" + size );
+
             var convertedBytes = new byte[ size ];
             var strNumber      = value;
             var currentNumber  = string.Empty;

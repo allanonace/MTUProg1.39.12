@@ -313,7 +313,7 @@ namespace Xml
         [XmlIgnore]
         public string MeterTypeFlow
         {
-            get { return GetDisplayData<string> ( 1, String.Empty ); }
+            get { return GetDisplayData<string> ( 1, string.Empty ); }
         }
 
         [XmlIgnore]

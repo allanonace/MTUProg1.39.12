@@ -760,8 +760,9 @@ namespace MTUComm
                 {
                     ActionResult[] ports = mainAction_allParamsFromInterface.getPorts();
                     for (int i = 0; i < ports.Length; i++)
-                        if ( ports[ i ].getParameters ().Length > 0 ) // Does not write an empty port ( <Port ... /> )
-                            Port(i, element, ports[i], parameter.Parameters.ToArray());
+                        if ( ports[ i ] != null )
+                            if ( ports[ i ].getParameters ().Length > 0 ) // Does not write an empty port ( <Port ... /> )
+                                Port(i, element, ports[i], parameter.Parameters.ToArray());
                 }
                 else this.ComplexParameter(element, mainAction_allParamsFromInterface, parameter);
             }

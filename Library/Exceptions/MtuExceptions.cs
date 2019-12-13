@@ -97,6 +97,16 @@
     {
         public NoEventsLogException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
     }
+
+    public class PreparingLogInterfaceException : OwnExceptionsBase
+    {
+        public PreparingLogInterfaceException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
+
+    public class NumberToBcdIsLargerThanBytesRegister : OwnExceptionsBase
+    {
+        public NumberToBcdIsLargerThanBytesRegister ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
     
     #endregion
 
@@ -575,14 +585,14 @@
         public NodeDiscoveryNotStartedException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
     }
 
-    public class AttemptNotAchievedNodeDiscoveryException : OwnExceptionsBase
-    {
-        public AttemptNotAchievedNodeDiscoveryException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
-    }
-
     public class ActionNotAchievedNodeDiscoveryException : OwnExceptionsBase
     {
         public ActionNotAchievedNodeDiscoveryException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
+
+    public class ActionStoppedNodeDiscoveryException : OwnExceptionsBase
+    {
+        public ActionStoppedNodeDiscoveryException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
     }
 
     #endregion

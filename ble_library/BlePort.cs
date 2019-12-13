@@ -363,6 +363,12 @@ namespace ble_library
             writeSavedOffset = offset;
             writeSavedCount  = count;
 
+            // Note from STAR Programmer:
+            // found that some commands were failing when blasted out one after the other
+            // Determined that app could process data and send next command while ringing existed from previous
+            // response. Simplest method to fix is to delay (10ms from MTU code) before next command is sent
+            await Task.Delay ( 50 );
+
             // Data frame sent will always have a length of 20
             byte[] ret;// = new byte[ LENGTH_DATA_FRAME ];
 
@@ -406,12 +412,6 @@ namespace ble_library
                 Utils.PrintDeep ( "BlePort.WriteCharacteristic.. Waiting semaphore" );
                 
                 await this.semaphore.WaitAsync ();
-                
-                // Note from STAR Programmer:
-                // found that some commands were failing when blasted out one after the other
-                // Determined that app could process data and send next command while ringing existed from previous
-                // response. Simplest method to fix is to delay (10ms from MTU code) before next command is sent
-                await Task.Delay ( 10 );
                 
                 long nextTimeInit = DateTimeOffset.Now.ToUnixTimeMilliseconds ();
                 
