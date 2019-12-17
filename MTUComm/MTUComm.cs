@@ -592,7 +592,7 @@ namespace MTUComm
             if ( ! this.mtu.MtuDemand ||
                  ! this.mtu.DataRead )
             {
-                textError = "The MTU is not an OnDemand 1.2 compatible device";
+                textError = "The MTU does not support Historical Reads";
                 return false;
             }
 
