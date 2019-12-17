@@ -160,7 +160,7 @@ namespace Xml
 
         private byte encoderDigitsToDrop;
 
-        [XmlAttribute("EncoderDigitsToDrop")]
+        [XmlElement("EncoderDigitsToDrop")]
         public byte EncoderDigitsToDrop
         {
             get { return this.encoderDigitsToDrop; }

@@ -4029,11 +4029,14 @@ namespace aclara_meters.view
                 value_sre = this.sld_SnapReads   .Value.ToString ();
 
                 // Is a two-way MTU
-                if ( global.TimeToSync &&
-                        mtu.TimeToSync    &&
-                        mtu.FastMessageConfig )
-                    value_two = this.pck_TwoWay.SelectedItem.ToString ();
-
+                if (global.TimeToSync &&
+                        mtu.TimeToSync &&
+                        mtu.FastMessageConfig)
+                {
+                    value_two = this.pck_TwoWay.SelectedItem.ToString();
+                    //MRA like Star Programmer  ( en el artificial sync se ponia a false )
+                    global.FastMessageConfig = value_two.Equals("Fast") ? true : false;
+                }
                 // Alarms dropdownlist is hidden when only has one option
                 if (this.pck_Alarms.ItemsSource != null)
                 {

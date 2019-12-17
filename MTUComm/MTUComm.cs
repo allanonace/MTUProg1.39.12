@@ -3502,7 +3502,12 @@ namespace MTUComm
                 }
 
                 #endregion
-
+                //MRA Falta FastMessagingConfig??
+                if(mtu.FastMessageConfig)
+                {
+                    //await map.FastMessagingConfigMode.SetValueToMtu(global.FastMessageConfig);
+                    map.FastMessagingConfigMode = global.FastMessageConfig;
+                }
                 #region Digits to Drop
 
                 if ( mtu.DigitsToDrop &&
