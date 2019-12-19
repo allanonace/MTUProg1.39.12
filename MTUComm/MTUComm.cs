@@ -668,6 +668,11 @@ namespace MTUComm
         {
             try
             {
+                // Check if some required parameter is not present, after having eliminate the
+                // unnecessary parameters to avoid false positives about using the second port
+                if (!this.ValidateRequiredParams(action, out string errorRequired))
+                    throw new ScriptingTagMissingException(errorRequired);
+
                 // Translate Aclara parameters ID into application's nomenclature
                 // Return ( MTU_has_two_ports, Dictionary<APP_FIELD,( Value, Port_index )> )
                 var translatedParams = ScriptAux.TranslateAclaraParams ( action.GetParameters () );
@@ -680,11 +685,6 @@ namespace MTUComm
                 // Validate script parameters ( removing the unnecessary ones )
                 Dictionary<APP_FIELD,string> psSelected = ScriptAux.ValidateParams (
                     this.mtu, action, translatedParams, port2enabled );
-
-                // Check if some required parameter is not present, after having eliminate the
-                // unnecessary parameters to avoid false positives about using the second port
-                if ( ! this.ValidateRequiredParams ( action, out string errorRequired ) )
-                    throw new ScriptingTagMissingException ( errorRequired );
 
                 // Add parameters to Library.Data
                 foreach ( var entry in psSelected )
@@ -823,7 +823,7 @@ namespace MTUComm
                     if ( this.global.TimeToSync &&
                          this.mtu.TimeToSync    &&
                          this.mtu.FastMessageConfig )
-                        CheckIfNotPresent ( ParameterType.Fast2Way );
+                        CheckIfNotPresentWithDef ( ParameterType.Fast2Way, "True" );  // default FAST
                     
                     #endregion
                     #region Port 1
@@ -864,7 +864,7 @@ namespace MTUComm
                         // Read Interval
                         // NOTE: Is general data/not for the first port, but not present if the RDD is on port 1
                         // Calculates the default value to use in case the parameter is not present in the script
-                        string valueReadInterval = string.Empty;
+                        string valueReadInterval = "1 Hour";
                         ScriptAux.PrepareReadIntervalList ( mtu, ref valueReadInterval );
                         CheckIfNotPresentWithDef (
                             ParameterType.ReadInterval,
@@ -2647,7 +2647,7 @@ namespace MTUComm
         private async Task AddMtu ( Action action )
         {
             truquitoAction   = action;
-            Parameter[] ps   = action.GetParameters ();
+            Parameter[] ps;//   = action.GetParameters ();
             dynamic     form = new AddMtuForm ( this.mtu );
             form.UsePort2    = false;
             bool scriptUseP2 = false;
@@ -2670,7 +2670,14 @@ namespace MTUComm
             try
             {
                 bool port2IsActivated = await this.GetMemoryMap ( true ).P2StatusFlag.GetValue ();
-    
+
+                // Check if some required parameter is not present, after having eliminate the
+                // unnecessary parameters to avoid false positives about using the second port
+                if (!this.ValidateRequiredParams(action, out string errorRequired))
+                    throw new ScriptingTagMissingException(errorRequired);
+
+                ps = action.GetParameters();
+
                 // Recover parameters from script and translate from Aclara nomenclature to our own
                 foreach ( Parameter parameter in ps )
                 {
@@ -3231,8 +3238,8 @@ namespace MTUComm
     
                 // Check if some required parameter is not present, after having eliminate the
                 // unnecessary parameters to avoid false positives about using the second port
-                if ( ! this.ValidateRequiredParams ( action, out string errorRequired ) )
-                    throw new ScriptingTagMissingException ( errorRequired );
+               // if ( ! this.ValidateRequiredParams ( action, out string errorRequired ) )
+                //    throw new ScriptingTagMissingException ( errorRequired );
 
                 #endregion
     
