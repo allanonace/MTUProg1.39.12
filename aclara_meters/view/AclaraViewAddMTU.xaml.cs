@@ -1590,19 +1590,20 @@ namespace aclara_meters.view
                 }
                 else // Text
                 {
-                    string format = optionalField.Format;
+                    //string format = optionalField.Format;
  
                     Keyboard keyboard = Keyboard.Default;
-                    if (format.Equals("alphanumeric")) keyboard = Keyboard.Numeric;
-                    else if (format.Equals("time")) keyboard = Keyboard.Numeric;
+                    //if (format.Equals("alphanumeric")) keyboard = Keyboard.Numeric;
+                    //else if (format.Equals("time")) keyboard = Keyboard.Numeric;
 
                     optionalEntry = new BorderlessEntry()
                     {
                         HorizontalOptions = LayoutOptions.FillAndExpand,
                         HeightRequest = 40,
                         Keyboard = keyboard,
-                        FontSize = 17
+                        FontSize = 17                    
                     };
+                    
                     optionalEntry.Name = optionalField.Name.Replace(" ", "_");
                     optionalEntry.Display = optionalField.Display;
 
