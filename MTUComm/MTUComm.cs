@@ -2756,6 +2756,7 @@ namespace MTUComm
                         
                         // No meter was found using the selected parameters
                         else throw new ScriptingAutoDetectMeterException ();
+                        form.UpdateParameter(FIELD.METER_TYPE, meterPort1);
                     }
                     // Script does not contain some of the needed tags ( NumberOfDials,... )
                     else throw new ScriptingAutoDetectTagsMissingScript ();
@@ -2809,6 +2810,7 @@ namespace MTUComm
                             
                             // No meter was found using the selected parameters
                             else throw new ScriptingAutoDetectMeterException ( string.Empty, 2 );
+                            form.UpdateParameter(FIELD.METER_TYPE_2, meterPort2);
                         }
                         // Script does not contain some of the needed tags ( NumberOfDials,... )
                         else throw new ScriptingAutoDetectTagsMissingScript ( string.Empty, 2 );

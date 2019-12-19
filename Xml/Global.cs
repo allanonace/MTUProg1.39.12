@@ -989,11 +989,11 @@ namespace Xml
         #region Collections
 
         [XmlIgnore]
-        private List<Option> Options_Default;
+        public List<Option> Options_Default;
 
         [XmlArray("Options")]
         [XmlArrayItem("option")]
-        private List<Option> Options_Deserialized;
+        public List<Option> Options_Deserialized;
         
         [XmlIgnore]
         public List<Option> Options
@@ -1007,11 +1007,11 @@ namespace Xml
         }
         
         [XmlIgnore]
-        private List<string> Cancel_Default;
+        public List<string> Cancel_Default;
         
         [XmlArray("Cancel")]
         [XmlArrayItem("option")]
-        private List<string> Cancel_Deserialized;
+        public List<string> Cancel_Deserialized;
 
         [XmlIgnore]
         public List<string> Cancel

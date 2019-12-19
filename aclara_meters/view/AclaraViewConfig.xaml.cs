@@ -56,8 +56,18 @@ namespace aclara_meters.view
             {
                 Result = InitialConfigProcess();
                 if (!Result)
+                {
+                    GenericUtilsClass.SetInstallMode("None");
+                    this.ShowErrorAndKill(new ConfigurationFilesNotFoundException());
                     return; // The apps will be forced to close / kill
-
+                }
+                if (!Configuration.CheckLoadXML())
+                {
+                    GenericUtilsClass.SetInstallMode("None");
+                    GenericUtilsClass.DeleteConfigFiles(Mobile.ConfigPath);
+                    this.ShowErrorAndKill(new ConfigurationFilesNotFoundException());
+                    return;
+                }
                 SecureStorage.SetAsync("ConfigVersion", NewConfigVersion);
                 SecureStorage.SetAsync("DateCheck", DateTime.Today.ToShortDateString());
             }
@@ -95,6 +105,15 @@ namespace aclara_meters.view
                                     this.ShowErrorAndKill(new ConfigurationFilesNewVersionException());
                                     return;
                                 }
+                                else
+                                {
+                                    if(!Configuration.CheckLoadXML())
+                                    {
+                                        GenericUtilsClass.RestoreConfigFiles();
+                                        this.ShowErrorAndKill(new ConfigurationFilesNewVersionException());
+                                        return;
+                                    }
+                                }
                             }
                         }
                     }
@@ -113,7 +132,7 @@ namespace aclara_meters.view
                     else
                     {
                         GenericUtilsClass.DeleteConfigFiles(Mobile.ConfigPath);
-                        GenericUtilsClass.SetInstallMode("None");
+                        GenericUtilsClass.SetInstallMode("None");                      
                     }
 
                     // Finishes because the app will be killed
@@ -221,13 +240,12 @@ namespace aclara_meters.view
                 }
                 else
                 {
-                    this.ShowErrorAndKill(new ConfigurationFilesNotFoundException());
                     GenericUtilsClass.SetInstallMode("None");
-
+                    this.ShowErrorAndKill(new ConfigurationFilesNotFoundException());                    
                     return false;
                 }
             }
-            return true;
+            return false; // mode FTP without config files 
         }
 
         public bool InitializeConfiguration()

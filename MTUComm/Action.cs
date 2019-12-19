@@ -1487,7 +1487,9 @@ namespace MTUComm
                                      meter_reading_error.Length < 1 )
                                 {
                                     ulong meter_reading  = await map[ PORT_PREFIX + indexPort + IFACE_MREADING ].GetValue ();
-                                    ulong tempReadingVal = ( ! mtu.PulseCountOnly ) ? meter_reading : meter_reading * ( ulong )meter.HiResScaling;
+                                    //MRA
+                                    
+                                    ulong tempReadingVal = (meter.HiResScaling > 0 && mtu.PulseCountOnly) ? meter_reading * (ulong)meter.HiResScaling : meter_reading;
                                     
                                     String tempReading    = tempReadingVal.ToString ();
                                     bool   useDummyDigits = this.config.useDummyDigits ();

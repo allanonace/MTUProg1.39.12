@@ -381,7 +381,7 @@ namespace MTUComm.MemoryMap
         public async Task<ulong> BcdToULong ( MemoryRegister<ulong> MemoryRegister )
         {
             byte[] bytes  = await MemoryRegister.GetValueByteArray ();
-           // Array.Reverse(bytes);
+            Array.Reverse(bytes);
             string outNum = string.Empty;
             
             foreach ( byte b in bytes )
@@ -595,7 +595,7 @@ namespace MTUComm.MemoryMap
                 convertedBytes[(i - 1) / 2] |= (byte)((v / 10) << 4);
                 currentNumber = string.Empty;
             }
-            //Array.Reverse(convertedBytes);
+            Array.Reverse(convertedBytes);
             return convertedBytes;
         }
 

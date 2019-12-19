@@ -62,6 +62,7 @@ namespace aclara_meters.view
 
                 Loading = bExec;
                 backgroundWait.IsEnabled = bExec;
+                frm_FTP.IsEnabled = !bExec;
                 Botones.IsVisible = !bExec;
      
         }

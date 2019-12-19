@@ -53,8 +53,18 @@ namespace aclara_meters.view
                     //{
                     //    Application.Current.MainPage = new NavigationPage(new AclaraViewConfig(dialogs));
                     //});
-                    await DisplayAlert("Attention", "The app will close to apply the configuration", "OK");
-                    System.Diagnostics.Process.GetCurrentProcess().Kill();
+                    if (Configuration.CheckLoadXML())
+                    {
+                        await DisplayAlert("Attention", "The app will close to apply the configuration", "OK");
+                        System.Diagnostics.Process.GetCurrentProcess().Kill();
+                    }
+                    else
+                    {
+                        GenericUtilsClass.SetInstallMode("None");
+                        GenericUtilsClass.DeleteConfigFiles(Mobile.ConfigPath);
+                        await DisplayAlert("Attention",
+                            "There is a problem with the configuration files downloaded from SFTP, some of them are corrupted. Contact your IT administrator", "OK");                        
+                    }
                     return;
 
                 case "ERROR":
@@ -86,7 +96,7 @@ namespace aclara_meters.view
         public async void Btn_Manual_Clicked(object sender, EventArgs e)
         {
             GenericUtilsClass.SetInstallMode("Manual");
-            await DisplayAlert("Attention", "Now you must copy the config files in the public folder of the app, then press Continue", "Continue");
+            await DisplayAlert("Attention", "Now you must copy the config files in the public folder of the app, then restart the app", "OK");
             //Device.BeginInvokeOnMainThread(() =>
             //{
             //    Application.Current.MainPage = new NavigationPage(new AclaraViewConfig(dialogs));
