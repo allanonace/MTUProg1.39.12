@@ -1590,10 +1590,10 @@ namespace aclara_meters.view
                 }
                 else // Text
                 {
-                    //string format = optionalField.Format;
+                    string format = optionalField.Format;
  
                     Keyboard keyboard = Keyboard.Default;
-                    //if (format.Equals("alphanumeric")) keyboard = Keyboard.Numeric;
+                    if (format.Equals("numeric")) keyboard = Keyboard.Numeric;
                     //else if (format.Equals("time")) keyboard = Keyboard.Numeric;
 
                     optionalEntry = new BorderlessEntry()
@@ -1609,7 +1609,8 @@ namespace aclara_meters.view
 
                     CommentsLengthValidatorBehavior behavior = new CommentsLengthValidatorBehavior
                     {
-                        MaxLength = optionalField.Len
+                        MaxLength = optionalField.Len,
+                        MinLength = optionalField.MinLen
                     };
 
                     optionalEntry.Behaviors.Add(behavior);

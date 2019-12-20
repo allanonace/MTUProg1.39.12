@@ -55,17 +55,36 @@ namespace aclara_meters.Behaviors
     public class CommentsLengthValidatorBehavior : Behavior<BorderlessEntry>
     {
         public int MaxLength { get; set; }
+        public int MinLength { get; set; }
+
 
         protected override void OnAttachedTo(BorderlessEntry bindable)
         {
             base.OnAttachedTo(bindable);
             bindable.TextChanged += OnEntryTextChanged;
+            bindable.Completed += OnEntryCompleted;
         }
 
         protected override void OnDetachingFrom(BorderlessEntry bindable)
         {
             base.OnDetachingFrom(bindable);
             bindable.TextChanged -= OnEntryTextChanged;
+            bindable.Completed -= OnEntryCompleted;
+        }
+
+        private void OnEntryCompleted(object sender, EventArgs e)
+        {
+            var entry = (BorderlessEntry)sender;
+
+            if (entry.Text != null
+                 && entry.Text.Length < this.MinLength)
+            {
+                entry.TextColor = Color.Red;              
+            }
+            else
+            {
+                entry.TextColor = Color.Default;
+            }
         }
 
         private void OnEntryTextChanged(object sender, TextChangedEventArgs e)
@@ -73,7 +92,8 @@ namespace aclara_meters.Behaviors
             var entry = (BorderlessEntry)sender;
 
 
-            if (!string.IsNullOrWhiteSpace(e.NewTextValue) && entry.Text != null && entry.Text.Length > this.MaxLength)
+            if (!string.IsNullOrWhiteSpace(e.NewTextValue) && entry.Text != null 
+                && entry.Text.Length > this.MaxLength )
             {
 
                 entry.TextChanged -= OnEntryTextChanged;
@@ -82,6 +102,7 @@ namespace aclara_meters.Behaviors
             }
 
         }
+       
     }
     public class EntryLengthValidatorBehavior : Behavior<BorderlessEntry>
     {

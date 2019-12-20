@@ -8,6 +8,7 @@ namespace Xml
         public Option()
         {
             Format = "alphanumeric";
+            MinLen = 0;
         }
 
         [XmlAttribute("name")]
