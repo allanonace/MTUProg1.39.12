@@ -521,10 +521,17 @@ namespace aclara_meters.view
         private async Task InitilizeValuesAsync()
         {
             dynamic map = Data.Get.MemoryMap;
+            //MRA
+            int twoway;
             if (map.ContainsMember("FastMessagingConfigFreq"))
             {
-                bool two = await map.FastMessagingConfigFreq.GetValue();
-                int twoway = two ? 1 : 0;
+                bool ConfMode = await map.FastMessagingConfigMode.GetValue();
+                if (ConfMode)
+                {
+                    bool two = await map.FastMessagingConfigFreq.GetValue();
+                    twoway = two ? 1 : 0;
+                }
+                else twoway = 0;
 
                 Device.BeginInvokeOnMainThread(() =>
                 {
@@ -1606,6 +1613,7 @@ namespace aclara_meters.view
                     
                     optionalEntry.Name = optionalField.Name.Replace(" ", "_");
                     optionalEntry.Display = optionalField.Display;
+                    optionalEntry.MaxLength = optionalField.Len;
 
                     CommentsLengthValidatorBehavior behavior = new CommentsLengthValidatorBehavior
                     {

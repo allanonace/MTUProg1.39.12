@@ -525,7 +525,7 @@ namespace Xml
             // Form
             this.ColorEntry                   = false;                // Uses a color screen for newer model handhelds
             this.NewMeterPort2isTheSame       = false;                // Optionally copies Port 1 data to Port 2
-            this.LiveDigitsOnly               = true;                 // If true it will show X for Dummy Digits. False it will show 0
+            this.LiveDigitsOnly               = false;                 // If true it will show 0 for Dummy Digits. False it will show X
             this.Port2DisableNo               = false;                // Disable ability to click on Display checkbox to disable Port2
             this.ReverseReading               = false;                // Enables or disables entry of old and new meter readings in reverse format
 
