@@ -1,6 +1,7 @@
 using System;
 using Xml;
 using System.Threading.Tasks;
+using Library;
 
 namespace MTUComm
 {
@@ -18,6 +19,8 @@ namespace MTUComm
             public ProgressArgs ( string message )
             {
                 Message = message;
+
+                Utils.PrintDeep ( "Progress Message: " + message );
             }
 
             public ProgressArgs ( int step, int totalsteps, string message )

@@ -367,7 +367,7 @@ namespace ble_library
             // found that some commands were failing when blasted out one after the other
             // Determined that app could process data and send next command while ringing existed from previous
             // response. Simplest method to fix is to delay (10ms from MTU code) before next command is sent
-            await Task.Delay ( 50 );
+            await Task.Delay ( 10 );
 
             // Data frame sent will always have a length of 20
             byte[] ret;// = new byte[ LENGTH_DATA_FRAME ];

@@ -191,7 +191,7 @@ namespace MTUComm
             }
         }
 
-        public static Dictionary<APP_FIELD,string> ValidateParams (
+        public static Dictionary<APP_FIELD,dynamic> ValidateParams (
             Mtu mtu,
             Action action,
             ( bool UsePort2, Dictionary<APP_FIELD,( dynamic Value, int Port )> Data ) translatedParams,
@@ -397,10 +397,11 @@ namespace MTUComm
             // Validate each parameter and remove those that are not going to be used
             
             string        valueStr       = string.Empty;
+            string        valueDyn       = null;
             string        msgDescription = string.Empty;
             StringBuilder msgError       = new StringBuilder ();
             StringBuilder msgErrorPopup  = new StringBuilder ();
-            Dictionary<APP_FIELD,string> entriesSelected = new Dictionary<APP_FIELD,string> ();
+            Dictionary<APP_FIELD,dynamic> entriesSelected = new Dictionary<APP_FIELD,dynamic> ();
             foreach ( var entry in data )
             {
                 APP_FIELD type = entry.Key;
@@ -503,6 +504,7 @@ namespace MTUComm
                         {
                             if ( port == 0 )
                             {
+                                // Incorrect consumption reading
                                 if ( ! ( fail = meterPort1.NumberOfDials <= -1 || 
                                      NoELNum ( valueStr, meterPort1.NumberOfDials ) ) )
                                 {
@@ -517,6 +519,7 @@ namespace MTUComm
                             }
                             else
                             {
+                                // Incorrect consumption reading
                                 if ( ! ( fail = meterPort2.NumberOfDials <= -1 ||
                                      NoELNum ( valueStr, meterPort2.NumberOfDials ) ) )
                                 {
@@ -589,6 +592,7 @@ namespace MTUComm
                         // Param totally useless in this action type
                         if ( isNotWrite )
                             continue;
+                        valueDyn = value;
                         break;
                         #endregion
                         #region Read Interval [ Only Writing ]
@@ -743,7 +747,7 @@ namespace MTUComm
                 }
                 // Parameter validated and selected
                 else
-                    entriesSelected.Add ( type, valueStr );
+                    entriesSelected.Add ( type, ( valueDyn == null ) ? valueStr : valueDyn );
             }
 
             if ( msgError.Length > 0 )

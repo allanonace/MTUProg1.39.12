@@ -1367,36 +1367,22 @@ namespace MTUComm.MemoryMap
             MemoryRegisterDictionary changes,
             Dictionary<string,dynamic> mixedRegisters )
         {
+            Console.WriteLine ( "----" );
+            Console.WriteLine ( "Get modified registers: " + typeof ( T ) );
+
             foreach ( KeyValuePair<string,dynamic> entry in mixedRegisters )
             {
                 dynamic register = entry.Value;
+                RegType regType  = ( RegType )register.valueType;
 
                 switch ( Type.GetTypeCode ( typeof ( T ) ) )
                 {
-                    case TypeCode.Int32:
-                        if ( ( RegType )register.valueType == RegType.INT )
-                            changes.AddElement<int> ( register );
-                        break;
-                    case TypeCode.UInt32:
-                        if ( ( RegType )register.valueType == RegType.UINT )
-                            changes.AddElement<uint> ( register );
-                        break;
-                    case TypeCode.UInt64:
-                        if ( ( RegType )register.valueType == RegType.ULONG )
-                            changes.AddElement<ulong> ( register );
-                        break;
-                    case TypeCode.Boolean:
-                        if ( ( RegType )register.valueType == RegType.BOOL )
-                            changes.AddElement<bool> ( register );
-                        break;
-                    case TypeCode.Char:
-                        if ( ( RegType )register.valueType == RegType.CHAR )
-                            changes.AddElement<char> ( register );
-                        break;
-                    case TypeCode.String:
-                        if ( ( RegType )register.valueType == RegType.STRING )
-                            changes.AddElement<string> ( register );
-                        break;
+                    case TypeCode.Int32  : if ( regType == RegType.INT    ) changes.AddElement<int   > ( register ); break;
+                    case TypeCode.UInt32 : if ( regType == RegType.UINT   ) changes.AddElement<uint  > ( register ); break;
+                    case TypeCode.UInt64 : if ( regType == RegType.ULONG  ) changes.AddElement<ulong > ( register ); break;
+                    case TypeCode.Boolean: if ( regType == RegType.BOOL   ) changes.AddElement<bool  > ( register ); break;
+                    case TypeCode.Char   : if ( regType == RegType.CHAR   ) changes.AddElement<char  > ( register ); break;
+                    case TypeCode.String : if ( regType == RegType.STRING ) changes.AddElement<string> ( register ); break;
                 }
             }
         }

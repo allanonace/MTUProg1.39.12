@@ -989,7 +989,7 @@ namespace Xml
         #region Collections
 
         [XmlIgnore]
-        public List<Option> Options_Default;
+        private List<Option> Options_Default;
 
         [XmlArray("Options")]
         [XmlArrayItem("option")]

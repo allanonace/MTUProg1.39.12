@@ -314,14 +314,9 @@ namespace MTUComm.MemoryMap
                 await MemoryRegisters.MtuSoftBuildNumber .GetValue () );
         }
 
-        public async Task<int> FastMessagingMode_Get ( MemoryOverload<int> MemoryOverload, dynamic MemoryRegisters )
+        public async Task<string> FastMessagingMode_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
         {
-            return ( await MemoryRegisters.FastMessagingConfigMode.GetValue () ) ? ON_INT : OFF_INT;
-        }
-
-        public async Task<string> FastMessagingFrequency_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
-        {
-            return ( await MemoryRegisters.FastMessagingConfigFreq.GetValue () ) ? MESAG_FAST : MESAG_SLOW;
+            return ( await MemoryRegisters.FastMessagingConfigMode.GetValue () ) ? MESAG_FAST : MESAG_SLOW;
         }
 
         public async Task<int> MinutesToHours_Get ( MemoryOverload<int> MemoryOverload, dynamic[] MemoryRegisters )
@@ -422,13 +417,14 @@ namespace MTUComm.MemoryMap
         {
             string reply = string.Empty;
             string param = Convert.ToString ( await MemoryRegisters[ 0 ].GetValue (), INDEX_STATE )
-                .PadLeft(PAD_LEFT,ZERO)
-                .Substring(6);
+                .PadLeft(PAD_LEFT,ZERO) // -> 00000000
+                .Substring(6); // 8-6 = 2 -> Bits 2 and 1 -> 000000'XX'
             switch (param)
             {
                 case CASE_00: reply = CASE_00_BFS; break;
                 case CASE_01: reply = CASE_01_BFS; break;
                 case CASE_10: reply = CASE_10_BFS; break;
+                // TODO: IS CASE '11' IMPOSSIBLE THAT IT APPEARS?
             }
             return reply;
         }
@@ -437,8 +433,8 @@ namespace MTUComm.MemoryMap
         {
             string reply = string.Empty;
             string param = Convert.ToString ( await MemoryRegisters[ 0 ].GetValue (), INDEX_STATE )
-                .PadLeft(PAD_LEFT,ZERO)
-                .Substring(3,3);
+                .PadLeft(PAD_LEFT,ZERO) // -> 00000000
+                .Substring(3,3); // Bits 5, 4 and 3 -> 000'XXX'00
             switch (param)
             {
                 case CASE_000: reply = CASE_000_TX; break;
@@ -448,6 +444,7 @@ namespace MTUComm.MemoryMap
                 case CASE_100: reply = CASE_100_TX; break;
                 case CASE_101: reply = CASE_101_TX; break;
                 case CASE_110: reply = CASE_110_TX; break;
+                // TODO: IS CASE '111' IMPOSSIBLE THAT IT APPEARS?
             }
             return reply + CASE_NOFLOW;
         }
@@ -456,13 +453,14 @@ namespace MTUComm.MemoryMap
         {
             string reply = string.Empty;
             string param = Convert.ToString ( await MemoryRegisters[ 0 ].GetValue (), INDEX_STATE )
-                .PadLeft(PAD_LEFT,ZERO)
-                .Substring(5,2);
+                .PadLeft(PAD_LEFT,ZERO) // -> 00000000
+                .Substring(5,2); // Bits 3 and 2 -> 00000'XX'0
             switch (param)
             {
                 case CASE_00: reply = CASE_00_LKD; break;
                 case CASE_01: reply = CASE_01_LKD; break;
                 case CASE_10: reply = CASE_10_LKD; break;
+                // TODO: IS CASE '11' IMPOSSIBLE THAT IT APPEARS?
             }
             return reply;
         }
@@ -471,8 +469,8 @@ namespace MTUComm.MemoryMap
         {
             string reply = string.Empty;
             string param = Convert.ToString ( await MemoryRegisters[ 0 ].GetValue (), INDEX_STATE )
-                .PadLeft(PAD_LEFT,ZERO)
-                .Substring(2, 3);
+                .PadLeft(PAD_LEFT,ZERO) // -> 00000000
+                .Substring(2, 3); // Bits 6, 5 and 4 -> 00'XXX'000
             switch (param)
             {
                 case CASE_000: reply = CASE_000_TX; break;
@@ -482,6 +480,7 @@ namespace MTUComm.MemoryMap
                 case CASE_100: reply = CASE_100_TX; break;
                 case CASE_101: reply = CASE_101_TX; break;
                 case CASE_110: reply = CASE_110_TX; break;
+                // TODO: IS CASE '111' IMPOSSIBLE THAT IT APPEARS?
             }
             return reply + CASE_LEAK;
         }

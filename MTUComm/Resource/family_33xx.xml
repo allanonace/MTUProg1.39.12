@@ -5,47 +5,79 @@
 
   <!-- INIT - Alarms -->
 
-  <!-- Set Ecoder alarms -->
-  <Register> <!-- OK -->
-    <Id>ECoderLeakDetectionCurrent</Id>
-    <Description>Leak Detection Current Alarm</Description>
-    <Type>bool</Type>
-    <Address>200</Address>
-    <Size>1</Size>
-    <Write>true</Write>
-    <CustomGet/>
-    <CustomSet/>
-  </Register>
-  <Register> <!-- OK -->
-    <Id>ECoderDaysOfLeak</Id>
-    <Description>Days of Leak Alarm</Description>
-    <Type>bool</Type>
-    <Address>200</Address>
-    <Size>2</Size>
-    <Write>true</Write>
-    <CustomGet/>
-    <CustomSet/>
-  </Register>
-  <Register> <!-- OK -->
-    <Id>ECoderDaysNoFlow</Id>
-    <Description>Days No Flow Alarm</Description>
-    <Type>bool</Type>
-    <Address>200</Address>
-    <Size>3</Size>
-    <Write>true</Write>
-    <CustomGet/>
-    <CustomSet/>
-  </Register>
-  <Register> <!-- OK -->
-    <Id>ECoderReverseFlow</Id>
-    <Description>Reverse Flow Alarm</Description>
-    <Type>bool</Type>
-    <Address>200</Address>
-    <Size>4</Size>
-    <Write>true</Write>
-    <CustomGet/>
-    <CustomSet/>
-  </Register>
+  <!-- Ecoder Alarms -->
+  <Overload>
+    <Id>P1BackFlowState</Id>
+    <Description>P1 Backflow state</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P1EcoderFlowAlarms</Register>
+    </Registers>
+    <CustomGet>method:BackFlowState_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P1DaysOfNoFlow</Id>
+    <Description>P1 Days of no flow</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P1EcoderFlowAlarms</Register>
+    </Registers>
+    <CustomGet>method:DaysOfNoFlow_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P1LeakDetection</Id>
+    <Description>P1 Leak detection state</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P1EcoderLeakAlarms</Register>
+    </Registers>
+    <CustomGet>method:LeakDetection_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P1DaysOfLeak</Id>
+    <Description>P1 Days of leak</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P1EcoderLeakAlarms</Register>
+    </Registers>
+    <CustomGet>method:DaysOfLeak_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P2BackFlowState</Id>
+    <Description>P2 Backflow state</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P2EcoderFlowAlarms</Register>
+    </Registers>
+    <CustomGet>method:BackFlowState_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P2DaysOfNoFlow</Id>
+    <Description>P2 Days of no flow</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P2EcoderFlowAlarms</Register>
+    </Registers>
+    <CustomGet>method:DaysOfNoFlow_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P2LeakDetection</Id>
+    <Description>P2 Leak detection state</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P2EcoderLeakAlarms</Register>
+    </Registers>
+    <CustomGet>method:LeakDetection_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P2DaysOfLeak</Id>
+    <Description>P2 Days of leak</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P2EcoderLeakAlarms</Register>
+    </Registers>
+    <CustomGet>method:DaysOfLeak_Get</CustomGet>
+  </Overload>
 
   <!-- END - Alarms -->
 
@@ -252,78 +284,6 @@
     </Registers>
     <CustomGet>method</CustomGet>
   </Overload>
-  <Overload>
-    <Id>P1BackFlowState</Id>
-    <Description>P1 Backflow state</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>P1EcoderFlowAlarms</Register>
-    </Registers>
-    <CustomGet>method:BackFlowState_Get</CustomGet>
-  </Overload>
-  <Overload>
-    <Id>P1DaysOfNoFlow</Id>
-    <Description>P1 Days of no flow</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>P1EcoderFlowAlarms</Register>
-    </Registers>
-    <CustomGet>method:DaysOfNoFlow_Get</CustomGet>
-  </Overload>
-  <Overload>
-    <Id>P1LeakDetection</Id>
-    <Description>P1 Leak detection state</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>P1EcoderLeakAlarms</Register>
-    </Registers>
-    <CustomGet>method:LeakDetection_Get</CustomGet>
-  </Overload>
-  <Overload>
-    <Id>P1DaysOfLeak</Id>
-    <Description>P1 Days of leak</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>P1EcoderLeakAlarms</Register>
-    </Registers>
-    <CustomGet>method:DaysOfLeak_Get</CustomGet>
-  </Overload>
-  <Overload>
-    <Id>P2BackFlowState</Id>
-    <Description>P2 Backflow state</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>P2EcoderFlowAlarms</Register>
-    </Registers>
-    <CustomGet>method:BackFlowState_Get</CustomGet>
-  </Overload>
-  <Overload>
-    <Id>P2DaysOfNoFlow</Id>
-    <Description>P2 Days of no flow</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>P2EcoderFlowAlarms</Register>
-    </Registers>
-    <CustomGet>method:DaysOfNoFlow_Get</CustomGet>
-  </Overload>
-  <Overload>
-    <Id>P2LeakDetection</Id>
-    <Description>P2 Leak detection state</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>P2EcoderLeakAlarms</Register>
-    </Registers>
-    <CustomGet>method:LeakDetection_Get</CustomGet>
-  </Overload>
-  <Overload>
-    <Id>P2DaysOfLeak</Id>
-    <Description>P2 Days of leak</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>P2EcoderLeakAlarms</Register>
-    </Registers>
-    <CustomGet>method:DaysOfLeak_Get</CustomGet>
-  </Overload>
   
   <!-- END - Overloads -->
   
@@ -352,8 +312,29 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
+  <Register> <!-- OK -->
+    <Id>P2ImmediateAlarm</Id>
+    <Description>Set to transmit an immediate alarm for port 2</Description>
+    <Type>bool</Type>
+    <Address>58</Address>
+    <Size>2</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>P2UrgentAlarm</Id>
+    <Description>Set to generate an urgent alarm to dcu (force call to ncc) for port 2</Description>
+    <Type>bool</Type>
+    <Address>58</Address>
+    <Size>3</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
 
   <!-- Bits to reset ( zero/false ) -->
+  <!-- Should be set to zero always -->
   <Register> <!-- OK -->
     <Id>AlarmMask1</Id>
     <Description>Alarm mask first bit</Description>
@@ -370,6 +351,48 @@
     <Type>bool</Type>
     <Address>42</Address>
     <Size>1</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+
+  <!-- Set Ecoder alarms -->
+  <Register> <!-- OK - LeakDetection -->
+    <Id>ECoderLeakDetectionCurrent</Id>
+    <Description>Leak Detection Current Alarm</Description>
+    <Type>bool</Type>
+    <Address>200</Address>
+    <Size>1</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK - DaysOfLeak -->
+    <Id>ECoderDaysOfLeak</Id>
+    <Description>Days of Leak Alarm</Description>
+    <Type>bool</Type>
+    <Address>200</Address>
+    <Size>2</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK - DaysNoFlow -->
+    <Id>ECoderDaysNoFlow</Id>
+    <Description>Days No Flow Alarm</Description>
+    <Type>bool</Type>
+    <Address>200</Address>
+    <Size>3</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK - ReverseFlow -->
+    <Id>ECoderReverseFlow</Id>
+    <Description>Reverse Flow Alarm</Description>
+    <Type>bool</Type>
+    <Address>200</Address>
+    <Size>4</Size>
     <Write>true</Write>
     <CustomGet/>
     <CustomSet/>
@@ -772,7 +795,7 @@
   </Register>
   <Register> <!-- OK -->
     <Id>P1EcoderFlowAlarms</Id>
-    <Description>Port 1 Flow State Record</Description>
+    <Description>In Encoder Mode this is used for Port 1 ECoder Flow Alarms</Description>
     <Type>int</Type>
     <Address>102</Address>
     <Size>1</Size>
@@ -782,7 +805,7 @@
   </Register>
   <Register> <!-- OK -->
     <Id>P1EcoderLeakAlarms</Id>
-    <Description>Port 1 Leak State Record</Description>
+    <Description>In Encoder Mode this is used for Port 1 ECoder Leak Alarms</Description>
     <Type>int</Type>
     <Address>103</Address>
     <Size>1</Size>
@@ -802,7 +825,7 @@
   </Register>
   <Register> <!-- OK -->
     <Id>P2EcoderFlowAlarms</Id>
-    <Description>Port 2 Flow State Record</Description>
+    <Description>In Encoder Mode this is used for Port 2 ECoder Flow Alarms</Description>
     <Type>int</Type>
     <Address>110</Address>
     <Size>1</Size>
@@ -812,7 +835,7 @@
   </Register>
   <Register> <!-- OK -->
     <Id>P2EcoderLeakAlarms</Id>
-    <Description>Port 2 Leak State Record</Description>
+    <Description>In Encoder Mode this is used for Port 2 ECoder Leak Alarms</Description>
     <Type>int</Type>
     <Address>111</Address>
     <Size>1</Size>

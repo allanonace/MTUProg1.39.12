@@ -313,8 +313,8 @@
 			<Parameter 	name="ReadIntervalMinutes" 			display="ReadIntervalMinutes" 			log="true" 	interface="false"/>
 			<Parameter 	name="MtuVoltageBattery" 			display="Battery" 						log="true" 	interface="true"/>
 			<!-- INIT - Fast-2-Way / Fast Messaging -->
-			<Parameter 	name="Fast-2-Way" 					display="2-Way" 						log="true" 	interface="true"	source="MemoryMap.FastMessagingFrequency" 			conditional="Mtu.FastMessageConfig=true"/>
-			<Parameter 	name="MtuMsgProtocolConfig" 		display="Mtu Msg Protocol Config" 		log="true" 	interface="false" 	source="MemoryMap.FastMessagingMode" 				conditional="Mtu.FastMessageConfig=true"/>
+			<Parameter 	name="Fast-2-Way" 					display="2-Way" 						log="true" 	interface="true"	source="MemoryMap.FastMessagingMode" 				conditional="Mtu.FastMessageConfig=true"/>
+			<Parameter 	name="MtuMsgProtocolConfig" 		display="Mtu Msg Protocol Config" 		log="true" 	interface="false" 	source="MemoryMap.FastMessagingConfig" 				conditional="Mtu.FastMessageConfig=true"/>
 			<Parameter 	name="MtuPrimaryWindowInterval" 	display="Mtu Primary Window Interval" 	log="true" 	interface="false" 														conditional="Mtu.FastMessageConfig=true"/>
 			<Parameter 	name="MtuWindowAStart" 				display="Mtu Window A Start" 			log="true" 	interface="false" 														conditional="Mtu.FastMessageConfig=true"/>
 			<Parameter 	name="MtuWindowBStart" 				display="Mtu Window B Start" 			log="true" 	interface="false" 														conditional="Mtu.FastMessageConfig=true"/>
@@ -426,8 +426,8 @@
 			<Parameter 	name="ReadIntervalMinutes" 			display="ReadIntervalMinutes" 			log="true" 	interface="false"/>
 			<Parameter 	name="MtuVoltageBattery" 			display="Battery" 						log="true" 	interface="true"/>
 			<!-- INIT - Fast-2-Way / Fast Messaging -->
-			<Parameter 	name="Fast-2-Way" 					display="2-Way"  						log="true" 	interface="true" 	source="MemoryMap.FastMessagingFrequency" 			conditional="Mtu.FastMessageConfig=true"/>
-			<Parameter 	name="MtuMsgProtocolConfig" 		display="Mtu Msg Protocol Config" 		log="true" 	interface="false" 	source="MemoryMap.FastMessagingMode" 				conditional="Mtu.FastMessageConfig=true"/>
+			<Parameter 	name="Fast-2-Way" 					display="2-Way"  						log="true" 	interface="true" 	source="MemoryMap.FastMessagingMode" 				conditional="Mtu.FastMessageConfig=true"/>
+			<Parameter 	name="MtuMsgProtocolConfig" 		display="Mtu Msg Protocol Config" 		log="true" 	interface="false" 	source="MemoryMap.FastMessagingConfig" 				conditional="Mtu.FastMessageConfig=true"/>
 			<Parameter 	name="MtuPrimaryWindowInterval" 	display="Mtu Primary Window Interval" 	log="true" 	interface="false" 														conditional="Mtu.FastMessageConfig=true"/>
 			<Parameter 	name="MtuWindowAStart" 				display="Mtu Window A Start" 			log="true" 	interface="false" 														conditional="Mtu.FastMessageConfig=true"/>
 			<Parameter 	name="MtuWindowBStart" 				display="Mtu Window B Start" 			log="true" 	interface="false" 														conditional="Mtu.FastMessageConfig=true"/>

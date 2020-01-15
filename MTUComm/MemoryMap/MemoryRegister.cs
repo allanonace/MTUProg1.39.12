@@ -433,8 +433,8 @@ namespace MTUComm.MemoryMap
 
         /// <summary>
         /// Returns asynchronously the value cached in the register, without accesing
-        /// the physical memory of the MTU, at least for this register because using custom
-        /// methods could be necessary to recover other registers from the MTU.
+        /// the physical memory of the MTU, at least for this register because using
+        /// custom methods could be necessary to recover other registers from the MTU.
         /// </summary>
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.
@@ -497,7 +497,7 @@ namespace MTUComm.MemoryMap
             int numAttempts = MTUComm.LEXI_ATTEMPTS_N )
         {
             Utils.PrintDeep ( Environment.NewLine + "------WRITE_TO_MTU-------" );
-            Utils.PrintDeep( "Register -> SetValueToMtu -> " + this.id + ( ( value != null ) ? " = " + value : "" ) );
+            Utils.PrintDeep ( "Register -> SetValueToMtu -> " + this.id + " = " + ( ( value != null ) ? value : this.ValueRaw ) );
         
             // Set value in temporary memory map before write it to the MTU
             if ( value != null )

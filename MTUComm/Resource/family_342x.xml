@@ -126,6 +126,154 @@
     <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
 
+  <!-- Imm Alarms -->
+  <Overload> <!-- OK - InsufficientMemory -->
+    <Id>InsufficientMemoryImmTamperStatus</Id>
+    <Description>Insufficient Memory Imm Tamper Status</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>InsufficientMemoryImmAlarm</Register>
+    </Registers>
+    <CustomGet>method:TamperImmStatus_Get</CustomGet>
+  </Overload>
+  <Overload> <!-- OK - GasCutWire -->
+    <Id>GasCutWireImmTamperStatus</Id>
+    <Description>Gas Cut Wire Imm Tamper Status</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>GasCutWireImmAlarm</Register>
+    </Registers>
+    <CustomGet>method:TamperImmStatus_Get</CustomGet>
+  </Overload>
+  <Overload> <!-- OK - SerialComProblem -->
+    <Id>SerialComProblemImmTamperStatus</Id>
+    <Description>Serial Com Problem Imm Tamper Status</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>SerialComProblemImmAlarm</Register>
+    </Registers>
+    <CustomGet>method:TamperImmStatus_Get</CustomGet>
+  </Overload>
+  <Overload> <!-- OK - LastGasp -->
+    <Id>LastGaspImmTamperStatus</Id>
+    <Description>Last Gasp Imm Tamper Status</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>LastGaspImmAlarm</Register>
+    </Registers>
+    <CustomGet>method:TamperImmStatus_Get</CustomGet>
+  </Overload>
+  <Overload> <!-- OK - P2CutWire -->
+    <Id>P2CutWireImmTamperStatus</Id>
+    <Description>P2 Cut Wire Imm Tamper Status</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P2CutWireImmAlarm</Register>
+    </Registers>
+    <CustomGet>method:TamperImmStatus_Get</CustomGet>
+  </Overload>
+  <Overload> <!-- OK - Interface/PCI -->
+    <Id>InterfaceImmTamperStatus</Id>
+    <Description>Interface Imm Tamper Status</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>InterfaceImmAlarm</Register>
+    </Registers>
+    <CustomGet>method:TamperImmStatus_Get</CustomGet>
+  </Overload>
+  <Overload> <!-- OK - SerialCutWire -->
+    <Id>SerialCutWireImmTamperStatus</Id>
+    <Description>Serial Cut Wire Imm Tamper Status</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>SerialCutWireImmAlarm</Register>
+    </Registers>
+    <CustomGet>method:TamperImmStatus_Get</CustomGet>
+  </Overload>
+  <Overload> <!-- OK - P1CutWire -->
+    <Id>P1CutWireImmTamperStatus</Id>
+    <Description>P1 Cut Wire Imm Tamper Status</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P1CutWireImmAlarm</Register>
+    </Registers>
+    <CustomGet>method:TamperImmStatus_Get</CustomGet>
+  </Overload>
+
+  <!-- Ecoder Alarms -->
+  <Overload>
+    <Id>P1BackFlowState</Id>
+    <Description>P1 Backflow state</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P1EcoderFlowAlarms</Register>
+    </Registers>
+    <CustomGet>method:BackFlowState_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P1DaysOfNoFlow</Id>
+    <Description>P1 Days of no flow</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P1EcoderFlowAlarms</Register>
+    </Registers>
+    <CustomGet>method:DaysOfNoFlow_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P1LeakDetection</Id>
+    <Description>P1 Leak detection state</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P1EcoderLeakAlarms</Register>
+    </Registers>
+    <CustomGet>method:LeakDetection_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P1DaysOfLeak</Id>
+    <Description>P1 Days of leak</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P1EcoderLeakAlarms</Register>
+    </Registers>
+    <CustomGet>method:DaysOfLeak_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P2BackFlowState</Id>
+    <Description>P2 Backflow state</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P2EcoderFlowAlarms</Register>
+    </Registers>
+    <CustomGet>method:BackFlowState_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P2DaysOfNoFlow</Id>
+    <Description>P2 Days of no flow</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P2EcoderFlowAlarms</Register>
+    </Registers>
+    <CustomGet>method:DaysOfNoFlow_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P2LeakDetection</Id>
+    <Description>P2 Leak detection state</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P2EcoderLeakAlarms</Register>
+    </Registers>
+    <CustomGet>method:LeakDetection_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P2DaysOfLeak</Id>
+    <Description>P2 Days of leak</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P2EcoderLeakAlarms</Register>
+    </Registers>
+    <CustomGet>method:DaysOfLeak_Get</CustomGet>
+  </Overload>
+
   <!-- END - Alarms -->
 
   <Overload>
@@ -310,92 +458,11 @@
     <CustomGet>method</CustomGet>
   </Overload>
   <Overload>
-    <Id>P1BackFlowState</Id>
-    <Description>P1 Backflow state</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>P1EcoderFlowAlarms</Register>
-    </Registers>
-    <CustomGet>method:BackFlowState_Get</CustomGet>
-  </Overload>
-  <Overload>
-    <Id>P1DaysOfNoFlow</Id>
-    <Description>P1 Days of no flow</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>P1EcoderFlowAlarms</Register>
-    </Registers>
-    <CustomGet>method:DaysOfNoFlow_Get</CustomGet>
-  </Overload>
-  <Overload>
-    <Id>P1LeakDetection</Id>
-    <Description>P1 Leak detection state</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>P1EcoderLeakAlarms</Register>
-    </Registers>
-    <CustomGet>method:LeakDetection_Get</CustomGet>
-  </Overload>
-  <Overload>
-    <Id>P1DaysOfLeak</Id>
-    <Description>P1 Days of leak</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>P1EcoderLeakAlarms</Register>
-    </Registers>
-    <CustomGet>method:DaysOfLeak_Get</CustomGet>
-  </Overload>
-  <Overload>
-    <Id>P2BackFlowState</Id>
-    <Description>P2 Backflow state</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>P2EcoderFlowAlarms</Register>
-    </Registers>
-    <CustomGet>method:BackFlowState_Get</CustomGet>
-  </Overload>
-  <Overload>
-    <Id>P2DaysOfNoFlow</Id>
-    <Description>P2 Days of no flow</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>P2EcoderFlowAlarms</Register>
-    </Registers>
-    <CustomGet>method:DaysOfNoFlow_Get</CustomGet>
-  </Overload>
-  <Overload>
-    <Id>P2LeakDetection</Id>
-    <Description>P2 Leak detection state</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>P2EcoderLeakAlarms</Register>
-    </Registers>
-    <CustomGet>method:LeakDetection_Get</CustomGet>
-  </Overload>
-  <Overload>
-    <Id>P2DaysOfLeak</Id>
-    <Description>P2 Days of leak</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>P2EcoderLeakAlarms</Register>
-    </Registers>
-    <CustomGet>method:DaysOfLeak_Get</CustomGet>
-  </Overload>
-  <Overload>
     <Id>FastMessagingMode</Id>
     <Description>Fast Messaging Configuration - Fast Messaging Mode</Description>
     <Type>int</Type>
     <Registers>
       <Register>FastMessagingConfigMode</Register>
-    </Registers>
-    <CustomGet>method</CustomGet>
-  </Overload>
-  <Overload>
-    <Id>FastMessagingFrequency</Id>
-    <Description>Fast Messaging Configuration - Response Frequency</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>FastMessagingConfigFreq</Register>
     </Registers>
     <CustomGet>method</CustomGet>
   </Overload>
@@ -427,9 +494,29 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
+  <Register> <!-- OK -->
+    <Id>P2ImmediateAlarm</Id>
+    <Description>Set to transmit an immediate alarm for port 2</Description>
+    <Type>bool</Type>
+    <Address>54</Address>
+    <Size>2</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>P2UrgentAlarm</Id>
+    <Description>Set to generate an urgent alarm to dcu for port 2 (force call to ncc)</Description>
+    <Type>bool</Type>
+    <Address>54</Address>
+    <Size>3</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
 
   <!-- Set Alarms Imm -->
-  <Register> <!-- OK -->
+  <Register> <!-- OK - InsufficientMemoryImmAlarm -->
     <Id>InsufficientMemoryImmAlarm</Id>
     <Description>Set for enable  tamper</Description>
     <Type>bool</Type>
@@ -439,7 +526,7 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register> <!-- OK - GasCutWireImmAlarm -->
     <Id>GasCutWireImmAlarm</Id>
     <Description>Set for enable  tamper. This should not be set for OnDemand MTUs</Description>
     <Type>bool</Type>
@@ -449,7 +536,7 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register> <!-- OK - SerialComProblemImmAlarm -->
     <Id>SerialComProblemImmAlarm</Id>
     <Description>Set for enable  tamper</Description>
     <Type>bool</Type>
@@ -459,7 +546,7 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register> <!-- OK - LastGaspImmAlarm -->
     <Id>LastGaspImmAlarm</Id>
     <Description>Set for enable  tamper</Description>
     <Type>bool</Type>
@@ -469,7 +556,7 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register> <!-- OK - P2CutWireImmAlarm -->
     <Id>P2CutWireImmAlarm</Id>
     <Description>Set for enable  tamper</Description>
     <Type>bool</Type>
@@ -479,7 +566,7 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register> <!-- OK - InterfaceImmAlarm -->
     <Id>InterfaceImmAlarm</Id>
     <Description>Set for enable  tamper</Description>
     <Type>bool</Type>
@@ -489,7 +576,7 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register> <!-- OK - SerialCutWireImmAlarm -->
     <Id>SerialCutWireImmAlarm</Id>
     <Description>Set for enable  tamper</Description>
     <Type>bool</Type>
@@ -499,7 +586,7 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register> <!-- OK - P1CutWireImmAlarm -->
     <Id>P1CutWireImmAlarm</Id>
     <Description>Set for enable  tamper</Description>
     <Type>bool</Type>
@@ -765,7 +852,7 @@
   </Register>
 
   <!-- Set Ecoder alarms -->
-  <Register> <!-- OK -->
+  <Register> <!-- OK - LeakDetection -->
     <Id>ECoderLeakDetectionCurrent</Id>
     <Description>Leak Detection Current Alarm</Description>
     <Type>bool</Type>
@@ -775,7 +862,7 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register> <!-- OK - DaysOfLeak -->
     <Id>ECoderDaysOfLeak</Id>
     <Description>Days of Leak Alarm</Description>
     <Type>bool</Type>
@@ -785,7 +872,7 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register> <!-- OK - DaysNoFlow -->
     <Id>ECoderDaysNoFlow</Id>
     <Description>Days No Flow Alarm</Description>
     <Type>bool</Type>
@@ -795,7 +882,7 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register> <!-- OK - ReverseFlow -->
     <Id>ECoderReverseFlow</Id>
     <Description>Reverse Flow Alarm</Description>
     <Type>bool</Type>
@@ -1471,8 +1558,18 @@
 	  <CustomSet/>
   </Register>
   <Register> <!-- OK -->
+    <Id>FastMessagingConfig</Id>
+    <Description>Fast Messaging Configuration</Description>
+    <Type>int</Type>
+    <Address>163</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+	  <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
     <Id>FastMessagingConfigMode</Id>
-    <Description>Fast Messaging Configuration - Fast Messaging Mode ( False-Off | True-On )</Description>
+    <Description>Fast Messaging Configuration - Fast Messaging Mode ( Slow-Off | Fast-On )</Description>
     <Type>bool</Type>
     <Address>163</Address>
     <Size>0</Size>
@@ -1480,9 +1577,9 @@
     <CustomGet/>
 	  <CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register> <!-- OK - NOT USED YET -->
     <Id>FastMessagingConfigFreq</Id>
-    <Description>Fast Messaging Configuration - Response Frequency ( False-F1/Slow | True-F2/Fast )</Description>
+    <Description>Fast Messaging Configuration - Response Frequency</Description>
     <Type>bool</Type>
     <Address>163</Address>
     <Size>1</Size>

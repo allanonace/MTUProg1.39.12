@@ -45,6 +45,8 @@ namespace MTUComm.MemoryMap
                 case TypeCode.Char   : this.dictionary[ RegType.CHAR   ].Add ( register ); break;
                 case TypeCode.String : this.dictionary[ RegType.STRING ].Add ( register ); break;
             }
+
+            Console.WriteLine ( "Add Modified Register: " + register.id );
         }
 
         /// <summary>

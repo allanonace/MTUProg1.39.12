@@ -134,12 +134,14 @@ namespace MTUComm
         private const int WAIT_AFTER_EVENT_LOGS    = 1000;
 
         /* Constants: RF-Check ( prev. Install Confirmation )
+            WAIT_BTW_ARTIFICIAL - Waiting time between steps within the Artificial TimeSync
             WAIT_BTW_IC_ERROR   - Waiting time between attempts to perform the Install Confirmation process = 1s
             IC_OK               - The Install Confirmation process has been completed successfully = 0
             IC_NOT_ACHIEVED     - The Install Confirmation process has not completed successfully = 1
             IC_EXCEPTION        - The Install Confirmation process has ended due to an exception = 2
             WAIT_AFTER_IC_ERROR - During installation, if the RF-Check process fails, a wait must be made before continuing = 4s
         */
+        private const int WAIT_BTW_ARTIFICIAL      = 1000;
         private const int WAIT_BTW_IC_ERROR        = 1000;
         private const int IC_OK                    = 0;
         private const int IC_NOT_ACHIEVED          = 1;
@@ -670,8 +672,12 @@ namespace MTUComm
             {
                 // Check if some required parameter is not present, after having eliminate the
                 // unnecessary parameters to avoid false positives about using the second port
-                if (!this.ValidateRequiredParams(action, out string errorRequired))
-                    throw new ScriptingTagMissingException(errorRequired);
+                // NOTE: This sentece must be at the beginning of the process because some required
+                // NOTE: parameters have a default value in case they are not present, and perform this
+                // NOTE: step after the validation of the parameters ends with the "new" parameters added to
+                // NOTE: action list but not translated nor added to the psSelected dictionary used to fill Data
+                if ( ! this.ValidateRequiredParams ( action, out string errorRequired ) )
+                    throw new ScriptingTagMissingException ( errorRequired );
 
                 // Translate Aclara parameters ID into application's nomenclature
                 // Return ( MTU_has_two_ports, Dictionary<APP_FIELD,( Value, Port_index )> )
@@ -683,7 +689,7 @@ namespace MTUComm
                 bool port2enabled = await map.P2StatusFlag.GetValue ();
 
                 // Validate script parameters ( removing the unnecessary ones )
-                Dictionary<APP_FIELD,string> psSelected = ScriptAux.ValidateParams (
+                Dictionary<APP_FIELD,dynamic> psSelected = ScriptAux.ValidateParams (
                     this.mtu, action, translatedParams, port2enabled );
 
                 // Add parameters to Library.Data
@@ -2100,8 +2106,12 @@ namespace MTUComm
             await map.MtuDatetime_Minutes.SetValueToMtu ( currDate.Minute );
             await map.MtuDatetime_Seconds.SetValueToMtu ( currDate.Second );
 
+            await Task.Delay ( WAIT_BTW_ARTIFICIAL );
+
             await map.InstallConfirmationNotSynced.SetValueToMtu ( false );
             await map.InstallConfirmationReceived .SetValueToMtu ( true  );
+
+            await Task.Delay ( WAIT_BTW_ARTIFICIAL );
 
             await map.FastMessagingConfigMode.SetValueToMtu ( global.FastMessageConfig );
         }
@@ -2673,8 +2683,8 @@ namespace MTUComm
 
                 // Check if some required parameter is not present, after having eliminate the
                 // unnecessary parameters to avoid false positives about using the second port
-                if (!this.ValidateRequiredParams(action, out string errorRequired))
-                    throw new ScriptingTagMissingException(errorRequired);
+                if ( ! this.ValidateRequiredParams ( action, out string errorRequired ) )
+                    throw new ScriptingTagMissingException ( errorRequired );
 
                 ps = action.GetParameters();
 
@@ -2763,7 +2773,6 @@ namespace MTUComm
                         
                         // No meter was found using the selected parameters
                         else throw new ScriptingAutoDetectMeterException ();
-                        form.UpdateParameter(FIELD.METER_TYPE, meterPort1);
                     }
                     // Script does not contain some of the needed tags ( NumberOfDials,... )
                     else throw new ScriptingAutoDetectTagsMissingScript ();
@@ -2817,7 +2826,6 @@ namespace MTUComm
                             
                             // No meter was found using the selected parameters
                             else throw new ScriptingAutoDetectMeterException ( string.Empty, 2 );
-                            form.UpdateParameter(FIELD.METER_TYPE_2, meterPort2);
                         }
                         // Script does not contain some of the needed tags ( NumberOfDials,... )
                         else throw new ScriptingAutoDetectTagsMissingScript ( string.Empty, 2 );
@@ -2870,7 +2878,8 @@ namespace MTUComm
             
                 // Validate each parameter and remove those that are not going to be used
 
-                string value = string.Empty;
+                string  value    = string.Empty;
+                dynamic valueDyn = null;
                 string msgDescription  = string.Empty;
                 StringBuilder msgError = new StringBuilder ();
                 StringBuilder msgErrorPopup = new StringBuilder ();
@@ -3109,6 +3118,7 @@ namespace MTUComm
                             case FIELD.METER_TYPE:
                             case FIELD.METER_TYPE_2:
                             //...
+                            valueDyn = parameter.Value;
                             break;
                             #endregion
                             #region Read Interval
@@ -3208,7 +3218,9 @@ namespace MTUComm
                                           typeStr );
                     }
                     else
-                        parameter.Value = value;
+                        parameter.Value = ( valueDyn == null ) ? value : valueDyn;
+
+                    valueDyn = null;
                 }
 
                 if ( msgError.Length > 0 )
@@ -3236,11 +3248,6 @@ namespace MTUComm
                     throw new ProcessingParamsScriptException ( msgErrorStr, 1, msgErrorPopupStr );
                 }
     
-                // Check if some required parameter is not present, after having eliminate the
-                // unnecessary parameters to avoid false positives about using the second port
-               // if ( ! this.ValidateRequiredParams ( action, out string errorRequired ) )
-                //    throw new ScriptingTagMissingException ( errorRequired );
-
                 #endregion
     
                 #region Auto-detect Alarm
@@ -3481,7 +3488,8 @@ namespace MTUComm
                      this.mtu.TimeToSync &&
                      this.mtu.FastMessageConfig )
                 {
-                    map.FastMessagingConfigFreq = ( Data.Get.TwoWay.ToUpper ().Equals ( "SLOW" ) ) ? false : true; // F1/Slow and F2/Fast
+                    // NOTE: Konstantin "Bit 0 - Mode 1 is Fast and 0 is Slow. That is ON/OFF"
+                    map.FastMessagingConfigMode = Data.Get.TwoWay.ToUpper ().Equals ( "FAST" );
                 }
 
                 #endregion
@@ -3511,12 +3519,7 @@ namespace MTUComm
                 }
 
                 #endregion
-                //MRA Falta FastMessagingConfig??
-                if(mtu.FastMessageConfig)
-                {
-                    //await map.FastMessagingConfigMode.SetValueToMtu(global.FastMessageConfig);
-                    map.FastMessagingConfigMode = global.FastMessageConfig;
-                }
+                
                 #region Digits to Drop
 
                 if ( mtu.DigitsToDrop &&
@@ -3542,41 +3545,50 @@ namespace MTUComm
                         try
                         {
                             // Set alarms [ Alarm Message Transmission ]
-                            if ( mtu.InsufficientMemory     ) map.InsufficientMemoryAlarm    = alarms.InsufficientMemory;
-                            if ( mtu.GasCutWireAlarm        ) map.GasCutWireAlarm            = alarms.CutAlarmCable;
+                            if ( mtu.InsufficientMemory     ) map.InsufficientMemoryAlarm    = alarms.InsufficientMemory;       // 34xx and 35xx36xx
+                            if ( mtu.GasCutWireAlarm        ) map.GasCutWireAlarm            = alarms.CutAlarmCable;            // 31xx32xx and 342x
                             if ( form.UsePort2 &&
-                                 mtu.GasCutWireAlarm        ) map.P2GasCutWireAlarm          = alarms.CutAlarmCable;
-                            if ( mtu.SerialComProblem       ) map.SerialComProblemAlarm      = alarms.SerialComProblem;
-                            if ( mtu.LastGasp               ) map.LastGaspAlarm              = alarms.LastGasp;
-                            if ( mtu.TiltTamper             ) map.TiltAlarm                  = alarms.Tilt;
-                            if ( mtu.MagneticTamper         ) map.MagneticAlarm              = alarms.Magnetic;
-                            if ( mtu.RegisterCoverTamper    ) map.RegisterCoverAlarm         = alarms.RegisterCover;
-                            if ( mtu.ReverseFlowTamper      ) map.ReverseFlowAlarm           = alarms.ReverseFlow;
-                            if ( mtu.SerialCutWire          ) map.SerialCutWireAlarm         = alarms.SerialCutWire;
-                            if ( mtu.TamperPort1            ) map.P1CutWireAlarm             = alarms.TamperPort1;
+                                 mtu.GasCutWireAlarm        ) map.P2GasCutWireAlarm          = alarms.CutAlarmCable;            // 31xx32xx
+                            if ( mtu.SerialComProblem       ) map.SerialComProblemAlarm      = alarms.SerialComProblem;         // 34xx and 35xx36xx
+                            if ( mtu.LastGasp               ) map.LastGaspAlarm              = alarms.LastGasp;                 // 34xx and 35xx36xx
+                            if ( mtu.TiltTamper             ) map.TiltAlarm                  = alarms.Tilt;                     // 31xx32xx, 34xx and 35xx36xx
                             if ( form.UsePort2 &&
-                                 mtu.TamperPort2            ) map.P2CutWireAlarm             = alarms.TamperPort2;
-                            if ( mtu.CutWireDelaySetting    ) map.CutWireDelaySetting        = alarms.CutWireDelaySetting;
+                                 mtu.GasCutWireAlarm        ) map.P2TiltAlarm                = alarms.Tilt;                     // 31xx32xx
+                            if ( mtu.MagneticTamper         ) map.MagneticAlarm              = alarms.Magnetic;                 // 31xx32xx, 34xx and 35xx36xx
+                            if ( form.UsePort2 &&
+                                 mtu.MagneticTamper         ) map.P2MagneticAlarm            = alarms.Magnetic;                 // 31xx32xx
+                            if ( mtu.RegisterCoverTamper    ) map.RegisterCoverAlarm         = alarms.RegisterCover;            // 31xx32xx, 34xx and 35xx36xx
+                            if ( form.UsePort2 &&
+                                 mtu.RegisterCoverTamper    ) map.P2RegisterCoverAlarm       = alarms.RegisterCover;            // 31xx32xx
+                            if ( mtu.ReverseFlowTamper      ) map.ReverseFlowAlarm           = alarms.ReverseFlow;              // 31xx32xx, 34xx and 35xx36xx
+                            if ( form.UsePort2 &&
+                                 mtu.ReverseFlowTamper      ) map.P2ReverseFlowAlarm         = alarms.ReverseFlow;              // 31xx32xx
+                            if ( mtu.SerialCutWire          ) map.SerialCutWireAlarm         = alarms.SerialCutWire;            // 342x
+                            if ( mtu.TamperPort1            ) map.P1CutWireAlarm             = alarms.TamperPort1;              // 34xx and 35xx36xx
+                            if ( form.UsePort2 &&
+                                 mtu.TamperPort2            ) map.P2CutWireAlarm             = alarms.TamperPort2;              // 34xx and 35xx36xx
+                            if ( mtu.CutWireDelaySetting    ) map.CutWireDelaySetting        = alarms.CutWireDelaySetting;      // 34xx and 35xx36xx
 
                             // Set immediate alarms [ Alarm Message Immediate ]
-                            if ( mtu.InsufficientMemoryImm  ) map.InsufficientMemoryImmAlarm = alarms.InsufficientMemoryImm;
-                            if ( mtu.MoistureDetectImm      ) map.MoistureImmAlarm           = alarms.MoistureDetectImm;
-                            if ( mtu.ProgramMemoryErrorImm  ) map.ProgramMemoryImmAlarm      = alarms.ProgramMemoryErrorImm;
-                            if ( mtu.MemoryMapErrorImm      ) map.MemoryMapImmAlarm          = alarms.MemoryMapErrorImm;
-                            if ( mtu.EnergizerLastGaspImm   ) map.EnergizerLastGaspImmAlarm  = alarms.EnergizerLastGaspImm;
-                            if ( mtu.GasCutWireAlarmImm     ) map.GasCutWireImmAlarm         = alarms.CutWireAlarmImm;
-                            if ( mtu.SerialComProblemImm    ) map.SerialComProblemImmAlarm   = alarms.SerialComProblemImm;
-                            if ( mtu.LastGaspImm            ) map.LastGaspImmAlarm           = alarms.LastGaspImm;
-                            if ( mtu.TiltTamperImm          ) map.TiltImmAlarm               = alarms.TiltTamperImm;
-                            if ( mtu.MagneticTamperImm      ) map.MagneticImmAlarm           = alarms.MagneticTamperImm;
-                            if ( mtu.RegisterCoverTamperImm ) map.RegisterCoverImmAlarm      = alarms.RegisterCoverTamperImm;
-                            if ( mtu.ReverseFlowTamperImm   ) map.ReverseFlowImmAlarm        = alarms.ReverseFlowTamperImm;
-                            if ( mtu.SerialCutWireImm       ) map.SerialCutWireImmAlarm      = alarms.SerialCutWireImm;
-                            if ( mtu.TamperPort1Imm         ) map.P1CutWireImmAlarm          = alarms.TamperPort1Imm;
+                            if ( mtu.InsufficientMemoryImm  ) map.InsufficientMemoryImmAlarm = alarms.InsufficientMemoryImm;    // 34xx and 35xx36xx
+                            if ( mtu.MoistureDetectImm      ) map.MoistureImmAlarm           = alarms.MoistureDetectImm;        // 35xx36xx
+                            if ( mtu.ProgramMemoryErrorImm  ) map.ProgramMemoryImmAlarm      = alarms.ProgramMemoryErrorImm;    // 35xx36xx
+                            if ( mtu.MemoryMapErrorImm      ) map.MemoryMapImmAlarm          = alarms.MemoryMapErrorImm;        // 35xx36xx
+                            if ( mtu.EnergizerLastGaspImm   ) map.EnergizerLastGaspImmAlarm  = alarms.EnergizerLastGaspImm;     // 35xx36xx
+                            if ( mtu.GasCutWireAlarmImm     ) map.GasCutWireImmAlarm         = alarms.CutWireAlarmImm;          // 342x
+                            if ( mtu.SerialComProblemImm    ) map.SerialComProblemImmAlarm   = alarms.SerialComProblemImm;      // 34xx and 35xx36xx
+                            if ( mtu.LastGaspImm            ) map.LastGaspImmAlarm           = alarms.LastGaspImm;              // 34xx and 35xx36xx
+                            if ( mtu.TiltTamperImm          ) map.TiltImmAlarm               = alarms.TiltTamperImm;            // 35xx36xx
+                            if ( mtu.MagneticTamperImm      ) map.MagneticImmAlarm           = alarms.MagneticTamperImm;        // 35xx36xx
+                            if ( mtu.RegisterCoverTamperImm ) map.RegisterCoverImmAlarm      = alarms.RegisterCoverTamperImm;   // 35xx36xx
+                            if ( mtu.ReverseFlowTamperImm   ) map.ReverseFlowImmAlarm        = alarms.ReverseFlowTamperImm;     // 35xx36xx
+                            if ( mtu.SerialCutWireImm       ) map.SerialCutWireImmAlarm      = alarms.SerialCutWireImm;         // 342x
+                            if ( mtu.TamperPort1Imm         ) map.P1CutWireImmAlarm          = alarms.TamperPort1Imm;           // 34xx and 35xx36xx
                             if ( form.UsePort2 &&
-                                 mtu.TamperPort2Imm         ) map.P2CutWireImmAlarm          = alarms.TamperPort2Imm;
+                                 mtu.TamperPort2Imm         ) map.P2CutWireImmAlarm          = alarms.TamperPort2Imm;           // 34xx and 35xx36xx
 
                             // Ecoder alarms
+                            // 33xx, 34xx and 35xx36xx
                             // NOTE: Same register is used to set both ports working with E-coder alarms
                             if ( mtu.Ecoder )
                             {
@@ -3587,6 +3599,7 @@ namespace MTUComm
                             }
 
                             // OnDemand 1.2 alarms
+                            // 35xx36xx
                             if ( mtu.MtuDemand )
                             {
                                 // NOTE: VSWR alarm is set in the factory
@@ -3597,16 +3610,22 @@ namespace MTUComm
                             }
 
                             // Write directly ( without conditions )
-                            map.ImmediateAlarm = alarms.ImmediateAlarmTransmit;
-                            if ( map.ContainsMember ( "UrgentAlarm" ) )
-                                map.UrgentAlarm = alarms.DcuUrgentAlarm;
+                            // NOTE: Only will be one entry for each alarm in Add block in the
+                            // NOTE: log, because both alarms are configured with the same value
+                            map.ImmediateAlarm = alarms.ImmediateAlarmTransmit;                                                     // 31xx32xx, 33xx, 34xx and 35xx36xx
+                            if ( map.ContainsMember ( "P2ImmediateAlarm" ) ) map.P2ImmediateAlarm = alarms.ImmediateAlarmTransmit;  // 31xx32xx, 33xx, 34xx and 35xx36xx
+                            if ( map.ContainsMember ( "UrgentAlarm"      ) ) map.UrgentAlarm      = alarms.DcuUrgentAlarm;          // 31xx32xx, 33xx and 342x
+                            if ( map.ContainsMember ( "P2UrgentAlarm"    ) ) map.P2UrgentAlarm    = alarms.DcuUrgentAlarm;          // 31xx32xx, 33xx and 342x
                             
                             // Overlap count
-                            map.MessageOverlapCount = alarms.Overlap;
-                            if ( form.UsePort2 )
-                                map.P2MessageOverlapCount = alarms.Overlap;
+                            map.MessageOverlapCount = alarms.Overlap;               // 31xx32xx, 33xx, 34xx and 35xx36xx
+                            if ( form.UsePort2 &&                     
+                                 map.ContainsMember ( "P2MessageOverlapCount" ) )
+                                map.P2MessageOverlapCount = alarms.Overlap;         // 31xx32xx and 33xx
 
-                            // For the moment only for the family 33xx
+                            // Type of alarm to send [ 0 Wire, 1 Tilt, 2 Magnetic, 3 Other ]
+                            // 33xx
+                            // NOTE: Both AlarmMask should be set to zero always
                             if ( map.ContainsMember ( "AlarmMask1" ) ) map.AlarmMask1 = false; // Set '0'
                             if ( map.ContainsMember ( "AlarmMask2" ) ) map.AlarmMask2 = false;
                         }
@@ -3723,14 +3742,14 @@ namespace MTUComm
 
                 Utils.Print("--------RDD_START--------");
 
-                if (!Data.Get.UNIT_TEST && // Avoid this subprocess during the unit test because the RemoteDisconnect has its own test
-                     (this.mtu.Port1.IsSetFlow ||
-                       this.mtu.TwoPorts && this.mtu.Port2.IsSetFlow))
+                if ( ! Data.Get.UNIT_TEST && // Avoid this subprocess during the unit test because the RemoteDisconnect has its own test
+                     ( this.mtu.Port1.IsSetFlow ||
+                       this.mtu.TwoPorts && this.mtu.Port2.IsSetFlow ) )
                 {
                     // If the Remote Disconnect fails, it cancels the installation
-                    await this.RemoteDisconnect_Logic(true);
+                    await this.RemoteDisconnect_Logic ( true );
 
-                    await this.CheckIsTheSameMTU();
+                    await this.CheckIsTheSameMTU ();
                 }
 
                 Utils.Print("-------RDD_FINISH--------");
@@ -3748,7 +3767,7 @@ namespace MTUComm
                 if ( ( await map.GetModifiedRegistersDifferences ( this.GetMemoryMap ( true ) ) ).Length > 0 )
                     throw new PuckCantCommWithMtuException ();
 
-                // It is necessary for Encoders and E-coders, which should read the reading from the the meter
+                // It is necessary for Encoders and E-coders, which should read the reading from the Meter
                 // NOTE: This flag should be activated after the the previous map comparison, to avoid
                 // NOTE: false positive error when comparing the meter reading and the value not inserted by the user ( zero )
                 if ( this.mtu.Port1.IsForEncoderOrEcoder )
@@ -3790,12 +3809,23 @@ namespace MTUComm
                     
                     // PCI Alarm needs to be set after MTU is turned on, just before the read MTU
                     // The Status will show enabled during install and actual status (triggered) during the read
-                    if ( mtu.InterfaceTamper    ) await map.InterfaceAlarm   .SetValueToMtu ( alarms.InterfaceTamper    );
-                    if ( mtu.InterfaceTamperImm ) await map.InterfaceImmAlarm.SetValueToMtu ( alarms.InterfaceTamperImm );
+                    // 31xx32xx, 34xx and 35xx36xx
+                    if ( mtu.InterfaceTamper )
+                        await map.InterfaceAlarm.SetValueToMtu ( alarms.InterfaceTamper );
+                    
+                    // 31xx32xx
+                    if ( form.UsePort2 &&
+                         mtu.InterfaceTamper &&
+                         map.ContainsMember ( "P2InterfaceAlarm" ) )
+                        await map.P2InterfaceAlarm.SetValueToMtu ( alarms.InterfaceTamper );
+
+                    // 34xx and 35xx36xx
+                    if ( mtu.InterfaceTamperImm )
+                        await map.InterfaceImmAlarm.SetValueToMtu ( alarms.InterfaceTamperImm );
                 }
 
                 #endregion
-                 
+                
                 #region RFCheck ( prev. Install Confirmation )
 
                 // After TurnOn has to be performed an InstallConfirmation
@@ -4174,9 +4204,20 @@ namespace MTUComm
         /// <param name="map">MemoryMap used in the writing process</param>
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.</returns>
-        public async Task WriteMtuModifiedRegisters ( MemoryMap.MemoryMap map )
+        public async Task WriteMtuModifiedRegisters (
+            MemoryMap.MemoryMap map )
         {
             List<dynamic> modifiedRegisters = map.GetModifiedRegisters ().GetAllElements ();
+
+            /*
+            dynamic dynmap = map;
+            await dynmap.P1MeterId.SetValueToMtu ();
+            await Task.Delay ( 2000 );
+            await dynmap.P1MeterReading.SetValueToMtu ();
+
+            modifiedRegisters.Remove ( dynmap.P1MeterId );
+            modifiedRegisters.Remove ( dynmap.P1MeterReading );
+            */
 
             int retryIndex = 0;
             int retryTotal = 3;

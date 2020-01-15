@@ -5,6 +5,10 @@
   
   <!-- INIT - Alarms -->
 
+  <!-- There is no need of tampers for the second port alarms -->
+  <!-- because the alarms of both ports are configured with the same -->
+  <!-- value and the addresses used as tampers are the same, achieving -->
+  <!-- the same result working only with the alarms of the first port -->
   <Overload> <!-- OK -->
     <Id>TiltTamperStatus</Id>
     <Description>Tilt Tamper Status</Description>
@@ -298,6 +302,26 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
+  <Register> <!-- OK -->
+    <Id>P2ImmediateAlarm</Id>
+    <Description>Set to transmit an immediate alarm for port 2</Description>
+    <Type>bool</Type>
+    <Address>58</Address>
+    <Size>2</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>P2UrgentAlarm</Id>
+    <Description>Set to generate an urgent alarm to dcu for port 2 (force call to ncc)</Description>
+    <Type>bool</Type>
+    <Address>58</Address>
+    <Size>3</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
 
   <!-- Set Alarms -->
   <Register> <!-- OK -->
@@ -321,7 +345,7 @@
     <CustomSet/>
   </Register>
   <Register> <!-- OK -->
-    <Id>InterfaceAlarm</Id>
+    <Id>InterfaceAlarm</Id> <!-- PCI -->
     <Description>Set to enable programming coil interface tamper</Description>
     <Type>bool</Type>
     <Address>42</Address>
@@ -352,7 +376,7 @@
   </Register>
   <Register> <!-- OK -->
     <Id>GasCutWireAlarm</Id>
-    <Description>Set for enable cut cable tamper</Description>
+    <Description>Set to enable cut cable tamper</Description>
     <Type>bool</Type>
     <Address>45</Address>
     <Size>0</Size>
@@ -362,7 +386,7 @@
   </Register>
   <Register> <!-- OK -->
     <Id>P2GasCutWireAlarm</Id>
-    <Description> P2 Set to enable port 2 alarm (cut or corrector)</Description>
+    <Description>Set to enable port 2 alarm (cut or corrector)</Description>
     <Type>bool</Type>
     <Address>45</Address>
     <Size>2</Size>
@@ -370,8 +394,58 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
+  <Register> <!-- OK -->
+    <Id>P2TiltAlarm</Id>
+    <Description>Set to enable tilt tamper for port 2</Description>
+    <Type>bool</Type>
+    <Address>58</Address>
+    <Size>0</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>P2MagneticAlarm</Id>
+    <Description>Set to enable magnetic tamper for port 2</Description>
+    <Type>bool</Type>
+    <Address>58</Address>
+    <Size>1</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>P2InterfaceAlarm</Id> <!-- PCI -->
+    <Description>Set to enable programming coil interface tamper for port 2</Description>
+    <Type>bool</Type>
+    <Address>58</Address>
+    <Size>4</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>P2RegisterCoverAlarm</Id>
+    <Description>Set to enable register cover tamper for port 2</Description>
+    <Type>bool</Type>
+    <Address>58</Address>
+    <Size>5</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>P2ReverseFlowAlarm</Id>
+    <Description>Set to enable reverse flow tamper for port 2</Description>
+    <Type>bool</Type>
+    <Address>58</Address>
+    <Size>6</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
 
-  <!-- Tampers -->
+  <!-- Read Alarms -->
   <Register> <!-- OK -->
     <Id>TiltTamper</Id>
     <Description>Set when tilt tamper</Description>
