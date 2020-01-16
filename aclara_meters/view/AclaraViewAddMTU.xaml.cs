@@ -520,26 +520,15 @@ namespace aclara_meters.view
 
         private async Task InitilizeValuesAsync()
         {
-            dynamic map = Data.Get.MemoryMap;
-            //MRA
-            int twoway;
-            if (map.ContainsMember("FastMessagingConfigFreq"))
-            {
-                bool ConfMode = await map.FastMessagingConfigMode.GetValue();
-                if (ConfMode)
-                {
-                    bool two = await map.FastMessagingConfigFreq.GetValue();
-                    twoway = two ? 1 : 0;
-                }
-                else twoway = 0;
+            dynamic map    = Data.Get.MemoryMap;
+            int     twoway = ( await map.FastMessagingConfigMode.GetValue () ) ? 1 : 0; // Fast or Slow
 
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    if (!div_RDDGeneral.IsVisible)
-                        pck_TwoWay.SelectedIndex = twoway;
-                    else pck_TwoWay_V.SelectedIndex = twoway;
-                });
-            }
+            Device.BeginInvokeOnMainThread ( () =>
+            {
+                if ( ! div_RDDGeneral.IsVisible )
+                     pck_TwoWay  .SelectedIndex = twoway;
+                else pck_TwoWay_V.SelectedIndex = twoway;
+            });
         }
 
         private void InitializeAddMtuForm()
