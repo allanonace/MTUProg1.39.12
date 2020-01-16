@@ -1739,9 +1739,9 @@ namespace MTUComm
                         prevFinalResult    = currentFinalResult;
                         currentFinalResult = finalResults.Count - 1;
                         
-                        Utils.PrintDeep (
-                            "INIT block [ New Parent: " + currentNestedLevel + " , New FinalResultIndex: " + currentFinalResult + " ] " +
-                            "-> And: " + condition.IsAnd + " Or: " + condition.IsOr );
+                        //Utils.PrintDeep (
+                        //    "INIT block [ New Parent: " + currentNestedLevel + " , New FinalResultIndex: " + currentFinalResult + " ] " +
+                        //    "-> And: " + condition.IsAnd + " Or: " + condition.IsOr );
                         
                         continue;
                     }
@@ -1751,7 +1751,7 @@ namespace MTUComm
                         currentNestedLevel--;
                         currentFinalResult = prevFinalResult--;
                         
-                        Utils.PrintDeep ( "FINISH [ Return to Parent: " + currentNestedLevel + " , Return to FinalResultIndex: " + currentFinalResult + " ]" );
+                        //Utils.PrintDeep ( "FINISH [ Return to Parent: " + currentNestedLevel + " , Return to FinalResultIndex: " + currentFinalResult + " ]" );
                         
                         continue;
                     }
@@ -1803,8 +1803,8 @@ namespace MTUComm
 
                     #endregion
 
-                    Utils.PrintDeep ( "   " + condition.Key + " == " + condition.Value + " -> " + result +
-                        " [ Parent: " + ( currentNestedLevel - 1 ) + " , FinalResultIndex: " + currentFinalResult + " ]" );
+                    //Utils.PrintDeep ( "   " + condition.Key + " == " + condition.Value + " -> " + result +
+                    //    " [ Parent: " + ( currentNestedLevel - 1 ) + " , FinalResultIndex: " + currentFinalResult + " ]" );
 
                     // Concatenate results
                     if ( ! condition.InitNewBlock )
@@ -1814,17 +1814,18 @@ namespace MTUComm
                     }
                     else finalResults[ currentFinalResult ]  = result;
 
-                    Utils.PrintDeep ( "   Final = " + result + " -> FinalResult[" + currentFinalResult + "] = " + finalResults[ currentFinalResult ] );
+                    //Utils.PrintDeep ( "   Final = " + result + " -> FinalResult[" + currentFinalResult + "] = " + finalResults[ currentFinalResult ] );
                 }
                 
                 #endregion
 
                 #region Calculate inside out
 
+                /*
                 Utils.PrintDeep ( "----" );
 
                 Utils.PrintDeep ( conditionStr );
-                Utils.PrintDeep("-");
+                Utils.PrintDeep ("-");
 
                 for ( int i = 0; i < finalResults.Count; i++ )
 		        {
@@ -1836,6 +1837,7 @@ namespace MTUComm
 		        }
 		
 		        Utils.PrintDeep ( string.Empty );
+                */
 
                 /*
                 e.g. "Level0.P1=true | ( Level1.P1=3 + ( Level2.P1=1 + Level2.P2=1 ) | ( Level2.P3=2 + Level2.P3=2 ) | Level1.P2=4 )"
@@ -1863,19 +1865,19 @@ namespace MTUComm
                     used        = 0;
                     finalResult = 0;
                     
-                    Utils.PrintDeep ( "Parent: " + parent + " [ For " + parent + " >= 0 ]" );
+                    //Utils.PrintDeep ( "Parent: " + parent + " [ For " + parent + " >= 0 ]" );
                     
                     // Iterates all groups, first finding current parent ( travels the sentence from left to right )
                     int groupLimit = finalResults.Count;
                     for ( int group = 0; group < groupLimit; group++ )
                     {
-                        Utils.PrintDeep ( "    Group: " + group + " [ For 0 < " + groupLimit + " ]" );
+                        //Utils.PrintDeep ( "    Group: " + group + " [ For 0 < " + groupLimit + " ]" );
                         
                         if ( group == parent )
                         {
                             finalResult = finalResults[ group ];
                             
-                            Utils.PrintDeep ( "        Parent: FinalResult = " + finalResult );
+                            //Utils.PrintDeep ( "        Parent: FinalResult = " + finalResult );
                         }
                         else if ( blockParent[ group ] == parent )
                         {
@@ -1889,37 +1891,37 @@ namespace MTUComm
                             if ( ! andCondition ) finalResult += entryFinalResult; // If one condition validate, pass
                             else                  finalResult *= entryFinalResult; // All conditions have to validate
                             
-                            Utils.PrintDeep (
-                                "        Child: FinalResult = " + preFinalResult +
-                                ( ( andCondition ) ? " x" : " +" ) +
-                                " " + entryFinalResult + " = " +
-                                finalResult + " [ Used: " + used + " ]" );
+                            //Utils.PrintDeep (
+                            //    "        Child: FinalResult = " + preFinalResult +
+                            //    ( ( andCondition ) ? " x" : " +" ) +
+                            //    " " + entryFinalResult + " = " +
+                            //    finalResult + " [ Used: " + used + " ]" );
                         }
                     }
                     
                     if ( parent > 0 &&
                         used   > 0 )
                     {
-                        Utils.PrintDeep ( "    Remove elements: " + ( finalResults.Count - 1 - used ) + " / " + finalResults.Count );
+                        //Utils.PrintDeep ( "    Remove elements: " + ( finalResults.Count - 1 - used ) + " / " + finalResults.Count );
                         
                         finalResults.RemoveRange ( finalResults.Count - 1 - used, used );
                         finalResults[ parent ] = finalResult;
                         
-                        Utils.PrintDeep (
-                            "    FinalResult = " + finalResult +
-                            " | FinalResults.Count = " + finalResults.Count );
+                        //Utils.PrintDeep (
+                        //    "    FinalResult = " + finalResult +
+                        //    " | FinalResults.Count = " + finalResults.Count );
                 
-                        int i = 0;
-                        foreach ( int result in finalResults )
-                            Utils.PrintDeep ( "        · Group " + i++ + " = " + result );
+                        //int i = 0;
+                        //foreach ( int result in finalResults )
+                        //    Utils.PrintDeep ( "        · Group " + i++ + " = " + result );
                     }
                 }
 
                 #endregion
 
-                Utils.PrintDeep ( "----" );
+                //Utils.PrintDeep ( "----" );
                 
-                Utils.PrintDeep ( finalResult );
+                //Utils.PrintDeep ( finalResult );
 
                 return ( finalResult > 0 );
             }

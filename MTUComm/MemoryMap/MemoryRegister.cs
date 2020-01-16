@@ -493,8 +493,7 @@ namespace MTUComm.MemoryMap
         /// <seealso cref="ResetByteAndSetValueToMtu"/>
         /// <seealso cref="SetValue"/>
         public async Task SetValueToMtu (
-            dynamic value = null,
-            int numAttempts = MTUComm.LEXI_ATTEMPTS_N )
+            dynamic value = null )
         {
             Utils.PrintDeep ( Environment.NewLine + "------WRITE_TO_MTU-------" );
             Utils.PrintDeep ( "Register -> SetValueToMtu -> " + this.id + " = " + ( ( value != null ) ? value : this.ValueRaw ) );
@@ -505,16 +504,14 @@ namespace MTUComm.MemoryMap
             
             // Write value set in memory map to the MTU
             if ( valueType == RegType.BOOL )
-                await this.SetBitToMtu ( numAttempts );
+                await this.SetBitToMtu ();
             else
             {
                 // Recover byte array with length equals to the value to set,
                 // not the length ( sizeGet ) that will be used to recover/get
                 await this.lexi.Write (
                     ( uint )this.address,
-                    this.funcGetByteArray ( false ),
-                    numAttempts,
-                    MTUComm.WAIT_BTW_LEXI_ATTEMPTS );
+                    this.funcGetByteArray ( false ) );
             }
             
             Utils.PrintDeep ( "---WRITE_TO_MTU_FINISH---" + Environment.NewLine );
@@ -530,8 +527,7 @@ namespace MTUComm.MemoryMap
         /// for a correct exceptions bubbling.</returns>
         /// <seealso cref="SetValueToMtu"/>
         /// <seealso cref="ResetByteAndSetValueToMtu"/>
-        private async Task SetBitToMtu (
-            int numAttempts )
+        private async Task SetBitToMtu ()
         {
             // Read current value
             byte systemFlags = ( await this.lexi.Read ( ( uint )this.address, 1, true ) )[ 0 ];
@@ -550,9 +546,7 @@ namespace MTUComm.MemoryMap
             
             await this.lexi.Write (
                 ( uint )this.address,
-                new byte[] { systemFlags },
-                numAttempts,
-                MTUComm.WAIT_BTW_LEXI_ATTEMPTS );
+                new byte[] { systemFlags } );
         }
 
         /// <summary>
@@ -662,9 +656,7 @@ namespace MTUComm.MemoryMap
                 // Reset full byte ( all flags to zero/disable )
                 await this.lexi.Write (
                     ( uint )this.address,
-                    new byte[] { default ( byte ) },
-                    MTUComm.LEXI_ATTEMPTS_N,
-                    MTUComm.WAIT_BTW_LEXI_ATTEMPTS );
+                    new byte[] { default ( byte ) } );
                 
                 // Write flag for this register
                 await this.SetValueToMtu ( value );

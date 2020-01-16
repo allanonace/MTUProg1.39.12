@@ -286,6 +286,13 @@ namespace Lexi
                                   58886, 54429, 50452, 45483, 40994, 37561, 33584, 31687, 27214, 22741,
                                   18780, 15843, 11370, 7921, 3960};
 
+        /* Constants: LExI Attempts
+            LEXI_ATTEMPTS_N        - Number of attempts to perform an LExI write|read before returning an error = 2
+            WAIT_BTW_LEXI_ATTEMPTS - Waiting time before making a new LExI write|read attempt after an error = 1
+        */
+        private const int LEXI_ATTEMPTS_N        = 4;
+        public  const int WAIT_BTW_LEXI_ATTEMPTS = 1;
+
         #endregion
 
         #region Attributes
@@ -380,7 +387,30 @@ namespace Lexi
             if ( m_serial == null )
                 throw new ArgumentNullException ( "No Serial interface defined" );
 
-            return await Read ( m_serial, address, data, m_timeout );
+            // Try the specified time of attempts
+            byte[] result = null;
+            int attempts = 0;
+            do
+            {
+                Utils.PrintDeep ( Environment.NewLine + "-------LEXI_READ--------| Attempt " + ++attempts );
+
+                try
+                {
+                    result = await Read ( m_serial, address, data, m_timeout );
+
+                    break;
+                }
+                catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
+                {
+                    if ( ++attempts < LEXI_ATTEMPTS_N )
+                        await Task.Delay ( WAIT_BTW_LEXI_ATTEMPTS * 1000 );
+                    else
+                        throw e;                  
+                }
+            }
+            while ( attempts < LEXI_ATTEMPTS_N );
+
+            return result;
 
             #endregion
         }
@@ -491,13 +521,30 @@ namespace Lexi
         {
             return await this.Write (
                 addressOrLexiCmd,
+                LEXI_ATTEMPTS_N,
                 data,
-                1,
-                1,
                 bytesResponse,
                 filtersResponse,
                 lexiAction,
                 true );
+        }
+
+        public async Task<LexiWriteResult> Write (
+            uint   addressOrLexiCmd,
+            byte[] data            = null,
+            uint[] bytesResponse   = null, // By default is +2 ACK
+            LexiFiltersResponse filtersResponse = null, // It is used when multiple responses are possible ( base 0 )
+            LexiAction lexiAction  = LexiAction.Write,
+            bool avoidACK = false )
+        {
+            return await this.Write (
+                addressOrLexiCmd,
+                LEXI_ATTEMPTS_N,
+                data,
+                bytesResponse,
+                filtersResponse,
+                lexiAction,
+                avoidACK );
         }
 
         /// <summary>
@@ -512,9 +559,8 @@ namespace Lexi
         /// <seealso cref="Read(uint, uint)"/>
         public async Task<LexiWriteResult> Write (
             uint   addressOrLexiCmd,
+            int    maxAttempts,
             byte[] data            = null,
-            int    attempts        = 1,
-            int    secsBtwAttempts = 1,
             uint[] bytesResponse   = null, // By default is +2 ACK
             LexiFiltersResponse filtersResponse = null, // It is used when multiple responses are possible ( base 0 )
             LexiAction lexiAction  = LexiAction.Write,
@@ -572,12 +618,11 @@ namespace Lexi
 
             // Try the specified time of attempts
             LexiWriteResult result = null;
-            if ( attempts        <= 0 ) attempts        = 1;
-            if ( secsBtwAttempts <= 0 ) secsBtwAttempts = 1;
-            int count = 0;
+            if ( maxAttempts <= 0 ) maxAttempts = LEXI_ATTEMPTS_N;
+            int attempts = 0;
             do
             {
-                Utils.PrintDeep ( Environment.NewLine + "-------LEXI_WRITE--------| Attempt " + ++count );
+                Utils.PrintDeep ( Environment.NewLine + "-------LEXI_WRITE--------| Attempt " + ++attempts );
 
                 try
                 {
@@ -601,13 +646,13 @@ namespace Lexi
                          Utils.IsSubclassOfGeneric ( typeof ( OwnSpecialExceptionsBase<> ), e.GetType () ) )
                         return ( ( OwnSpecialExceptionsBase<LexiWriteResult> ) e ).Response;
 
-                    else if ( --attempts > 0 )
-                        await Task.Delay ( secsBtwAttempts * 1000 );
+                    else if ( ++attempts < maxAttempts )
+                        await Task.Delay ( WAIT_BTW_LEXI_ATTEMPTS * 1000 );
                     else
                         throw e;                  
                 }
             }
-            while ( attempts > 0 );
+            while ( attempts < maxAttempts );
 
             return result;
 
