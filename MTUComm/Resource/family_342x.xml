@@ -461,7 +461,7 @@
   <Overload>
     <Id>FastMessagingMode</Id>
     <Description>Fast Messaging Configuration - Fast Messaging Mode</Description>
-    <Type>int</Type>
+    <Type>string</Type>
     <Registers>
       <Register>FastMessagingConfigMode</Register>
     </Registers>

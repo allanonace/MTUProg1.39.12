@@ -4,6 +4,7 @@
 .sass-cache/
 .tscache/
 .vscode/
+.history/
 .sonarlint/
 .sonarqube/
 .scannerwork/
