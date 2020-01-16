@@ -518,17 +518,23 @@ namespace aclara_meters.view
             #endregion
         }
 
-        private async Task InitilizeValuesAsync()
+        private async Task InitilizeValuesAsync ()
         {
-            dynamic map    = Data.Get.MemoryMap;
-            int     twoway = ( await map.FastMessagingConfigMode.GetValue () ) ? 1 : 0; // Fast or Slow
+            dynamic map = Data.Get.MemoryMap;
 
-            Device.BeginInvokeOnMainThread ( () =>
+            if ( this.global.TimeToSync &&
+                 this.currentMtu.TimeToSync &&
+                 this.currentMtu.FastMessageConfig )
             {
-                if ( ! div_RDDGeneral.IsVisible )
-                     pck_TwoWay  .SelectedIndex = twoway;
-                else pck_TwoWay_V.SelectedIndex = twoway;
-            });
+                int twoway = ( await map.FastMessagingConfigMode.GetValue () ) ? 1 : 0; // Fast or Slow
+
+                Device.BeginInvokeOnMainThread ( () =>
+                {
+                    if ( ! div_RDDGeneral.IsVisible )
+                         pck_TwoWay  .SelectedIndex = twoway;
+                    else pck_TwoWay_V.SelectedIndex = twoway;
+                });
+            }
         }
 
         private void InitializeAddMtuForm()

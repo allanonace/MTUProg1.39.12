@@ -3725,8 +3725,6 @@ namespace MTUComm
                 OnProgress ( this, new Delegates.ProgressArgs ( "Writing to MTU..." ) );
 
                 // Write changes into MTU
-                // NOTE: The memory map instance used inside AddMtuLog is configured for read only once
-                // NOTE: each register and for that reason for example Encryption the first time is not logged
                 await this.WriteMtuModifiedRegisters ( map );
                 await addMtuLog.LogAddMtu ();
                 
@@ -4208,6 +4206,12 @@ namespace MTUComm
             MemoryMap.MemoryMap map )
         {
             List<dynamic> modifiedRegisters = map.GetModifiedRegisters ().GetAllElements ();
+
+            // Removes the encryption key from the list of modified values to write to the MTU,
+            // because it was already done during the ( old ) encryption process and it does not
+            // make sense to repeat the write, in addition that reduced the number of times an MTU can be encrypted
+            // NOTE: Linq's Single and First methods return an exception if no entry matches the condition
+            modifiedRegisters.Remove ( modifiedRegisters.SingleOrDefault ( reg => reg.id.ToUpper ().Equals ( "EncryptionKey".ToUpper () ) ) );
 
             /*
             dynamic dynmap = map;
