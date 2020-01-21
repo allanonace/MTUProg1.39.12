@@ -1938,8 +1938,8 @@ namespace MTUComm
 
                         bool    isF1;
                         short   bestRssiResponse = -150;
-                        string  freq1wayStr      = await map.Frequency1Way  .GetValue ( false ); // Execute LExI command without attempts
-                        string  freq2wayTxStr    = await map.Frequency2WayTx.GetValue ( false );
+                        string  freq1wayStr      = await map.Frequency1Way  .GetValue (); // Overload
+                        string  freq2wayTxStr    = await map.Frequency2WayTx.GetValue (); // Overload
                         // NOTE: Parsing to double is important to take into account the separator symbol ( . or , ),
                         // NOTE: because parse "123,456" returns "123456" and use CultureInfo.InvariantCulture is not an universal solution
                         CultureInfo usCulture    = new CultureInfo ( "en-US" );
