@@ -68,7 +68,7 @@
     <Error id="501" message="MTU can't be turned on or off after having tried it _var_ times" footer="Turn On|Off not achieved" />
     
     <!-- Install Confirmation -->    
-    <Error id="600" message="The MTU does not support for two-way or tag TimeToSync is false in Globa.xml" footer="MTU not support 2-way" no_error="true" />
+    <Error id="600" message="The MTU does not support for two-way or tag TimeToSync is false in Global.xml" footer="MTU not support 2-way" no_error="true" />
     <Error id="601" message="The MTU is turned off" footer="MTU turned Off" no_error="true" />
     <Error id="602" message="Installation Confirmation process has failed trying to communicate with the DCU" /> <!-- footer not necessary -->
     <Error id="603" message="Installation Confirmation can't be performed after having tried it _var_ times" footer="IC not achieved" />

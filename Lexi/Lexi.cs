@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
+using System.Text;
 using System.Threading.Tasks;
 using Lexi.Interfaces;
 using Library;
@@ -287,9 +287,11 @@ namespace Lexi
                                   18780, 15843, 11370, 7921, 3960};
 
         /* Constants: LExI Attempts
+            CMD_ATTEMPTS_ONE       - LExI commands that return a list of items should not have multiple attempts = 1
             LEXI_ATTEMPTS_N        - Number of attempts to perform an LExI write|read before returning an error = 2
             WAIT_BTW_LEXI_ATTEMPTS - Waiting time before making a new LExI write|read attempt after an error = 1
         */
+        private const int LEXI_ATTEMPTS_ONE      = 1;
         private const int LEXI_ATTEMPTS_N        = 4;
         public  const int WAIT_BTW_LEXI_ATTEMPTS = 1;
 
@@ -303,6 +305,11 @@ namespace Lexi
 
         private readonly int m_timeout; // Timout limit to wait for MTU response.
 
+        private static int numErrors   = 0;
+        private static int numAttempts = 0;
+        private static int currrentAttemps = 0;
+        private static StringBuilder errorsLog;
+
         #endregion
 
         #region Properties
@@ -312,9 +319,28 @@ namespace Lexi
             set { map = value; }
         }
 
+        public static int NumErrors
+        {
+            get { return numErrors; }
+        }
+
+        public static int NumAttempts
+        {
+            get { return numAttempts; }
+        }
+
         #endregion
 
         #region Initialization
+
+        static Lexi ()
+        {
+            #if DEBUG
+            
+            errorsLog = new StringBuilder ();
+
+            #endif
+        }
 
         public Lexi()
         {
@@ -332,6 +358,80 @@ namespace Lexi
 
         #region Read and Write
 
+        public static void ShowPopupAttemps ()
+        {
+            if ( currrentAttemps > 0 )
+                errorsLog.AppendLine ( "Error with " + currrentAttemps + " attempt/s" );
+
+            if ( ! string.IsNullOrEmpty ( errorsLog.ToString () ) )
+                PageLinker.ShowAlert ( "Com.Errors", errorsLog.ToString () );
+        }
+
+        public static void ResetAttemptsCounter ()
+        {
+            numErrors   = 0;
+            numAttempts = 0;
+
+            #if DEBUG
+
+            currrentAttemps = 0;
+            errorsLog.Clear ();
+
+            #endif
+        }
+
+        public static void AddNewError ()
+        {
+            #if DEBUG
+
+            if ( numErrors > 0 &&
+                 currrentAttemps > 0 )
+            {
+                errorsLog.AppendLine ( "Error with " + currrentAttemps + " attempt/s" );
+                currrentAttemps = 0;
+            }
+
+            #endif
+
+            numErrors++;
+            AddAttempt ();
+        }
+
+        public static void AddAttempt ()
+        {
+            numAttempts++;
+
+            #if DEBUG
+
+            currrentAttemps++;
+
+            #endif
+        }
+
+        public async Task<byte[]> Read (
+            UInt32 address,
+            uint data,
+            bool isPartOfWrite = false )
+        {
+            return await this.Read (
+                address,
+                LEXI_ATTEMPTS_N,
+                data,
+                isPartOfWrite );
+        }
+
+        public async Task<byte[]> ReadWithoutAttempts (
+            UInt32 address,
+            uint data,
+            bool isPartOfWrite = false )
+        {
+            return await this.Read (
+                address,
+                LEXI_ATTEMPTS_ONE,
+                data,
+                isPartOfWrite );
+        }
+
         /// <summary>
         /// Prepares and executes a read action from the physical memory of the MTU.
         /// </summary>
@@ -339,10 +439,11 @@ namespace Lexi
         /// <param name="data">Additional data to be sent with the LExI command</param>
         /// <returns>Response from the MTU.</returns>
         /// <seealso cref="Write(uint, byte[], uint[], LexiFiltersResponse, LexiAction)"/>
-        public async Task<byte[]> Read (
+        private async Task<byte[]> Read (
             UInt32 address,
-            uint data,
-            bool isPartOfWrite = false )
+            int    maxAttempts,
+            uint   data,
+            bool   isPartOfWrite = false )
         {
             #region Unit Test
 
@@ -389,10 +490,11 @@ namespace Lexi
 
             // Try the specified time of attempts
             byte[] result = null;
+            if ( maxAttempts <= 0 ) maxAttempts = LEXI_ATTEMPTS_N;
             int attempts = 0;
             do
             {
-                Utils.PrintDeep ( Environment.NewLine + "-------LEXI_READ--------| Attempt " + ++attempts );
+                Utils.PrintDeep ( Environment.NewLine + "-------LEXI_READ--------| Attempt " + ( attempts + 1 ) );
 
                 try
                 {
@@ -402,13 +504,21 @@ namespace Lexi
                 }
                 catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
                 {
-                    if ( ++attempts < LEXI_ATTEMPTS_N )
+                    #if DEBUG
+
+                    if ( attempts == 0 )
+                         Lexi.AddNewError ();
+                    else Lexi.AddAttempt ();
+
+                    #endif
+
+                    if ( ++attempts < maxAttempts )
                         await Task.Delay ( WAIT_BTW_LEXI_ATTEMPTS * 1000 );
                     else
                         throw e;                  
                 }
             }
-            while ( attempts < LEXI_ATTEMPTS_N );
+            while ( attempts < maxAttempts );
 
             return result;
 
@@ -521,7 +631,7 @@ namespace Lexi
         {
             return await this.Write (
                 addressOrLexiCmd,
-                LEXI_ATTEMPTS_N,
+                LEXI_ATTEMPTS_ONE,
                 data,
                 bytesResponse,
                 filtersResponse,
@@ -531,15 +641,33 @@ namespace Lexi
 
         public async Task<LexiWriteResult> Write (
             uint   addressOrLexiCmd,
-            byte[] data            = null,
-            uint[] bytesResponse   = null, // By default is +2 ACK
+            byte[] data           = null,
+            uint[] bytesResponse  = null, // By default is +2 ACK
             LexiFiltersResponse filtersResponse = null, // It is used when multiple responses are possible ( base 0 )
-            LexiAction lexiAction  = LexiAction.Write,
+            LexiAction lexiAction = LexiAction.Write,
             bool avoidACK = false )
         {
             return await this.Write (
                 addressOrLexiCmd,
                 LEXI_ATTEMPTS_N,
+                data,
+                bytesResponse,
+                filtersResponse,
+                lexiAction,
+                avoidACK );
+        }
+
+        public async Task<LexiWriteResult> WriteWithoutAttempts (
+            uint   addressOrLexiCmd,
+            byte[] data           = null,
+            uint[] bytesResponse  = null, // By default is +2 ACK
+            LexiFiltersResponse filtersResponse = null, // It is used when multiple responses are possible ( base 0 )
+            LexiAction lexiAction = LexiAction.Write,
+            bool avoidACK = false )
+        {
+            return await this.Write (
+                addressOrLexiCmd,
+                LEXI_ATTEMPTS_ONE,
                 data,
                 bytesResponse,
                 filtersResponse,
@@ -557,7 +685,7 @@ namespace Lexi
         /// <param name="lexiAction">Action to perform using <see cref="LexiAction"/> enumeration ( lexiAction.OperationRequest or lexiAction.Write )</param>
         /// <returns>Response from the MTU.</returns>
         /// <seealso cref="Read(uint, uint)"/>
-        public async Task<LexiWriteResult> Write (
+        private async Task<LexiWriteResult> Write (
             uint   addressOrLexiCmd,
             int    maxAttempts,
             byte[] data            = null,
@@ -622,7 +750,7 @@ namespace Lexi
             int attempts = 0;
             do
             {
-                Utils.PrintDeep ( Environment.NewLine + "-------LEXI_WRITE--------| Attempt " + ++attempts );
+                Utils.PrintDeep ( Environment.NewLine + "-------LEXI_WRITE--------| Attempt " + ( attempts + 1 ) );
 
                 try
                 {
@@ -640,6 +768,14 @@ namespace Lexi
                 }
                 catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
                 {
+                    #if DEBUG
+
+                    if ( attempts == 0 )
+                         Lexi.AddNewError ();
+                    else Lexi.AddAttempt ();
+
+                    #endif
+
                     // NOTE: Avoiding ACK is due to the special case related to the new encryption process, where
                     // NOTE: STAR Programmer does not take into account whether LExI commands work or not ( correct ACK = 0x06 )
                     if ( avoidACK &&

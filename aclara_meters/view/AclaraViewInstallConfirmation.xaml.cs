@@ -170,7 +170,16 @@ namespace aclara_meters.view
                     ContentNav.IsEnabled = false;
                     ChangeLowerButtonImage(true);
                     _userTapped = true;
+
+                    #if DEBUG
+
+                    bottomBar.GetLabelElement("label_read").Text = base.LogAttempts ( "Reading from MTU ... " );
+
+                    #else
+
                     bottomBar.GetLabelElement("label_read").Text = "Reading from MTU ... ";
+
+                    #endif
 
                     listaMTUread.ItemsSource = null;
                     bottomBar.GetImageElement ( "img_ndresult" ).IsVisible = false;
@@ -182,6 +191,12 @@ namespace aclara_meters.view
 
         private async Task ThreadProcedureMTUCOMMAction()
         {
+            #if DEBUG
+
+            Lexi.Lexi.ResetAttemptsCounter ();
+
+            #endif
+
             //Create Ation when opening Form
             MTUComm.Action add_mtu = new MTUComm.Action (
                 FormsApp.ble_interface,
@@ -194,7 +209,15 @@ namespace aclara_meters.view
 
                 Device.BeginInvokeOnMainThread(() =>
                 {
+                    #if DEBUG
+
+                    bottomBar.GetLabelElement("label_read").Text = base.LogAttempts ( mensaje );
+
+                    #else
+
                     bottomBar.GetLabelElement("label_read").Text = mensaje;
+
+                    #endif
                 });
             });
 
@@ -397,14 +420,24 @@ namespace aclara_meters.view
                 }
 
                 listaMTUread.ItemsSource = FinalReadListView;
-                bottomBar.GetLabelElement("label_read").Text = resultMsg;
                 _userTapped = false;
                 bottomBar.GetTGRElement("bg_action_button").NumberOfTapsRequired = 1;
                 ChangeLowerButtonImage(false);
-                ContentNav.IsEnabled = true;
-                backdark_bg.IsVisible = false;
-                indicator.IsVisible = false;
+                ContentNav.IsEnabled           = true;
+                backdark_bg.IsVisible          = false;
+                indicator.IsVisible            = false;
                 background_scan_page.IsEnabled = true;
+
+                #if DEBUG
+
+                bottomBar.GetLabelElement("label_read").Text = base.LogAttempts ( resultMsg );
+                Lexi.Lexi.ShowPopupAttemps ();
+
+                #else
+
+                bottomBar.GetLabelElement("label_read").Text = resultMsg;
+
+                #endif
             }));
         }
 
@@ -415,17 +448,27 @@ namespace aclara_meters.view
             Task.Delay(100).ContinueWith(t =>
                 Device.BeginInvokeOnMainThread(() =>
                 {
-                    MTUDataListView = new List<ReadMTUItem> { };
-                    FinalReadListView = new List<ReadMTUItem> { };
+                    MTUDataListView          = new List<ReadMTUItem> { };
+                    FinalReadListView        = new List<ReadMTUItem> { };
                     listaMTUread.ItemsSource = FinalReadListView;
-                    bottomBar.GetLabelElement("label_read").Text = error.MessageFooter;
-                    _userTapped = false;
+                    _userTapped              = false;
                     bottomBar.GetTGRElement("bg_action_button").NumberOfTapsRequired = 1;
                     ChangeLowerButtonImage(false);
-                    backdark_bg.IsVisible = false;
-                    indicator.IsVisible = false;
+                    backdark_bg.IsVisible          = false;
+                    indicator.IsVisible            = false;
                     background_scan_page.IsEnabled = true;
-                    ContentNav.IsEnabled = true;
+                    ContentNav.IsEnabled           = true;
+
+                    #if DEBUG
+
+                    bottomBar.GetLabelElement("label_read").Text = base.LogAttempts ( error.MessageFooter );
+                    Lexi.Lexi.ShowPopupAttemps ();
+
+                    #else
+
+                    bottomBar.GetLabelElement("label_read").Text = error.MessageFooter;
+
+                    #endif
                 })
             );
         }

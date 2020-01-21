@@ -89,10 +89,8 @@ namespace MTUComm
         private const int WAIT_BEFORE_READ_MTU     = 1000;
         
         /* Constants: LExI commands
-            CMD_ATTEMPTS_ONE - LExI commands that return a list of items should not have multiple attempts = 1
-            CMD_BYTE_RES     - Byte index in the LExI commands response containing the result = 2
+            CMD_BYTE_RES - Byte index in the LExI commands response containing the result = 2
         */
-        private const int CMD_ATTEMPTS_ONE         = 1;
         private const int CMD_BYTE_RES             = 2;
 
         /* Constants: Historical Read ( prev. Data Read )
@@ -538,7 +536,7 @@ namespace MTUComm
             else if ( ! this.global.TimeToSync ||
                       ! this.mtu.TimeToSync )
             {
-                textError = "The MTU does not support for two-way or tag TimeToSync is false in Globa.xml";
+                textError = "The MTU does not support for two-way or tag TimeToSync is false in Global.xml";
                 return false;
             }
 
@@ -1340,9 +1338,8 @@ namespace MTUComm
                         // NOTE: In MTU_Datalogging ( DataRead 3.4 ) indicates that Get repeat command has only two
                         // NOTE: possible responses, but if it is the same as relaunch the last Get next, should be has three
                         fullResponse =
-                            await this.lexi.Write (
+                            await this.lexi.WriteWithoutAttempts (
                                 ( ! retrying ) ? CMD_NEXT_EVENT_LOG : CMD_REPE_EVENT_LOG,
-                                CMD_ATTEMPTS_ONE,
                                 null,
                                 new uint[]{ CMD_NEXT_EVENT_RES_1, CMD_NEXT_EVENT_RES_2 },
                                 new LexiFiltersResponse ( new ( int,int,byte )[] {
@@ -1565,7 +1562,8 @@ namespace MTUComm
                     
                     await Task.Delay ( wait * 1000 );
                     
-                    fail = await regICNotSynced.GetValueFromMtu ();
+                    // Execute the LExI command without attempts, because the sentence is already in a loop
+                    fail = await regICNotSynced.GetValueFromMtu ( false, true );
                 }
                 // Is MTU not synced with DCU yet?
                 while ( fail && ++count <= max );
@@ -1599,7 +1597,7 @@ namespace MTUComm
                     Data.SetTemp ( "ArtificialInstallConfirmation", false );
                 }
 
-                int DcuId = await map.DcuId.GetValueFromMtu();
+                int DcuId = await map.DcuId.GetValueFromMtu ( false, true );
                 Data.SetTemp ( "DcuId", DcuId );
             }
             catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
@@ -1754,9 +1752,8 @@ namespace MTUComm
                     try
                     {
                         // Response: Byte 2 { 0 = Node discovery not initiated, 1 = Node discovery initiated }
-                        fullResponse = await this.lexi.Write (
+                        fullResponse = await this.lexi.WriteWithoutAttempts (
                             CMD_NODE_INIT,
-                            CMD_ATTEMPTS_ONE,
                             data,
                             new uint[] { CMD_NODE_INIT_RES },
                             new LexiFiltersResponse ( new ( int,int,byte )[] {
@@ -1805,9 +1802,8 @@ namespace MTUComm
                         try
                         {
                             // Response: Byte 2 { 0 = The MTU is busy, 1 = The MTU is ready for query }
-                            fullResponse = await this.lexi.Write (
+                            fullResponse = await this.lexi.WriteWithoutAttempts (
                                 CMD_NODE_QUERY,
-                                CMD_ATTEMPTS_ONE,
                                 null,
                                 new uint[] { CMD_NODE_QUERY_RES }, // ACK with response
                                 new LexiFiltersResponse ( new ( int,int,byte )[] {
@@ -1845,9 +1841,8 @@ namespace MTUComm
                         {
                             try
                             {
-                                fullResponse = await this.lexi.Write (
+                                fullResponse = await this.lexi.WriteWithoutAttempts (
                                     CMD_NODE_NEXT,
-                                    CMD_ATTEMPTS_ONE,
                                     null,
                                     new uint[] {
                                         CMD_NODE_NEXT_RES_1,
@@ -1943,8 +1938,8 @@ namespace MTUComm
 
                         bool    isF1;
                         short   bestRssiResponse = -150;
-                        string  freq1wayStr      = await map.Frequency1Way  .GetValue ();
-                        string  freq2wayTxStr    = await map.Frequency2WayTx.GetValue ();
+                        string  freq1wayStr      = await map.Frequency1Way  .GetValue ( false ); // Execute LExI command without attempts
+                        string  freq2wayTxStr    = await map.Frequency2WayTx.GetValue ( false );
                         // NOTE: Parsing to double is important to take into account the separator symbol ( . or , ),
                         // NOTE: because parse "123,456" returns "123456" and use CultureInfo.InvariantCulture is not an universal solution
                         CultureInfo usCulture    = new CultureInfo ( "en-US" );
@@ -3873,7 +3868,7 @@ namespace MTUComm
             byte[] sha    = new byte[ regAesKey.sizeGet ]; // 32 bytes
             
             // Checks if the encryption index has reached the byte maximum value ( 255 )
-            if ( await regEncryIndex.GetValue () >= byte.MaxValue )
+            if ( await regEncryIndex.GetValueFromMtu () >= byte.MaxValue )
                 throw new EncryptionIndexLimitReachedException ();
 
             try

@@ -322,7 +322,7 @@ namespace aclara_meters.view
                           backdark_bg.IsVisible = false;
                           indicator.IsVisible = false;
                           background_scan_page.IsEnabled = true;
-                          bottomBar.GetLabelElement("label_read").Text = "Press Button to Start";
+                          bottomBar.GetLabelElement("label_read").Text = "Press Button to START";
 
                             #region Port 2 Buttons Listener
 
@@ -421,9 +421,17 @@ namespace aclara_meters.view
                  hasMeterPortTwo &&
                  currentMtu.Port2.IsForEncoderOrEcoder)
                 Device.BeginInvokeOnMainThread(() =>
-              {
-                  bottomBar.GetLabelElement("label_read").Text = AUTO_DETECTING;
-              });
+            {
+                #if DEBUG
+
+                bottomBar.GetLabelElement("label_read").Text = base.LogAttempts ( AUTO_DETECTING );
+
+                #else
+
+                bottomBar.GetLabelElement("label_read").Text = AUTO_DETECTING;
+
+                #endif
+            });
 
             // No RDD
             if (!this.currentMtu.Port1.IsSetFlow)
@@ -1407,14 +1415,6 @@ namespace aclara_meters.view
         #endregion
 
         #region Status message
-
-        public void SetUserInterfaceMTUStatus(string statusMsg)
-        {
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                bottomBar.GetLabelElement("label_read").Text = statusMsg;
-            });
-        }
 
         public string GetStringFromMTUStatus(MTUStatus mtuStatus, int time)
         {
@@ -3931,7 +3931,13 @@ namespace aclara_meters.view
         }
 
         private async Task AddMtu_Action ()
-        { 
+        {
+            #if DEBUG
+
+            Lexi.Lexi.ResetAttemptsCounter ();
+
+            #endif
+
             #region Get values from form
 
             Mtu mtu = this.add_mtu.CurrentMtu;
@@ -4334,8 +4340,16 @@ namespace aclara_meters.view
 
             Device.BeginInvokeOnMainThread ( () =>
             {
+                #if DEBUG
+
+                bottomBar.GetLabelElement("label_read").Text = base.LogAttempts ( mensaje );
+
+                #else
+
                 if ( ! string.IsNullOrEmpty ( mensaje ) )
                     bottomBar.GetLabelElement("label_read").Text = mensaje;
+
+                #endif
             });
         }
         
@@ -4516,18 +4530,28 @@ namespace aclara_meters.view
                 }
 
                 _userTapped = false;
-                bottomBar.GetTGRElement("bg_action_button").NumberOfTapsRequired = 1;
-                ChangeLowerButtonImage(false);
-                backdark_bg.IsVisible = false;
-                indicator.IsVisible = false;
-                bottomBar.GetLabelElement("label_read").Text = "Successful MTU write";
-                ContentNav.IsEnabled = true;
+                bottomBar.GetTGRElement ( "bg_action_button" ).NumberOfTapsRequired = 1;
+                ChangeLowerButtonImage ( false );
+                backdark_bg.IsVisible          = false;
+                indicator.IsVisible            = false;
+                ContentNav.IsEnabled           = true;
                 background_scan_page.IsEnabled = true;
-                ReadMTUChangeView.IsVisible = false;
-                listaMTUread.IsVisible = true;
-                listaMTUread.ItemsSource = FinalReadListView;
+                ReadMTUChangeView.IsVisible    = false;
+                listaMTUread.IsVisible         = true;
+                listaMTUread.ItemsSource       = FinalReadListView;
 
-               #region Hide button
+                #if DEBUG
+
+                bottomBar.GetLabelElement("label_read").Text = base.LogAttempts ( "Successful MTU Write" );
+                Lexi.Lexi.ShowPopupAttemps ();
+
+                #else
+
+                bottomBar.GetLabelElement("label_read").Text = "Successful MTU Write";
+
+                #endif
+
+                #region Hide button
 
                 bottomBar.GetImageElement("bg_action_button_img").IsEnabled = false;
                 bottomBar.GetImageElement("bg_action_button_img").Opacity = 0;
@@ -4546,11 +4570,21 @@ namespace aclara_meters.view
                     _userTapped = false;
                     bottomBar.GetTGRElement("bg_action_button").NumberOfTapsRequired = 1;
                     ChangeLowerButtonImage(false);
-                    backdark_bg.IsVisible = false;
-                    indicator.IsVisible = false;
-                    bottomBar.GetLabelElement("label_read").Text = error.MessageFooter;
+                    backdark_bg.IsVisible          = false;
+                    indicator.IsVisible            = false;
                     background_scan_page.IsEnabled = true;
-                    ContentNav.IsEnabled = true;
+                    ContentNav.IsEnabled           = true;
+
+                    #if DEBUG
+
+                    bottomBar.GetLabelElement("label_read").Text = base.LogAttempts ( error.MessageFooter );
+                    Lexi.Lexi.ShowPopupAttemps ();
+
+                    #else
+
+                    bottomBar.GetLabelElement("label_read").Text = error.MessageFooter;
+
+                    #endif
                 })
             );
         }

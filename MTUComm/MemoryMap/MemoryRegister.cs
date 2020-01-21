@@ -145,6 +145,7 @@ namespace MTUComm.MemoryMap
         public bool finalRead;
         private Lexi.Lexi lexi;
         public byte[] lastRead;
+        public bool onlyOneLexiAttempt { private set; get; }
 
         #endregion
 
@@ -415,14 +416,15 @@ namespace MTUComm.MemoryMap
         /// <seealso cref="ValueByteArrayRaw"/>
         /// <seealso cref="GetValue"/>
         public async Task<dynamic> GetValueFromMtu (
-            bool returnByteArray = false )
+            bool returnByteArray = false,
+            bool onlyOneLexiAttempt = false )
         {
             Utils.PrintDeep ( Environment.NewLine + "------LOAD_FROM_MTU------" );
             Utils.PrintDeep ( "Register -> GetValueFromMtu -> " + this.id + " [ Return byte array: " + returnByteArray + " ]" );
         
             // Reset flag that will be used in funcGet to invoke funcGetFromMtu
             this.readedFromMtu = false;
-            var result = await this.GetValue ();
+            var result = await this.GetValue ( onlyOneLexiAttempt );
             
             Utils.PrintDeep ( "---LOAD_FROM_MTU_FINISH--" + Environment.NewLine );
             
@@ -446,8 +448,11 @@ namespace MTUComm.MemoryMap
         /// <seealso cref="ValueByteArrayRaw"/>
         /// <seealso cref="GetValueFromMtu(bool)"/>
         /// <seealso cref="GetValueByteArray(bool)"/>
-        public async Task<T> GetValue ()
+        public async Task<T> GetValue (
+            bool onlyOneLexiAttempt = false )
         {
+            this.onlyOneLexiAttempt = onlyOneLexiAttempt;
+
             // If register has not customized get method, use normal/direct get raw value
             if ( ! this.HasCustomMethod_Get )
                 return await this.funcGet ();

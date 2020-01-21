@@ -2,7 +2,7 @@
 using System.Xml.Serialization;
 using Library.Exceptions;
 
-namespace Xml
+namespace Library
 {
     public class Error : ICloneable
     {

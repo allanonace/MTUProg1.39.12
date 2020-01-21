@@ -20,7 +20,7 @@ using nexus.protocols.ble.scan;
 using Plugin.Settings;
 using Xamarin.Forms;
 
-using Error = Xml.Error;
+using Error = Library.Error;
 
 namespace aclara_meters.view
 {

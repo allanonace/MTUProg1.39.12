@@ -469,7 +469,11 @@ namespace MTUComm.MemoryMap
                     byte[] read = default ( byte[] );
                     
                     if ( ! memoryRegister.finalRead )
-                         read = await lexi.Read ( ( uint )memoryRegister.address, ( uint )memoryRegister.sizeGet );
+                    {
+                        if ( ! memoryRegister.onlyOneLexiAttempt )
+                             read = await lexi.Read ( ( uint )memoryRegister.address, ( uint )memoryRegister.sizeGet );
+                        else read = await lexi.ReadWithoutAttempts ( ( uint )memoryRegister.address, ( uint )memoryRegister.sizeGet );
+                    }
                     else read = this.memory.Skip ( memoryRegister.address ).Take ( memoryRegister.sizeGet ).ToArray ();
 
                     memoryRegister.finalRead = false;

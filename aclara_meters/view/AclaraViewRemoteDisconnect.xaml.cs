@@ -116,7 +116,7 @@ namespace aclara_meters.view
                             backdark_bg.IsVisible = false;
                             indicator.IsVisible = false;
                             background_scan_page.IsEnabled = true;
-                            bottomBar.GetLabelElement("label_read").Text = "Press Button to Start";
+                            bottomBar.GetLabelElement("label_read").Text = "Press Button to START";
                    
                         })
                     );
@@ -819,7 +819,13 @@ namespace aclara_meters.view
         }
 
         private async Task ValveOperation_Action ()
-        { 
+        {
+            #if DEBUG
+
+            Lexi.Lexi.ResetAttemptsCounter ();
+
+            #endif
+
             #region Get values from form
 
             Data.SetTemp ( "WorkOrder",   tbx_FieldOrder.Text );
@@ -851,8 +857,16 @@ namespace aclara_meters.view
 
             Device.BeginInvokeOnMainThread ( () =>
             {
+                #if DEBUG
+
+                bottomBar.GetLabelElement("label_read").Text = base.LogAttempts ( mensaje );
+
+                #else
+
                 if ( ! string.IsNullOrEmpty ( mensaje ) )
                     bottomBar.GetLabelElement("label_read").Text = mensaje;
+
+                #endif
             });
         }
 
@@ -987,16 +1001,26 @@ namespace aclara_meters.view
                 _userTapped = false;
                 bottomBar.GetTGRElement("bg_action_button").NumberOfTapsRequired = 1;
                 ChangeLowerButtonImage(false);
-                backdark_bg.IsVisible = false;
-                indicator.IsVisible = false;
-                bottomBar.GetLabelElement("label_read").Text = "Successful Valve Operation";
-                ContentNav.IsEnabled = true;
+                backdark_bg.IsVisible          = false;
+                indicator.IsVisible            = false;
+                ContentNav.IsEnabled           = true;
                 background_scan_page.IsEnabled = true;
-                ReadMTUChangeView.IsVisible = false;
-                listaMTUread.IsVisible = true;
-                listaMTUread.ItemsSource = FinalReadListView;
+                ReadMTUChangeView.IsVisible    = false;
+                listaMTUread.IsVisible         = true;
+                listaMTUread.ItemsSource       = FinalReadListView;
 
-               #region Hide button
+                #if DEBUG
+
+                bottomBar.GetLabelElement("label_read").Text = base.LogAttempts ( "Successful Valve Operation" );
+                Lexi.Lexi.ShowPopupAttemps ();
+
+                #else
+
+                bottomBar.GetLabelElement("label_read").Text = "Successful Valve Operation";
+
+                #endif
+
+                #region Hide button
 
                 bottomBar.GetImageElement("bg_action_button_img").IsEnabled = false;
                 bottomBar.GetImageElement("bg_action_button_img").Opacity = 0;
@@ -1015,11 +1039,21 @@ namespace aclara_meters.view
                     _userTapped = false;
                     bottomBar.GetTGRElement("bg_action_button").NumberOfTapsRequired = 1;
                     ChangeLowerButtonImage(false);
-                    backdark_bg.IsVisible = false;
-                    indicator.IsVisible = false;
-                    bottomBar.GetLabelElement("label_read").Text = error.MessageFooter;
+                    backdark_bg.IsVisible          = false;
+                    indicator.IsVisible            = false;
                     background_scan_page.IsEnabled = true;
-                    ContentNav.IsEnabled = true;
+                    ContentNav.IsEnabled           = true;
+
+                    #if DEBUG
+
+                    bottomBar.GetLabelElement("label_read").Text = base.LogAttempts ( error.MessageFooter );
+                    Lexi.Lexi.ShowPopupAttemps ();
+
+                    #else
+
+                    bottomBar.GetLabelElement("label_read").Text = error.MessageFooter;
+
+                    #endif
                 })
             );
         }

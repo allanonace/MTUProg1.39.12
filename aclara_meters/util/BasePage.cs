@@ -1,10 +1,4 @@
-﻿// Copyright M. Griffie <nexus@nexussays.com>
-//
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at https://mozilla.org/MPL/2.0/.
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,7 +6,7 @@ using Xamarin.Forms;
 using MTUComm;
 using Library;
 
-using ActionType = MTUComm.Action.ActionType;
+using ActionType       = MTUComm.Action.ActionType;
 using ValidationResult = MTUComm.MTUComm.ValidationResult;
 
 namespace aclara_meters.util
@@ -39,19 +33,25 @@ namespace aclara_meters.util
             #endif
 
             // Reset previous main action reference
-            Singleton.Remove<MTUComm.Action>();
+            Singleton.Remove<MTUComm.Action> ();
         }
 
-        protected override void OnAppearing()
+        protected override void OnAppearing ()
         {
-            base.OnAppearing();
-            (BindingContext as IBaseViewModel)?.OnAppearing();
+            base.OnAppearing ();
+            ( BindingContext as IBaseViewModel )?.OnAppearing ();
+
+            #if DEBUG
+
+            Lexi.Lexi.ResetAttemptsCounter ();
+
+            #endif
         }
         
-        protected override void OnDisappearing()
+        protected override void OnDisappearing ()
         {
-            base.OnDisappearing();
-            (BindingContext as IBaseViewModel)?.OnDisappearing();
+            base.OnDisappearing ();
+            ( BindingContext as IBaseViewModel )?.OnDisappearing ();
         }
 
         protected async void AutoFillTextbox ( object sender, EventArgs e )
@@ -151,6 +151,15 @@ namespace aclara_meters.util
             {
                 return ValidationResult.EXCEPTION;
             }
+        }
+    
+        protected string LogAttempts (
+            string message )
+        {
+            return
+                "E."  + Lexi.Lexi.NumErrors  .ToString ( "000" ) +
+                " A." + Lexi.Lexi.NumAttempts.ToString ( "000" ) +
+                ( ( ! string.IsNullOrEmpty ( message ) ) ? " | " + message : string.Empty );
         }
     }
 }

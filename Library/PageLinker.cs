@@ -2,10 +2,8 @@
 using System.Threading.Tasks;
 using Acr.UserDialogs;
 using Xamarin.Forms;
-using Xml;
-using Library;
 
-namespace MTUComm
+namespace Library
 {
     public class PageLinker
     {
@@ -76,7 +74,7 @@ namespace MTUComm
             await GetInstance ()._ShowAlert ( title, message, btnText, kill );
         }
 
-        public async static Task ShowAlert (
+        public async static Task ShowErrorAlert (
             string title,
             Error  error,
             bool   kill    = false,

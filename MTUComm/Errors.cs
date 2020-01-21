@@ -495,7 +495,7 @@ namespace MTUComm
         {
             Error error = this.AddErrorByException ( e, portIndex );
 
-            PageLinker.ShowAlert ( ERROR_INFO, error, kill );
+            PageLinker.ShowErrorAlert ( ERROR_INFO, error, kill );
             
             // Method can be invoked when Configuration is not instantiated yet
             if ( Singleton.Has<Configuration> () )
@@ -515,7 +515,7 @@ namespace MTUComm
             if ( this.errorsToLog.Count > 0 )
             {
                 Error error = this.errorsToLog[ this.errorsToLog.Count - 1 ];
-                PageLinker.ShowAlert ( ERROR_INFO, this.lastError );
+                PageLinker.ShowErrorAlert ( ERROR_INFO, this.lastError );
                 
                 lastErrorLogGenerated = this.logger.Error ();
 
@@ -530,7 +530,7 @@ namespace MTUComm
             Error error = this.GetErrorByException ( e );
             error.Id = -1;
             
-            await PageLinker.ShowAlert ( ERROR_INFO, error );
+            await PageLinker.ShowErrorAlert ( ERROR_INFO, error );
         }
 
         #endregion

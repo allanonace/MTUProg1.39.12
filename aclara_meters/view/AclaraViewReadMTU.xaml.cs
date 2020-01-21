@@ -608,6 +608,12 @@ namespace aclara_meters.view
 
         private async Task ThreadProcedureMTUCOMMAction()
         {
+            #if DEBUG
+
+            Lexi.Lexi.ResetAttemptsCounter ();
+
+            #endif
+
             //Create Ation when opening Form
             MTUComm.Action add_mtu = new MTUComm.Action (
                 FormsApp.ble_interface,
@@ -621,7 +627,17 @@ namespace aclara_meters.view
                 Device.BeginInvokeOnMainThread ( () =>
                 {
                     if ( ! string.IsNullOrEmpty ( mensaje ) )
+                    {
+                        #if DEBUG
+
+                        bottomBar.GetLabelElement("label_read").Text = base.LogAttempts ( mensaje );
+
+                        #else
+
                         bottomBar.GetLabelElement("label_read").Text = mensaje;
+
+                        #endif
+                    }
                 });
             });
 
@@ -746,7 +762,17 @@ namespace aclara_meters.view
             await Task.Delay(100).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
-                bottomBar.GetLabelElement("label_read").Text = "Successful MTU read";
+                #if DEBUG
+
+                bottomBar.GetLabelElement("label_read").Text = base.LogAttempts ( "Successful MTU Read" );
+                Lexi.Lexi.ShowPopupAttemps ();
+
+                #else
+
+                bottomBar.GetLabelElement("label_read").Text = "Successful MTU Read";
+
+                #endif
+
                 this.EnableInteraction ();
             }));
         }
@@ -760,9 +786,19 @@ namespace aclara_meters.view
                 {
                     MTUDataListView          = new List<ReadMTUItem> { };
                     FinalReadListView        = new List<ReadMTUItem> { };
-                    bottomBar.GetLabelElement("label_read").Text          = error.MessageFooter;
                     listaMTUread.ItemsSource = FinalReadListView;
                     this.EnableInteraction ();
+
+                    #if DEBUG
+
+                    bottomBar.GetLabelElement("label_read").Text = base.LogAttempts ( error.MessageFooter );
+                    Lexi.Lexi.ShowPopupAttemps ();
+
+                    #else
+
+                    bottomBar.GetLabelElement("label_read").Text = error.MessageFooter;
+
+                    #endif
                 }));
         }
         
