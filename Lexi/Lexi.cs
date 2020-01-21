@@ -504,21 +504,23 @@ namespace Lexi
                 }
                 catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
                 {
-                    #if DEBUG
+                    if ( ++attempts <= maxAttempts )
+                    {
+                        #if DEBUG
 
-                    if ( attempts == 0 )
-                         Lexi.AddNewError ();
-                    else Lexi.AddAttempt ();
+                        if ( attempts == 0 )
+                             Lexi.AddNewError ();
+                        else Lexi.AddAttempt ();
 
-                    #endif
+                        #endif
 
-                    if ( ++attempts < maxAttempts )
                         await Task.Delay ( WAIT_BTW_LEXI_ATTEMPTS * 1000 );
+                    }
                     else
                         throw e;                  
                 }
             }
-            while ( attempts < maxAttempts );
+            while ( attempts <= maxAttempts );
 
             return result;
 
@@ -768,27 +770,29 @@ namespace Lexi
                 }
                 catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
                 {
-                    #if DEBUG
-
-                    if ( attempts == 0 )
-                         Lexi.AddNewError ();
-                    else Lexi.AddAttempt ();
-
-                    #endif
-
                     // NOTE: Avoiding ACK is due to the special case related to the new encryption process, where
                     // NOTE: STAR Programmer does not take into account whether LExI commands work or not ( correct ACK = 0x06 )
                     if ( avoidACK &&
                          Utils.IsSubclassOfGeneric ( typeof ( OwnSpecialExceptionsBase<> ), e.GetType () ) )
                         return ( ( OwnSpecialExceptionsBase<LexiWriteResult> ) e ).Response;
 
-                    else if ( ++attempts < maxAttempts )
+                    else if ( ++attempts <= maxAttempts )
+                    {
+                        #if DEBUG
+
+                        if ( attempts == 0 )
+                             Lexi.AddNewError ();
+                        else Lexi.AddAttempt ();
+
+                        #endif
+
                         await Task.Delay ( WAIT_BTW_LEXI_ATTEMPTS * 1000 );
+                    }
                     else
                         throw e;                  
                 }
             }
-            while ( attempts < maxAttempts );
+            while ( attempts <= maxAttempts );
 
             return result;
 

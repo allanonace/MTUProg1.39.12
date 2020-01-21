@@ -1288,12 +1288,12 @@ namespace MTUComm
             ActionResult result = new ActionResult ( actionType );
             InterfaceParameters[] parameters = this.config.getAllParamsFromInterface ( mtu, actionType );
             
-            int retryTotal = 3;
-            int retryIndex = retryTotal;
+            //int retryTotal = 3;
+            //int retryIndex = retryTotal;
             string sourceWhere = string.Empty;
             foreach ( InterfaceParameters parameter in parameters )
             {
-                ATTEMPT:
+                //ATTEMPT:
 
                 try
                 {
@@ -1371,6 +1371,7 @@ namespace MTUComm
                     Utils.Print ( "Error: Interface parameter '" + parameter.Name + "'" +
                         ( ( string.IsNullOrEmpty ( sourceWhere ) ? string.Empty : " [ Source: " + sourceWhere + " ]" ) ) );
 
+                    /*
                     if ( --retryIndex >= 0 )
                     {
                         Utils.Print ( "Error: Interface parameter -> RETRY #" + ( retryTotal - retryIndex ) );
@@ -1379,10 +1380,11 @@ namespace MTUComm
                         goto ATTEMPT;
                     }
                     else
-                        throw new PreparingLogInterfaceException ();
+                    */
+                    throw new PreparingLogInterfaceException ();
                 }
 
-                retryIndex = retryTotal;
+                //retryIndex = retryTotal;
             }
             
             // Add additional parameters ( from script ) for all actions except for the Add
