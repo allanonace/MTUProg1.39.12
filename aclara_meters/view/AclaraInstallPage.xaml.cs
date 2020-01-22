@@ -63,7 +63,8 @@ namespace aclara_meters.view
                         GenericUtilsClass.SetInstallMode("None");
                         GenericUtilsClass.DeleteConfigFiles(Mobile.ConfigPath);
                         await DisplayAlert("Attention",
-                            "There is a problem with the configuration files downloaded from SFTP, some of them are corrupted. Contact your IT administrator", "OK");                        
+                            "There is a problem with the configuration files downloaded from SFTP, "+ Environment.NewLine +
+                            "some of them are corrupted or maybe some MTUs don't have port type defined. Contact your IT administrator", "OK");                        
                     }
                     return;
 
