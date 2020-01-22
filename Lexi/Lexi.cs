@@ -578,7 +578,7 @@ namespace Lexi
                             Utils.PrintDeep ( "Lexi.Read -> BytesToRead: " + num );
 
                             if ( num <= headerOffset )
-                                 Utils.PrintDeep ( "Lexi.Write -> Only or partially the Echo" );
+                                 Utils.PrintDeep ( "Lexi.Write -> Only or partially the Echo ( " + num + " <= " + headerOffset + " )" );
                             else Utils.PrintDeep ( "Lexi.Write -> The number of bytes of data is less than expected" );
 
                             throw new TimeoutException ();

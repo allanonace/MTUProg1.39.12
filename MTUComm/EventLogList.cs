@@ -137,7 +137,7 @@ namespace MTUComm
                     // Repeating entry
                     if ( this.entries.Count >= evnt.Index )
                     {
-                        Utils.Print ( "Node Discovery: Processing already retrieved response/node" );
+                        Utils.Print ( "Data Read: Processing already retrieved response/log" );
 
                         // Clear previous responses
                         this.entries.RemoveRange ( ( int )evnt.Index - 1, this.entries.Count - ( ( int )evnt.Index - 1 ) );
