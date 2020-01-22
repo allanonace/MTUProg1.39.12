@@ -291,7 +291,7 @@ namespace Lexi
             LEXI_ATTEMPTS_N        - Number of attempts to perform an LExI write|read before returning an error = 2
             WAIT_BTW_LEXI_ATTEMPTS - Waiting time before making a new LExI write|read attempt after an error = 1
         */
-        private const int LEXI_ATTEMPTS_ONE      = 1;
+        private const int LEXI_ATTEMPTS_NONE     = 0;
         private const int LEXI_ATTEMPTS_N        = 4;
         public  const int WAIT_BTW_LEXI_ATTEMPTS = 1;
 
@@ -427,7 +427,7 @@ namespace Lexi
         {
             return await this.Read (
                 address,
-                LEXI_ATTEMPTS_ONE,
+                LEXI_ATTEMPTS_NONE,
                 data,
                 isPartOfWrite );
         }
@@ -490,7 +490,7 @@ namespace Lexi
 
             // Try the specified time of attempts
             byte[] result = null;
-            if ( maxAttempts <= 0 ) maxAttempts = LEXI_ATTEMPTS_N;
+            if ( maxAttempts < 0 ) maxAttempts = LEXI_ATTEMPTS_N;
             int attempts = 0;
             do
             {
@@ -633,7 +633,7 @@ namespace Lexi
         {
             return await this.Write (
                 addressOrLexiCmd,
-                LEXI_ATTEMPTS_ONE,
+                LEXI_ATTEMPTS_NONE,
                 data,
                 bytesResponse,
                 filtersResponse,
@@ -669,7 +669,7 @@ namespace Lexi
         {
             return await this.Write (
                 addressOrLexiCmd,
-                LEXI_ATTEMPTS_ONE,
+                LEXI_ATTEMPTS_NONE,
                 data,
                 bytesResponse,
                 filtersResponse,
@@ -748,7 +748,7 @@ namespace Lexi
 
             // Try the specified time of attempts
             LexiWriteResult result = null;
-            if ( maxAttempts <= 0 ) maxAttempts = LEXI_ATTEMPTS_N;
+            if ( maxAttempts < 0 ) maxAttempts = LEXI_ATTEMPTS_N;
             int attempts = 0;
             do
             {
