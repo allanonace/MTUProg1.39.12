@@ -947,7 +947,7 @@ namespace Lexi
                     else throw e;
                 }
                 
-                Utils.Print ( "Lexi.Read.. BytesRead: " + bytesRead + " / " + rawBuffer.Length );
+                Utils.PrintDeep ( "Lexi.Read.. BytesRead: " + bytesRead + " / " + rawBuffer.Length );
                 
                 Utils.PrintDeep ( "------BUFFER_FINISH------" );
 
@@ -957,7 +957,7 @@ namespace Lexi
                 byte[] response = new byte[ 2 ];
                 Array.Copy ( rawBuffer, responseOffset, response, 0, response.Length );
                 
-                Utils.Print ( "Lexi.Write.." +
+                Utils.PrintDeep ( "Lexi.Write.." +
                     " RawBuffer " + Utils.ByteArrayToString ( rawBuffer ) + " | " +
                     ( ( ! avoidACK ) ? "ACK " + Utils.ByteArrayToString ( response ) : "Avoid ACK" ) );
 

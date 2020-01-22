@@ -141,10 +141,10 @@ namespace MTUComm
 
                         // Clear previous responses
                         this.entries.RemoveRange ( ( int )evnt.Index - 1, this.entries.Count - ( ( int )evnt.Index - 1 ) );
-                        this.entries[ ( int )evnt.Index - 1 ] = evnt;
                     }
+
                     // New entry
-                    else this.entries.Add ( evnt );
+                    this.entries.Add ( evnt );
                     break;
             }
 
