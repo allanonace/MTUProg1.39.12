@@ -508,7 +508,7 @@ namespace Lexi
                     {
                         #if DEBUG
 
-                        if ( attempts == 0 )
+                        if ( attempts == 1 )
                              Lexi.AddNewError ();
                         else Lexi.AddAttempt ();
 
@@ -780,7 +780,7 @@ namespace Lexi
                     {
                         #if DEBUG
 
-                        if ( attempts == 0 )
+                        if ( attempts == 1 )
                              Lexi.AddNewError ();
                         else Lexi.AddAttempt ();
 
