@@ -296,10 +296,10 @@ namespace MTUComm
 
                         // Clear previous responses
                         this.entries.RemoveRange ( ( int )node.Index - 1, this.entries.Count - ( ( int )node.Index - 1 ) );
-                        this.entries[ ( int )node.Index - 1 ] = node;
                     }
+
                     // New entry
-                    else this.entries.Add ( node );
+                    this.entries.Add ( node );
                     break;
             }
 

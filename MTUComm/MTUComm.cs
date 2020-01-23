@@ -1296,11 +1296,15 @@ namespace MTUComm
                 DateTime start = end.Subtract ( new TimeSpan ( int.Parse ( Data.Get.NumOfDays ), 0, 0, 0 ) );
                 start = new DateTime ( start.Year, start.Month, start.Day, 0, 0, 0 );
 
+                Utils.Print ( "DataRead: From " + start + " to " + end );
+
                 byte[] data = new byte[ 10 ]; // 1+1+4x2
                 data[ 0 ] = ( byte )LogFilterMode.Match;    // Only return logs that matches the Log Entry Filter Field specified
                 data[ 1 ] = ( byte )LogEntryType.MeterRead; // The log entry filter to use
                 Array.Copy ( Utils.GetTimeSinceDate ( start ), 0, data, 2, 4 ); // Start time
                 Array.Copy ( Utils.GetTimeSinceDate ( end   ), 0, data, 6, 4 ); // Stop time
+
+                Utils.Print ( "Data Read: Initialize" );
 
                 try
                 {
@@ -1320,6 +1324,8 @@ namespace MTUComm
                 }
 
                 await Task.Delay ( WAIT_BEFORE_LOGS );
+
+                Utils.Print ( "Data Read: Requesting logs..." );
 
                 // Recover all logs registered in the MTU for the specified date range
                 bool retrying        = false;
@@ -1361,7 +1367,7 @@ namespace MTUComm
 
                         await Task.Delay ( WAIT_BTW_LOG_ERROR );
 
-                        Utils.Print ( "DataRead: Error trying to recover the next event [ Attempts " + countAttemptsEr + " / " + maxAttemptsEr + " ]" );
+                        Utils.Print ( "Data Read: Error trying to recover the next event [ Attempts " + countAttemptsEr + " / " + maxAttemptsEr + " ]" );
 
                         // Try one more time
                         Errors.AddError ( new AttemptNotAchievedGetEventsLogException () );
@@ -1394,10 +1400,12 @@ namespace MTUComm
                     {
                         // Finish because the MTU has not event logs for specified date range
                         case EventLogQueryResult.Empty:
+                            Utils.Print ( "Data Read: Empty" );
                             goto BREAK;
 
                         // Try one more time to recover an event log
                         case EventLogQueryResult.Busy:
+                            Utils.Print ( "Data Read: Busy" );
                             if ( ++countAttempts > maxAttempts )
                                 throw new MtuIsBusyToGetEventsLogException ();
                             else
@@ -1411,6 +1419,7 @@ namespace MTUComm
 
                         // Wait a bit and try to read/recover the next log
                         case EventLogQueryResult.NextRead:
+                            Utils.Print ( "Data Read: Next" );
                             OnProgress ( this, new Delegates.ProgressArgs ( "HR: Requesting logs... " + queryResult.Index + "/" + eventLogList.TotalEntries ) );
                             
                             await Task.Delay ( WAIT_BTW_LOGS );
@@ -1420,6 +1429,7 @@ namespace MTUComm
 
                         // Was last event log
                         case EventLogQueryResult.LastRead:
+                            Utils.Print ( "Data Read: Last" );
                             OnProgress ( this, new Delegates.ProgressArgs ( "HR: All logs requested" ) );
                             goto BREAK; // Exit from infinite while
                     }
@@ -1431,7 +1441,7 @@ namespace MTUComm
 
                 await this.CheckIsTheSameMTU ();
 
-                Utils.Print ( "DataRead Finished: " + eventLogList.Count );
+                Utils.Print ( "Data Read Finished: " + eventLogList.Count );
 
                 // It's just an informative pop-up, not an error
                 if ( eventLogList.Count <= 0 )
