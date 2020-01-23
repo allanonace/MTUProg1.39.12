@@ -105,6 +105,10 @@
 		<Mtu id="215" />
 		<Mtu id="216" />
 		<Mtu id="217" />
+    <Mtu id="218" />
+    <Mtu id="219" />
+    <Mtu id="220" />
+    <Mtu id="221" />
 	</MtuInterface>
 
 	<Interface family="31xx32xx" memorysize="320">
