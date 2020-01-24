@@ -433,6 +433,8 @@ namespace MTUComm.MemoryMap
             base.AddMethod ( METHODS_GET_PREFIX + memoryRegister.id,
                 new Func<Task<T>>( async () =>
                 {
+                    T result;
+
                     // The register has not be loaded yet from the MTU or is a
                     // readonly registers that in any moment could change their value
                     if ( ! this.readFromMtuOnlyOnce &&       // Always for not read yet or readonly registers
@@ -440,12 +442,18 @@ namespace MTUComm.MemoryMap
                            ! memoryRegister.write ) ||
                          this.readFromMtuOnlyOnce &&
                          ! memoryRegister.readedFromMtu )    // Only the first time for not read yet registers
-                        return await memoryRegister.funcGetFromMtu ();
+                    {
+                        result = await memoryRegister.funcGetFromMtu ();
+
+                        Utils.Print ( "Map -> Value: " + memoryRegister.id + " = " + result );
+
+                        return result;
+                    }
 
                     // Get value from local memory map ( not using/reading the MTU )
-                    T result = this.PropertyGet_Logic ( memoryRegister );
+                    result = this.PropertyGet_Logic ( memoryRegister );
 
-                    Utils.PrintDeep ( "Map -> Value cache: " + memoryRegister.id + " = " + result );
+                    Utils.Print ( "Map -> Value cache: " + memoryRegister.id + " = " + result );
 
                     return result;
                 }));

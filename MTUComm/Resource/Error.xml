@@ -10,7 +10,7 @@
     <Error id="101" message="Puck can't communicate with MTU" footer="Puck comm." />
     <Error id="102" message="Puck can't communicate with MTU after has completed writing process" footer="Puck comm. after writing" />
     <Error id="103" message="The Mtu.xml file does no contain the MTU ID specified" footer="MTU not in Mtu.xml" />
-    <Error id="104" message="Trying to start the MeterRead events log query" footer="HR not started" />
+    <Error id="104" message="Historical Read process can't be performed because initialization didn't work" footer="HR not started" />
     <Error id="105" message="Historical Read process has failed trying to recover data from the MTU" /> <!-- footer not necessary -->
     <Error id="106" message="Historical Read process can't be performed because the MTU is busy" footer="MTU is busy" />
     <Error id="107" message="Historical Read process can't be performed after having tried it several times" footer="HR not completed" />

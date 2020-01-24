@@ -343,7 +343,7 @@ namespace MTUComm
         {
             this.configuration = configuration;
             this.global = this.configuration.Global;
-            lexi = new Lexi.Lexi(serial, Data.Get.IsIOS ? 10000 : 20000 );
+            lexi = new Lexi.Lexi ( serial, Data.Get.IsIOS ? 10000 : 20000 );
             
             Singleton.Set = lexi;
         }
@@ -1326,11 +1326,11 @@ namespace MTUComm
                 await Task.Delay ( WAIT_BEFORE_LOGS );
 
                 Utils.Print ( "Data Read: Requesting logs..." );
-
+ 
                 // Recover all logs registered in the MTU for the specified date range
                 bool retrying        = false;
                 int  maxAttempts     = ( Data.Get.IsFromScripting ) ? 20 : 5;
-                int  maxAttemptsEr   = 2; // maxAttempts is for when the Mtu is busy and maxAttemptsEr for exceptions ( LExI,... )
+                int  maxAttemptsEr   = 4; // maxAttempts is for when the Mtu is busy and maxAttemptsEr for exceptions ( LExI,... )
                 int  countAttempts   = 0;
                 int  countAttemptsEr = 0;
                 EventLogList eventLogList = new EventLogList ( start, end, ( LogFilterMode )data[ 0 ], ( LogEntryType )data[ 1 ] );
@@ -1422,7 +1422,7 @@ namespace MTUComm
                             Utils.Print ( "Data Read: Next" );
                             OnProgress ( this, new Delegates.ProgressArgs ( "HR: Requesting logs... " + queryResult.Index + "/" + eventLogList.TotalEntries ) );
                             
-                            await Task.Delay ( WAIT_BTW_LOGS );
+                            //await Task.Delay ( WAIT_BTW_LOGS );
                             countAttempts = 0; // Reset accumulated fails after reading ok
                             retrying      = false; // And use Get Next Event Log Response command
                             break;

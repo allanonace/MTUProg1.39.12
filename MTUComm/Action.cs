@@ -11,6 +11,8 @@ using Xml;
 using Library.Exceptions;
 using System.IO;
 
+using System.Diagnostics;
+
 using NodeDiscoveryResult = MTUComm.MTUComm.NodeDiscoveryResult;
 using ValidationResult = MTUComm.MTUComm.ValidationResult;
 using FIELD = MTUComm.actions.AddMtuForm.FIELD;
@@ -76,10 +78,11 @@ namespace MTUComm
         /// </summary>
         private class ConditionObjet
         {
-            public String CondConcatenate { get; private set; }
-            public String CondOperation  { get; private set; }
-            public String Key        { get; private set; } // Type/Class.Property
-            public String Value      { get; private set; }
+            public string CondConcatenate { get; private set; }
+            public string CondOperation  { get; private set; }
+            public string Key        { get; private set; } // Type/Class.Property
+            public string Value      { get; private set; }
+            public string CondFull   { get; private set; }
 
             public bool IsAnd        { get { return this.CondConcatenate.Equals ( IFACE_AND ); } }
             public bool IsOr         { get { return this.CondConcatenate.Equals ( IFACE_OR  ); } }
@@ -115,6 +118,8 @@ namespace MTUComm
 
                     if ( this.Value.StartsWith ( "Data." ) )
                         this.Value = Data.Get[ this.Value.Split ( '.' )[ 1 ] ];
+
+                    this.CondFull = this.Key + this.CondOperation + this.Value;
                 }
             }
         }
@@ -277,6 +282,8 @@ namespace MTUComm
         private string lastLogCreated;
         private List<ActionResult> lastResults;
         private bool canceled;
+        private Dictionary<string,int> validatedConditions;
+        private Dictionary<string,bool> validatedSentences;
 
         private static bool alreadyInDataMainAction;
         
@@ -607,6 +614,8 @@ namespace MTUComm
             this.subActions                 = new List<Action> ();
             this.scriptParameters           = new List<Parameter> ();
             this.additionalScriptParameters = new List<Parameter> ();
+            this.validatedConditions        = new Dictionary<string,int> ();
+            this.validatedSentences         = new Dictionary<string,bool> ();
 
             if ( Data.Get.UNIT_TEST )
                 this.lastResults = new List<ActionResult> ();
@@ -919,20 +928,38 @@ namespace MTUComm
         {
             try
             {
+                #if DEBUG
+                Stopwatch timer = Stopwatch.StartNew ();
+                #endif
+
                 // Load parameters using the interface file
                 ActionResult result = await CreateActionResultUsingInterface ( args.Map, args.Mtu );
+
+                #if DEBUG
+                timer.Stop ();
+                TimeSpan timespan = timer.Elapsed;
+                Utils.Print ( String.Format ( "TIMER: ReadMTU - Interface -> {0:00}:{1:00}:{2:00}", timespan.Minutes, timespan.Seconds, timespan.Milliseconds / 10 ) );
+
+                timer.Restart ();
+                #endif
 
                 // Write result in the activity log
                 if ( ! Data.Get.UNIT_TEST )
                 this.lastLogCreated = logger.ReadMTU ( this, result, args.Mtu );
+
+                #if DEBUG
+                timer.Stop ();
+                timespan = timer.Elapsed;
+                Utils.Print ( String.Format ( "TIMER: ReadMTU - Log -> {0:00}:{1:00}:{2:00}", timespan.Minutes, timespan.Seconds, timespan.Milliseconds / 10 ) );
+                #endif
                 
                 // Show result in the screen
                 await this.OnFinish ( this, new Delegates.ActionFinishArgs (result, args.Mtu ) );
             }
             catch ( Exception e )
             {
-                if (!Errors.IsOwnException(e))
-                    Errors.LogErrorNowAndContinue(new PuckCantCommWithMtuException () );
+                if ( ! Errors.IsOwnException ( e ) )
+                     Errors.LogErrorNowAndContinue(new PuckCantCommWithMtuException () );
                 else Errors.LogErrorNowAndContinue ( e );
 
                 this.OnError ();
@@ -1288,6 +1315,9 @@ namespace MTUComm
             ActionResult result = new ActionResult ( actionType );
             InterfaceParameters[] parameters = this.config.getAllParamsFromInterface ( mtu, actionType );
             
+            this.validatedConditions.Clear ();
+            this.validatedSentences.Clear ();
+
             //int retryTotal = 3;
             //int retryIndex = retryTotal;
             string sourceWhere = string.Empty;
@@ -1681,6 +1711,11 @@ namespace MTUComm
             if ( string.IsNullOrEmpty ( conditionStr ) )
                 return true;
 
+            // Checks if the whole sentence is already validated
+            bool resultOk = false;
+            if ( this.validatedSentences.TryGetValue ( conditionStr, out resultOk ) )
+                return resultOk;
+
             try
             {
                 /* Por no liar mucho el tema, no se tendra en cuenta el orden de las operaciones, sino unicamente
@@ -1757,50 +1792,58 @@ namespace MTUComm
                         
                         continue;
                     }
-                    
-                    int      result       = 0;
-                    string   currentValue = string.Empty;
-                    string[] condMembers  = condition.Key.Split ( new char[]{ '.' } ); // Class.Property
-                    string   condProperty = ( condMembers.Length > 1 ) ? condMembers[ 1 ] : condMembers[ 0 ]; // Property
 
                     #region Get value
 
-                    switch ( condMembers[ 0 ] )
-                    {
-                        case IFACE_PORT  : currentValue = pType.GetProperty ( condProperty ).GetValue ( mtu.Ports[ portIndex - 1 ] ).ToString (); break;
-                        case IFACE_ACTION: currentValue = this .GetProperty ( condProperty ); break; // User, Date or Type
-                        case IFACE_MTU   : currentValue = mtu  .GetProperty ( condProperty ); break; // Mtu class
-                        case IFACE_METER : currentValue = meter.GetProperty ( condProperty ); break; // Meter
-                        case IFACE_GLOBAL: currentValue = gType.GetProperty ( condProperty ).GetValue ( global, null ).ToString(); break; // Global class
-                        case IFACE_DATA  : if ( ! Data.Contains ( condProperty ) || // Library.Data class
-                                                string.IsNullOrEmpty ( currentValue = Data.Get[ condProperty ].ToString () ) )
-                                            currentValue = string.Empty;
-                                        break;
-                        default: // Dynamic MemoryMap
-                            // Recover register from MTU memory map
-                            // Some registers have port sufix but other not
-                            if ( map.ContainsMember ( port + condProperty ) )
-                                currentValue = ( await map[ port + condProperty ].GetValue () ).ToString ();
-                            else if ( map.ContainsMember ( condProperty ) )
-                                currentValue = ( await map[ condProperty ].GetValue () ).ToString ();
-                            break;
-                    }
+                    int result = 0;
 
-                    // Compare property value with condition value
-                    if ( ! string.IsNullOrEmpty ( currentValue ) )
+                    // Checks if the whole condition/part of the sentence is already validated
+                    if ( ! this.validatedConditions.TryGetValue ( condition.CondFull, out result ) )
                     {
-                        float numCurrentValue, numValue;
-                        bool   isNumberCurrent = float.TryParse ( currentValue,    out numCurrentValue );
-                        bool   isNumber        = float.TryParse ( condition.Value, out numValue        );
-                        bool   bothNumber      = isNumberCurrent && isNumber;
-                        string lowerCurrent    = currentValue.ToLower ();
-                        string lower           = condition.Value.ToLower ();
+                        string   currentValue = string.Empty;
+                        string[] condMembers  = condition.Key.Split ( new char[]{ '.' } ); // Class.Property
+                        string   condProperty = ( condMembers.Length > 1 ) ? condMembers[ 1 ] : condMembers[ 0 ]; // Property
 
-                        if ( condition.IsEqual   &&   lowerCurrent.Equals ( lower ) ||
-                             condition.IsNot     && ! lowerCurrent.Equals ( lower ) ||
-                             condition.IsLess    && bothNumber && numCurrentValue < numValue ||
-                             condition.IsGreater && bothNumber && numCurrentValue > numValue )
-                            result = 1; // Ok
+                        switch ( condMembers[ 0 ] )
+                        {
+                            case IFACE_PORT  : currentValue = pType.GetProperty ( condProperty ).GetValue ( mtu.Ports[ portIndex - 1 ] ).ToString (); break;
+                            case IFACE_ACTION: currentValue = this .GetProperty ( condProperty ); break; // User, Date or Type
+                            case IFACE_MTU   : currentValue = mtu  .GetProperty ( condProperty ); break; // Mtu class
+                            case IFACE_METER : currentValue = meter.GetProperty ( condProperty ); break; // Meter
+                            case IFACE_GLOBAL: currentValue = gType.GetProperty ( condProperty ).GetValue ( global, null ).ToString(); break; // Global class
+                            case IFACE_DATA  : if ( ! Data.Contains ( condProperty ) || // Library.Data class
+                                                    string.IsNullOrEmpty ( currentValue = Data.Get[ condProperty ].ToString () ) )
+                                                currentValue = string.Empty;
+                                            break;
+                            default: // Dynamic MemoryMap
+                                // Recover register from MTU memory map
+                                // Some registers have port sufix but other not
+                                if ( map.ContainsMember ( port + condProperty ) )
+                                    currentValue = ( await map[ port + condProperty ].GetValue () ).ToString ();
+                                else if ( map.ContainsMember ( condProperty ) )
+                                    currentValue = ( await map[ condProperty ].GetValue () ).ToString ();
+                                break;
+                        }
+
+                        // Compare property value with condition value
+                        if ( ! string.IsNullOrEmpty ( currentValue ) )
+                        {
+                            float numCurrentValue, numValue;
+                            bool   isNumberCurrent = float.TryParse ( currentValue,    out numCurrentValue );
+                            bool   isNumber        = float.TryParse ( condition.Value, out numValue        );
+                            bool   bothNumber      = isNumberCurrent && isNumber;
+                            string lowerCurrent    = currentValue.ToLower ();
+                            string lower           = condition.Value.ToLower ();
+
+                            if ( condition.IsEqual   &&   lowerCurrent.Equals ( lower ) ||
+                                 condition.IsNot     && ! lowerCurrent.Equals ( lower ) ||
+                                 condition.IsLess    && bothNumber && numCurrentValue < numValue ||
+                                 condition.IsGreater && bothNumber && numCurrentValue > numValue )
+                                result = 1; // Ok
+                        }
+
+                        // Saves/cache result for the current condition/part of the sentence
+                        this.validatedConditions.Add ( condition.CondFull, result );
                     }
 
                     #endregion
@@ -1814,7 +1857,7 @@ namespace MTUComm
                         if      ( condition.IsOr  ) finalResults[ currentFinalResult ] += result; // If one condition validate, pass
                         else if ( condition.IsAnd ) finalResults[ currentFinalResult ] *= result; // All conditions have to validate
                     }
-                    else finalResults[ currentFinalResult ]  = result;
+                    else finalResults[ currentFinalResult ] = result;
 
                     //Utils.PrintDeep ( "   Final = " + result + " -> FinalResult[" + currentFinalResult + "] = " + finalResults[ currentFinalResult ] );
                 }
@@ -1902,7 +1945,7 @@ namespace MTUComm
                     }
                     
                     if ( parent > 0 &&
-                        used   > 0 )
+                         used   > 0 )
                     {
                         //Utils.PrintDeep ( "    Remove elements: " + ( finalResults.Count - 1 - used ) + " / " + finalResults.Count );
                         
@@ -1925,14 +1968,19 @@ namespace MTUComm
                 
                 //Utils.PrintDeep ( finalResult );
 
-                return ( finalResult > 0 );
+                resultOk = finalResult > 0;
             }
             catch ( Exception )
             {
-                //...
+                resultOk = false;
+            }
+            finally
+            {
+                // Saves/cache result for the current sentence
+                this.validatedSentences.Add ( conditionStr, resultOk );
             }
 
-            return false;
+            return resultOk;
         }
 
         #endregion
