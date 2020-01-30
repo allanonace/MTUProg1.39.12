@@ -2376,7 +2376,7 @@ namespace aclara_meters.view
 
             Label meterNames2Label = new Label()
             {
-                Text = "Meter Type",
+                Text = "Valve Type",
                 FontSize = 17,
                 FontAttributes = FontAttributes.Bold,
                 Margin = new Thickness(0, 4, 0, 0)

@@ -772,7 +772,7 @@ namespace MTUComm
                 ( paramType, portIndex, defValue ) =>
                 {
                     if ( ! CheckIfParamIsPresent ( paramType, portIndex, false ) )
-                        action.AddParameter ( new Parameter ( paramType, defValue ) );
+                        action.AddParameter ( new Parameter ( paramType, defValue, portIndex+1 ) );
                     
                     return true;
                 });
