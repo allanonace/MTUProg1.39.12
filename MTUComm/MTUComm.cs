@@ -2983,8 +2983,12 @@ namespace MTUComm
                             case FIELD.METER_READING:
                             case FIELD.METER_READING_2:
                             // Do not ask for new Meter reading if the port is for Encoders/Ecoders
-                            if ( parameter.Port == 0 && meterPort1.IsForEncoderOrEcoder ||
-                                 parameter.Port == 1 && meterPort2.IsForEncoderOrEcoder )
+                            if ( parameter.Port == 0 &&
+                                 ( meterPort1.IsForEncoderOrEcoder || 
+                                   meterPort1.IsForRDD ) ||
+                                 parameter.Port == 1 && 
+                                 ( meterPort2.IsForEncoderOrEcoder ||
+                                   meterPort2.IsForRDD ) )
                             {
                                 form.RemoveParameter ( ( parameter.Port == 0 ) ?
                                     FIELD.METER_READING : FIELD.METER_READING_2 );
@@ -3414,7 +3418,9 @@ namespace MTUComm
                 string p1readingStr = "0";
                 string p2readingStr = "0";
 
-                if ( noRddOrNotIn1 )
+                // Do not use the Meter reading if the port is for Encoders/Ecoders and RDDs
+                if ( noRddOrNotIn1 &&
+                     ! selectedMeter.IsForEncoderOrEcoder )
                 {
                     if ( form.ContainsParameter ( FIELD.METER_READING ) )
                     {
@@ -3433,8 +3439,10 @@ namespace MTUComm
                     }
                 }
 
+                // Do not use the Meter reading if the port is for Encoders/Ecoders and RDDs
                 if ( form.UsePort2 &&
-                     noRddOrNotIn2 )
+                     noRddOrNotIn2 &&
+                     ! selectedMeter2.IsForEncoderOrEcoder )
                 {
                     if ( form.ContainsParameter ( FIELD.METER_READING_2 ) )
                     {

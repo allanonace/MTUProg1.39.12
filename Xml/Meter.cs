@@ -291,6 +291,12 @@ namespace Xml
         }
 
         [XmlIgnore]
+        public bool IsForRDD
+        {
+            get { return Type.Equals ( "SETFLOW" ); }
+        }
+
+        [XmlIgnore]
         public bool IsForGas
         {
             get { return this.IsFor ( "Gas" ); }

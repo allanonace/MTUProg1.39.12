@@ -1567,14 +1567,14 @@ namespace MTUComm
                                         tempReading = tempReading
                                             .PadLeft ( tempReading.Length + meter.LeadingDummy, dummyDigit );
 
-                                    // Fill in the left with the character selected ( X o 0/zero )
+                                    // Fill in the right with the character selected ( X o 0/zero )
                                     if ( meter.DummyDigits > 0 )
                                         tempReading = tempReading
                                             .PadRight ( tempReading.Length + meter.DummyDigits, dummyDigit );
                                     
                                     // If the reading does not have a decimal part and the Meter scale is greater than
                                     // zero, convert the number to a floating point type, adding the point/separator
-                                    // e.g. Reading 12345678 , LiveDigits = 7 , Scale = 3 , Result = 23456.78
+                                    // e.g. Reading 12345678 , Scale = 3 , Result = 12345.678
                                     if ( meter.Scale > 0 &&
                                          tempReading.IndexOf ( "." ) == -1 )
                                         tempReading = tempReading

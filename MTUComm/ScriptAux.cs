@@ -489,8 +489,12 @@ namespace MTUComm
                             continue;
                         
                         // Do not ask for new Meter reading if the port is for Encoders/Ecoders
-                        else if ( port == 0 && meterPort1.IsForEncoderOrEcoder ||
-                                  port == 1 && meterPort2.IsForEncoderOrEcoder )
+                        else if ( port == 0 &&
+                                  ( meterPort1.IsForEncoderOrEcoder || 
+                                    meterPort1.IsForRDD ) ||
+                                  port == 1 && 
+                                  ( meterPort2.IsForEncoderOrEcoder ||
+                                    meterPort2.IsForRDD ) )
                             continue;
 
                         else if ( ! isAutodetectMeter )
