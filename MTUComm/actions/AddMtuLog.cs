@@ -263,7 +263,7 @@ namespace MTUComm
             if ( hasRDD &&
                  rddIn1 )
             {
-                Logger.AddParameter ( port, new Parameter ( "RDDSerialNumber", "RDD SerialNumber", await map.RDDSerialNumber.GetValue () ) );
+                Logger.AddParameter ( port, new Parameter ( "RDDSerialNumber", "RDD SerialNumber", Data.Get.RDDSerialNumber ) );
                 Logger.AddParameter ( port, new Parameter ( "RDDBatteryStatus", "RDD Battery Status", Data.Get.RDDBattery ) );
                 Logger.AddParameter ( port, new Parameter ( "RDDCurrentValvePosition", "RDD Current Valve Position", Data.Get.PrevRDDValvePosition ) );
                 Logger.AddParameter ( port, new Parameter ( "RDDDesiredValvePosition", "RDD Desired Valve Position", Data.Get.RDDPosition ) );
@@ -334,7 +334,7 @@ namespace MTUComm
                 if ( hasRDD &&
                      ! rddIn1 )
                 {
-                    Logger.AddParameter ( port, new Parameter ( "RDDSerialNumber", "RDD SerialNumber", await map.RDDSerialNumber.GetValue () ) );
+                    Logger.AddParameter ( port, new Parameter ( "RDDSerialNumber", "RDD SerialNumber", Data.Get.RDDSerialNumber ) );
                     Logger.AddParameter ( port, new Parameter ( "RDDBatteryStatus", "RDD Battery Status", Data.Get.RDDBattery ) );
                     Logger.AddParameter ( port, new Parameter ( "RDDCurrentValvePosition", "RDD Current Valve Position", Data.Get.PrevRDDValvePosition ) );
                     Logger.AddParameter ( port, new Parameter ( "RDDDesiredValvePosition", "RDD Desired Valve Position", Data.Get.RDDPosition ) );

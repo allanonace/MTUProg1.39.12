@@ -284,6 +284,8 @@ namespace MTUComm
         private bool canceled;
         private Dictionary<string,int> validatedConditions;
         private Dictionary<string,bool> validatedSentences;
+        private Dictionary<string,int> validatedConditionsPort;
+        private Dictionary<string,bool> validatedSentencesPort;
 
         private static bool alreadyInDataMainAction;
         
@@ -616,6 +618,8 @@ namespace MTUComm
             this.additionalScriptParameters = new List<Parameter> ();
             this.validatedConditions        = new Dictionary<string,int> ();
             this.validatedSentences         = new Dictionary<string,bool> ();
+            this.validatedConditionsPort    = new Dictionary<string,int> ();
+            this.validatedSentencesPort     = new Dictionary<string,bool> ();
 
             if ( Data.Get.UNIT_TEST )
                 this.lastResults = new List<ActionResult> ();
@@ -1116,7 +1120,7 @@ namespace MTUComm
                 ActionResult rdd_allParamsFromInterface     = await CreateActionResultUsingInterface ( args.Map, args.Mtu, null, ActionType.ValveOperation );
                 ActionResult readMtu_allParamsFromInterface = await CreateActionResultUsingInterface ( args.Map, args.Mtu );
 
-                // Write result in the DataRead file
+                // Write result in the RemoteDisconnect file
                 if ( ! Data.Get.UNIT_TEST )
                     this.lastLogCreated = logger.RemoteDisconnect ( rdd_allParamsFromInterface, readMtu_allParamsFromInterface, args.Mtu );
                 
@@ -1125,8 +1129,8 @@ namespace MTUComm
             }
             catch ( Exception e )
             {
-                if (!Errors.IsOwnException(e))
-                    Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                if ( ! Errors.IsOwnException ( e ) )
+                     Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
                 else Errors.LogErrorNowAndContinue ( e );
 
                 this.OnError ();
@@ -1325,14 +1329,23 @@ namespace MTUComm
             {
                 //ATTEMPT:
 
+                Utils.Print ( "Interface: " + parameter.Name );
+
                 try
                 {
                     if ( parameter.Name.Equals ( IFACE_PORT ) )
+                    {
                         for ( int i = 0; i < mtu.Ports.Count; i++ )
+                        {
+                            this.validatedConditionsPort.Clear ();
+                            this.validatedSentencesPort.Clear ();
+
                             result.addPort ( await ReadPortUsingInterface ( i + 1, parameter.Parameters.ToArray (), map, mtu, actionType ) );
+                        }
+                    }
                     else
                     {
-                        if ( await ValidateCondition ( parameter.Conditional, map, mtu ) )
+                        if ( await ValidateCondition ( parameter, map, mtu ) )
                         {
                             string value          = string.Empty;
                             string sourceProperty = parameter.Name;
@@ -1361,16 +1374,16 @@ namespace MTUComm
                                 default          : value      = ( await map[ sourceProperty ].GetValue () ).ToString (); break; // MemoryMap.ParameterName
                             }
 
-                            if (!string.IsNullOrEmpty(value))
+                            if ( ! string.IsNullOrEmpty ( value ) ||
+                                 parameter.AllowEmpty )
                             {
-
-                                if (!sourceWhere.Equals(IFACE_FORM))
+                                if ( ! sourceWhere.Equals ( IFACE_FORM ) )
                                 {
-                                    string display = (parameter.Display.ToLower().StartsWith("global.")) ?
-                                                        gType.GetProperty(parameter.Display.Split(new char[] { '.' })[1]).GetValue(global, null).ToString() :
+                                    string display = ( parameter.Display.ToLower ().StartsWith ( "global." ) ) ?
+                                                        gType.GetProperty ( parameter.Display.Split ( new char[] { '.' } )[1] ).GetValue ( global, null ).ToString () :
                                                         parameter.Display;
 
-                                    paramToAdd = new Parameter(parameter.Name, display, value, parameter.Source);
+                                    paramToAdd = new Parameter ( parameter.Name, display, value, parameter.Source );
                                 }
                                 // To change "name" attribute to show in IFACE_FORM case
                                 else
@@ -1499,10 +1512,12 @@ namespace MTUComm
                 // Iterate all parameters for this port
                 foreach ( InterfaceParameters parameter in parameters )
                 {
+                    Utils.Print ( "Interface.Port: " + parameter.Name );
+
                     // Meter readings are treated in a special way
                     if ( parameter.Name.Equals ( IFACE_MREADING ) )
                     {
-                        if ( await ValidateCondition ( parameter.Conditional, map, mtu, indexPort ) )
+                        if ( await ValidateCondition ( parameter, map, mtu, indexPort ) )
                         {
                             try
                             {
@@ -1589,7 +1604,7 @@ namespace MTUComm
                     }
                     else
                     {
-                        if ( await ValidateCondition ( parameter.Conditional, map, mtu, indexPort, meter ) )
+                        if ( await ValidateCondition ( parameter, map, mtu, indexPort, meter ) )
                         {
                             string value          = string.Empty;
                             string sourceWhere    = string.Empty;
@@ -1629,7 +1644,8 @@ namespace MTUComm
                                 throw new Exception ();
                             }
                             
-                            if ( ! string.IsNullOrEmpty ( value ) )
+                            if ( ! string.IsNullOrEmpty ( value ) ||
+                                 parameter.AllowEmpty )
                             {
                                 if ( Utils.IsBool ( value ) )
                                      value = Utils.FirstCharToCapital ( value );
@@ -1702,19 +1718,34 @@ namespace MTUComm
         /// </para>
         /// </returns>
         private async Task<bool> ValidateCondition (
-            string conditionStr,
+            InterfaceParameters parameter,
             dynamic map,
             Mtu mtu,
-            int portIndex = 1,
+            int portIndex = 0,
             Meter meter = null )
         {
+            // Elegant way to know if the invocation was done using a root or port parameter
+            bool isPort = ( portIndex != 0 );
+            if ( !isPort ) portIndex = 1;
+
+            string conditionStr = parameter.Conditional;
+
             if ( string.IsNullOrEmpty ( conditionStr ) )
                 return true;
 
             // Checks if the whole sentence is already validated
             bool resultOk = false;
-            if ( this.validatedSentences.TryGetValue ( conditionStr, out resultOk ) )
+            if ( !isPort && this.validatedSentences    .TryGetValue ( conditionStr, out resultOk ) ||
+                  isPort && this.validatedSentencesPort.TryGetValue ( conditionStr, out resultOk ) )
+            {
+                Utils.Print ( "Interface.Validation: " +
+                    ( ( isPort ) ? "Root " : "Port." + portIndex + " " ) +
+                    parameter.Name +
+                    " already validated = " + ( ( !resultOk ) ? "False" : "True" ) +
+                    " [ " + conditionStr + " ]" );
+
                 return resultOk;
+            }
 
             try
             {
@@ -1798,7 +1829,8 @@ namespace MTUComm
                     int result = 0;
 
                     // Checks if the whole condition/part of the sentence is already validated
-                    if ( ! this.validatedConditions.TryGetValue ( condition.CondFull, out result ) )
+                    if ( !isPort && !this.validatedConditions    .TryGetValue ( condition.CondFull, out result ) ||
+                          isPort && !this.validatedConditionsPort.TryGetValue ( condition.CondFull, out result ) )
                     {
                         string   currentValue = string.Empty;
                         string[] condMembers  = condition.Key.Split ( new char[]{ '.' } ); // Class.Property
@@ -1843,12 +1875,23 @@ namespace MTUComm
                         }
 
                         // Saves/cache result for the current condition/part of the sentence
-                        this.validatedConditions.Add ( condition.CondFull, result );
+                        if ( !isPort )
+                             this.validatedConditions    .Add ( condition.CondFull, result );
+                        else this.validatedConditionsPort.Add ( condition.CondFull, result );
+                    }
+                    // Condition previously/already validated
+                    else
+                    {
+                        Utils.Print ( "Interface.Validation: " + 
+                            ( ( isPort ) ? "Root " : "Port." + portIndex + " " ) +
+                            parameter.Name +
+                            " condition validated = " + ( ( result == 0 ) ? "False" : "True" ) +
+                            " [ " + condition.CondFull + " ]" );
                     }
 
                     #endregion
 
-                    //Utils.PrintDeep ( "   " + condition.Key + " == " + condition.Value + " -> " + result +
+                    //Utils.PrintDeep ("Interface.Validation:   " + condition.Key + " == " + condition.Value + " -> " + result +
                     //    " [ Parent: " + ( currentNestedLevel - 1 ) + " , FinalResultIndex: " + currentFinalResult + " ]" );
 
                     // Concatenate results
@@ -1856,10 +1899,16 @@ namespace MTUComm
                     {
                         if      ( condition.IsOr  ) finalResults[ currentFinalResult ] += result; // If one condition validate, pass
                         else if ( condition.IsAnd ) finalResults[ currentFinalResult ] *= result; // All conditions have to validate
+
+                        Utils.Print ( "Interface.Validation: " +
+                            ( ( isPort ) ? "Root " : "Port." + portIndex + " " ) +
+                            parameter.Name +
+                            " Add Condition = " + ( ( result == 0 ) ? "False" : "True" ) +
+                            " [ " + condition.CondFull + " ]" );
                     }
                     else finalResults[ currentFinalResult ] = result;
 
-                    //Utils.PrintDeep ( "   Final = " + result + " -> FinalResult[" + currentFinalResult + "] = " + finalResults[ currentFinalResult ] );
+                    //Utils.PrintDeep ("Interface.Validation:   Final = " + result + " -> FinalResult[" + currentFinalResult + "] = " + finalResults[ currentFinalResult ] );
                 }
                 
                 #endregion
@@ -1964,10 +2013,6 @@ namespace MTUComm
 
                 #endregion
 
-                //Utils.PrintDeep ( "----" );
-                
-                //Utils.PrintDeep ( finalResult );
-
                 resultOk = finalResult > 0;
             }
             catch ( Exception )
@@ -1977,7 +2022,15 @@ namespace MTUComm
             finally
             {
                 // Saves/cache result for the current sentence
-                this.validatedSentences.Add ( conditionStr, resultOk );
+                if ( !isPort )
+                     this.validatedSentences    .Add ( conditionStr, resultOk );
+                else this.validatedSentencesPort.Add ( conditionStr, resultOk );
+
+                Utils.Print ( "Interface.Validation: " +
+                    ( ( isPort ) ? "Root " : "Port." + portIndex + " " ) +
+                    parameter.Name +
+                    " Add Setence = " + ( ( !resultOk ) ? "False" : "True" ) +
+                    " [ " + conditionStr + " ]" );
             }
 
             return resultOk;

@@ -560,6 +560,15 @@
     <CustomGet>method:MinutesToHours_Get</CustomGet>
   </Overload>
   <Overload>
+    <Id>RDDSerialNumberAscii</Id>
+    <Description>RDD Serial Number encoded in ASCII</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>RDDSerialNumber</Register>
+    </Registers>
+    <CustomGet>method</CustomGet>
+  </Overload>
+  <Overload>
     <Id>RDDStatus</Id>
     <Description>The status reported by the RDD</Description>
     <Type>string</Type>

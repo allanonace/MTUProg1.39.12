@@ -657,8 +657,9 @@ namespace MTUComm
         {
             try
             {
-                // Check if some required parameter is not present, after having eliminate the
-                // unnecessary parameters to avoid false positives about using the second port
+                // Check if any required parameter is not present, but does nothing else
+                // because in the validation region of method ScriptAux.ValidateParams
+                // all unnecessary parameters will be removed
                 // NOTE: This sentece must be at the beginning of the process because some required
                 // NOTE: parameters have a default value in case they are not present, and perform this
                 // NOTE: step after the validation of the parameters ends with the "new" parameters added to
@@ -2312,21 +2313,22 @@ namespace MTUComm
                             
                             response = new RDDStatusResult ( fullResponse.Response );
                         }
-                        catch (Exception e) { Console.WriteLine($"mtucomm.cs_Remotedisconnectlogic {e.Message}"); }
+                        catch ( Exception ) { }
                     }
                     while ( ( response == null ||
                               response.ValvePosition == RDDValveStatus.IN_TRANSITION ||
                               response.ValvePosition != rddValveStatus ) &&
                             ! ( timeOut = nodeCounter.ElapsedMilliseconds > WAIT_RDD_MAX ) );
+                    
+                    string seconds = ( ( int )( WAIT_RDD_MAX / 1000 ) ).ToString ();
 
-                    string seconds = ((int)(WAIT_RDD_MAX / 1000)).ToString();
-                    if (response == null)
+                    // The process has failed
+                    if ( response == null )
                     {
-                        throw new RDDStatusIsUnknownAfterMaxTime(seconds);
+                        throw new RDDStatusIsUnknownAfterMaxTime ( seconds );
                     }
-                    else  // The process has failed
-                    if ( ! response.PreviousCmdSuccess ||
-                         response.ValvePosition != rddValveStatus )
+                    else if ( ! response.PreviousCmdSuccess ||
+                              response.ValvePosition != rddValveStatus )
                     {
                         result = RDD_NOT_ACHIEVED;
 
@@ -2346,11 +2348,12 @@ namespace MTUComm
                         }
                     }
 
-                    // The remote disconnect has worked well!
-
-                    // Updates firmware version of the RDD in global
+                    // Updates firmware version of the RDD in both global file and global instance
                     if ( ! ( ( string )Data.Get.RDDFirmware ).Equals ( this.global.RDDFirmwareVersion ) )
                         Utils.WriteToGlobal ( "RDDFirmwareVersion", Data.Get.RDDFirmware );
+
+                    // Save the seria number used during the process
+                    Data.SetTemp ( "RDDSerialNumber", response.SerialNumber );
                 }
             }
             catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
@@ -2663,8 +2666,8 @@ namespace MTUComm
             {
                 bool port2IsActivated = await this.GetMemoryMap ( true ).P2StatusFlag.GetValue ();
 
-                // Check if some required parameter is not present, after having eliminate the
-                // unnecessary parameters to avoid false positives about using the second port
+                // Check if any required parameter is not present, but does nothing else
+                // because in the validation region all unnecessary parameters will be removed
                 if ( ! this.ValidateRequiredParams ( action, out string errorRequired ) )
                     throw new ScriptingTagMissingException ( errorRequired );
 

@@ -42,6 +42,9 @@ namespace Xml
         [XmlAttribute("format")]
         public string Format { get; set; }
 
+        [XmlAttribute("allow_empty")]
+        public bool AllowEmpty { get; set; }
+
         [XmlText]
         public string Value { get; set; }
 

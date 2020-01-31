@@ -441,6 +441,19 @@ namespace Library
             return ( T )( object )result;
         }
 
+        public static string ConvertBytesToAscii (
+            byte[] data,
+            int    startAt = 0,
+            int    size    = 0,
+            bool   bytesAsInts = true )
+        {
+            if ( size == 0 ) size = data.Length;
+
+            byte[] sub = data.Skip ( startAt ).Take ( size ).ToArray ();
+
+            return Encoding.ASCII.GetString ( sub );
+        }
+
         #endregion
 
         #region String

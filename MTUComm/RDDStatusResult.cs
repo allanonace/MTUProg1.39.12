@@ -87,7 +87,7 @@ namespace MTUComm
 
         #region Attributes
         
-        private long             serialNumber;
+        private string           serialNumber;
         private RDDValveStatus   valvePosition;
         private RDDBatteryStatus battery;
         private RDDCmdSource     prevCmdSource;
@@ -98,7 +98,7 @@ namespace MTUComm
 
         #region Properties
 
-        public long SerialNumber
+        public string SerialNumber
         {
             get { return this.serialNumber; }
         }
@@ -137,7 +137,7 @@ namespace MTUComm
             byte[] response )
         {
             // NOTE: Not use ConvertNumericFromBytes because the serialNumber for the RDD has nine bytes, not eight
-            this.serialNumber  = Utils.CalculateNumericFromBytes<int>  ( response, BYTE_SERIAL_NUMBER, NUM_BYTES_SERIAL_NUMBER );              // 2 to 10
+            this.serialNumber  = Utils.ConvertBytesToAscii              ( response, BYTE_SERIAL_NUMBER, NUM_BYTES_SERIAL_NUMBER );             // 2 to 10
             this.valvePosition = Utils.ParseIntToEnum<RDDValveStatus>   ( ( int )response[ BYTE_VALVE_POSITION  ], RDDValveStatus  .UNKNOWN ); // 11
             this.battery       = Utils.ParseIntToEnum<RDDBatteryStatus> ( ( int )response[ BYTE_BATTERY         ], RDDBatteryStatus.UNKNOWN ); // 12
             this.prevCmdSource = Utils.ParseIntToEnum<RDDCmdSource>     ( ( int )response[ BYTE_PREV_CMD_SOURCE ], RDDCmdSource    .UNKNOWN ); // 13

@@ -710,7 +710,8 @@ namespace MTUComm
                         #region Valve Position [ Only RemoteDisconnect ]
                         case APP_FIELD.RDDPosition:
                         // Param totally useless in other action types
-                        if ( actionType != ActionType.ValveOperation)
+                        if ( isNotWrite &&
+                             actionType != ActionType.ValveOperation )
                             continue;
 
                         // Allowed values: CLOSE, OPEN, PARTIAL_OPEN
@@ -723,8 +724,9 @@ namespace MTUComm
                         #endregion
                         #region RDD Firmware [ Only RemoteDisconnect ]
                         case APP_FIELD.RDDFirmware:
-                        // Param totally useless in other action types
-                        if ( actionType != ActionType.ValveOperation)
+                        // Param totally useless in other action types than Add/Replace and ValveOperation
+                        if ( isNotWrite &&
+                             actionType != ActionType.ValveOperation )
                             continue;
                         
                         else if ( fail = NoELTxt ( valueStr, MAX_RDD_FW ) )

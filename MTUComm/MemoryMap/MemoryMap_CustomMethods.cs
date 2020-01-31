@@ -324,6 +324,12 @@ namespace MTUComm.MemoryMap
             // NOTE: 1440 minutes / 60 minutes one hour = 24 hours
             return ( int ) ( await MemoryRegisters[ 0 ].GetValue () / 1440 ); // Days
         }
+        
+        public async Task<string> RDDSerialNumberAscii_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
+        {
+            byte[] val = await MemoryRegisters.RDDSerialNumber.GetValueByteArray ();
+            return Utils.ConvertBytesToAscii ( val );
+        }
 
         public async Task<string> RDDStatus_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
         {

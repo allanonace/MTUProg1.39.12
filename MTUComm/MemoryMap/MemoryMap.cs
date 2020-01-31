@@ -488,7 +488,7 @@ namespace MTUComm.MemoryMap
 
                     memoryRegister.lastRead  = read;
                     
-                    Utils.PrintDeep ( "Map -> From MTU value: " + memoryRegister.id + " = " + Utils.ByteArrayToString ( read ) + " [ " + read + " ]" );
+                    Utils.Print ( "Map -> From MTU value: " + memoryRegister.id + " = " + Utils.ByteArrayToString ( read ) + " [ " + read + " ]" );
                     
                     // Convert byte array to desired format
                     object value = default ( T );
@@ -502,7 +502,7 @@ namespace MTUComm.MemoryMap
                         case TypeCode.String : value = ( object )this.GetStringFromMem_Logic ( read ); break;
                     }
                     
-                    Utils.PrintDeep ( "Map -> Converted value: " + memoryRegister.id + " = " + value );
+                    Utils.Print ( "Map -> Converted value: " + memoryRegister.id + " = " + value );
                     
                     // When sizeGet is different to size, no setting is performed, only recover
                     if ( memoryRegister.size == memoryRegister.sizeGet ||
@@ -511,12 +511,18 @@ namespace MTUComm.MemoryMap
                         // Write converted value in the memory map
                         switch ( Type.GetTypeCode( typeof( T ) ) )
                         {
+                            case TypeCode.Boolean: this.SetBoolToMem ( ( bool )( object )value, memoryRegister.address, memoryRegister.bit ); break;
+                            default: Array.Copy ( read, 0, this.memory, memoryRegister.address, memoryRegister.size ); break;
+
+                            // FIXME: Porque leches estoy seteando el valor convertido en la memoria ( byte[] )
+                            // FIXME: si despues en la recuperacion ( PropertyGet_Logic ) vuelvo a leer el array de bytes y convertirlo...
+                            /*
                             case TypeCode.Int32  : this.SetIntToMem   ( ( int   )( object )value, memoryRegister.address, memoryRegister.sizeGet ); break;
                             case TypeCode.UInt32 : this.SetUIntToMem  ( ( uint  )( object )value, memoryRegister.address, memoryRegister.sizeGet ); break;
                             case TypeCode.UInt64 : this.SetULongToMem ( ( ulong )( object )value, memoryRegister.address, memoryRegister.sizeGet ); break;
-                            case TypeCode.Boolean: this.SetBoolToMem  ( ( bool  )( object )value, memoryRegister.address, memoryRegister.bit     ); break;
                             case TypeCode.Char   : this.SetCharToMem  ( ( char  )( object )value, memoryRegister.address ); break;
                             case TypeCode.String : this.SetStringToMem<String> ( ( string )( object )value, memoryRegister.address, memoryRegister.sizeGet ); break;
+                            */
                         }
                         
                         value = this.PropertyGet_Logic ( memoryRegister );

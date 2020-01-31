@@ -14,8 +14,8 @@ namespace Library
         private const string PREFIX_AUX     = "_AllowEmptyField";
         private const string EXCEP_NAME_INI = "#";
         private const string EXCEP_NAME_SGN = "_";
-        public  const string ERROR_STR   = "-1";
-        public  const int    ERROR_VAL   = -1;
+        public  const string ERROR_STR      = "-1";
+        public  const int    ERROR_VAL      = -1;
 
         #endregion
 

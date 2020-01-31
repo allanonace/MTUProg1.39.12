@@ -498,7 +498,7 @@ namespace Lexi
 
                 try
                 {
-                    result = await Read ( m_serial, address, data, m_timeout );
+                    result = await Read_Logic ( m_serial, address, data, m_timeout );
 
                     break;
                 }
@@ -527,7 +527,7 @@ namespace Lexi
             #endregion
         }
 
-        private async Task<byte[]> Read (
+        private async Task<byte[]> Read_Logic (
             ISerial serial,
             UInt32 address,
             uint bytesToRead,
@@ -756,7 +756,7 @@ namespace Lexi
 
                 try
                 {
-                    result = await Write (
+                    result = await Write_Logic (
                         m_serial,
                         addressOrLexiCmd,
                         data,
@@ -799,7 +799,7 @@ namespace Lexi
             #endregion
         }
 
-        private async Task<LexiWriteResult> Write (
+        private async Task<LexiWriteResult> Write_Logic (
             ISerial serial,
             UInt32 addressOrLexiCmd,
             byte[] data,
