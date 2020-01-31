@@ -754,10 +754,7 @@
                                             <Frame Opacity="0.8" CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                 <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                     <Controls:BorderlessEntry IsReadOnly="true" Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_RDDPosition" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text" FontSize="17"
-                                                            HorizontalTextAlignment="Start">
-                                                        <Controls:BorderlessEntry.Behaviors>
-                                                            <behaviors:EntryValidatorBehavior />
-                                                        </Controls:BorderlessEntry.Behaviors>
+                                                            HorizontalTextAlignment="Start">                                                        
                                                     </Controls:BorderlessEntry>
                                                 </StackLayout>
                                             </Frame>
@@ -770,10 +767,7 @@
                                             <Frame Opacity="0.8" CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                 <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                     <Controls:BorderlessEntry IsReadOnly="true" Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_RDDSerialNumber" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text" FontSize="17"
-                                                            HorizontalTextAlignment="Start">
-                                                        <Controls:BorderlessEntry.Behaviors>
-                                                            <behaviors:EntryValidatorBehavior />
-                                                        </Controls:BorderlessEntry.Behaviors>
+                                                            HorizontalTextAlignment="Start">                                                       
                                                     </Controls:BorderlessEntry>
                                                 </StackLayout>
                                             </Frame>
@@ -786,10 +780,7 @@
                                             <Frame Opacity="0.8" CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                 <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                     <Controls:BorderlessEntry IsReadOnly="true" Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_Battery" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text" FontSize="17"
-                                                            HorizontalTextAlignment="Start">
-                                                        <Controls:BorderlessEntry.Behaviors>
-                                                            <behaviors:EntryValidatorBehavior />
-                                                        </Controls:BorderlessEntry.Behaviors>
+                                                            HorizontalTextAlignment="Start">                                                        
                                                     </Controls:BorderlessEntry>
                                                 </StackLayout>
                                             </Frame>
