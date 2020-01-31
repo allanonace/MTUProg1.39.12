@@ -1329,7 +1329,7 @@ namespace MTUComm
             {
                 //ATTEMPT:
 
-                Utils.Print ( "Interface: " + parameter.Name );
+                Utils.PrintDeep ( "Interface: " + parameter.Name );
 
                 try
                 {
@@ -1512,7 +1512,7 @@ namespace MTUComm
                 // Iterate all parameters for this port
                 foreach ( InterfaceParameters parameter in parameters )
                 {
-                    Utils.Print ( "Interface.Port: " + parameter.Name );
+                    Utils.PrintDeep ( "Interface.Port: " + parameter.Name );
 
                     // Meter readings are treated in a special way
                     if ( parameter.Name.Equals ( IFACE_MREADING ) )
@@ -1738,7 +1738,7 @@ namespace MTUComm
             if ( !isPort && this.validatedSentences    .TryGetValue ( conditionStr, out resultOk ) ||
                   isPort && this.validatedSentencesPort.TryGetValue ( conditionStr, out resultOk ) )
             {
-                Utils.Print ( "Interface.Validation: " +
+                Utils.PrintDeep ( "Interface.Validation: " +
                     ( ( isPort ) ? "Root " : "Port." + portIndex + " " ) +
                     parameter.Name +
                     " already validated = " + ( ( !resultOk ) ? "False" : "True" ) +
@@ -1882,7 +1882,7 @@ namespace MTUComm
                     // Condition previously/already validated
                     else
                     {
-                        Utils.Print ( "Interface.Validation: " + 
+                        Utils.PrintDeep ( "Interface.Validation: " + 
                             ( ( isPort ) ? "Root " : "Port." + portIndex + " " ) +
                             parameter.Name +
                             " condition validated = " + ( ( result == 0 ) ? "False" : "True" ) +
@@ -1900,7 +1900,7 @@ namespace MTUComm
                         if      ( condition.IsOr  ) finalResults[ currentFinalResult ] += result; // If one condition validate, pass
                         else if ( condition.IsAnd ) finalResults[ currentFinalResult ] *= result; // All conditions have to validate
 
-                        Utils.Print ( "Interface.Validation: " +
+                        Utils.PrintDeep ( "Interface.Validation: " +
                             ( ( isPort ) ? "Root " : "Port." + portIndex + " " ) +
                             parameter.Name +
                             " Add Condition = " + ( ( result == 0 ) ? "False" : "True" ) +
@@ -2026,7 +2026,7 @@ namespace MTUComm
                      this.validatedSentences    .Add ( conditionStr, resultOk );
                 else this.validatedSentencesPort.Add ( conditionStr, resultOk );
 
-                Utils.Print ( "Interface.Validation: " +
+                Utils.PrintDeep ( "Interface.Validation: " +
                     ( ( isPort ) ? "Root " : "Port." + portIndex + " " ) +
                     parameter.Name +
                     " Add Setence = " + ( ( !resultOk ) ? "False" : "True" ) +

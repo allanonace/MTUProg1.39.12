@@ -444,8 +444,7 @@ namespace Library
         public static string ConvertBytesToAscii (
             byte[] data,
             int    startAt = 0,
-            int    size    = 0,
-            bool   bytesAsInts = true )
+            int    size    = 0 )
         {
             if ( size == 0 ) size = data.Length;
 
