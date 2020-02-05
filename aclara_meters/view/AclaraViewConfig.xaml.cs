@@ -61,7 +61,7 @@ namespace aclara_meters.view
                     this.ShowErrorAndKill(new ConfigurationFilesNotFoundException());
                     return; // The apps will be forced to close / kill
                 }
-                if (!Configuration.CheckLoadXML())
+                if (!Configuration.LoadAndVerifyXMLs())
                 {
                     GenericUtilsClass.SetInstallMode("None");
                     GenericUtilsClass.DeleteConfigFiles(Mobile.ConfigPath);
@@ -107,7 +107,7 @@ namespace aclara_meters.view
                                 }
                                 else
                                 {
-                                    if(!Configuration.CheckLoadXML())
+                                    if(!Configuration.LoadAndVerifyXMLs())
                                     {
                                         GenericUtilsClass.RestoreConfigFiles();
                                         this.ShowErrorAndKill(new ConfigurationFilesNewVersionException());

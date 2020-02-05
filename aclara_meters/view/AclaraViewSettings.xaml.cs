@@ -614,7 +614,7 @@ namespace aclara_meters.view
                 GenericUtilsClass.BackUpConfigFiles();
                 if (await DownloadConfigProcess())
                 {
-                    if (Configuration.CheckLoadXML())
+                    if (Configuration.LoadAndVerifyXMLs())
                     {
                         await SecureStorage.SetAsync("ConfigVersion", NewConfigVersion);
                         await Application.Current.MainPage.DisplayAlert("Attention", "The application will end, restart it to make changes in the configuration", "OK");
@@ -1059,7 +1059,7 @@ namespace aclara_meters.view
                         {                        
                             if (result == "OK")
                             {
-                                if (Configuration.CheckLoadXML())
+                                if (Configuration.LoadAndVerifyXMLs())
                                 {
                                     await SecureStorage.SetAsync("ConfigVersion", GenericUtilsClass.CheckFTPConfigVersion());
                                     await Application.Current.MainPage.DisplayAlert("Attention", "The application will end, restart it to make changes in the configuration", "ok");

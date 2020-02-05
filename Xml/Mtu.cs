@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
+using System.Text.RegularExpressions;
+using System.Text;
+using Library;
 
 namespace Xml
 {
@@ -223,6 +226,60 @@ namespace Xml
 
         #endregion
     
+        #region Properties
+        
+        [XmlIgnore]
+        public bool IsFamily31xx32xx
+        {
+            get
+            {
+                if ( this.HasFamilySet )
+                    return this.family == Family._31xx32xx;
+
+                return this.HexNum.StartsWith ( "31" ) ||
+                       this.HexNum.StartsWith ( "32" );
+            }
+        }
+
+        [XmlIgnore]
+        public bool IsFamily33xx
+        {
+            get
+            {
+                if ( this.HasFamilySet )
+                    return this.family == Family._33xx;
+
+                return this.HexNum.StartsWith ( "33" );
+            }
+        }
+        
+        [XmlIgnore]
+        public bool IsFamily342x
+        {
+            get
+            {
+                if ( this.HasFamilySet )
+                    return this.family == Family._342x;
+
+                return this.HexNum.StartsWith ( "342" );
+            }
+        }
+
+        [XmlIgnore]
+        public bool IsFamily35xx36xx
+        {
+            get
+            {
+                if ( this.HasFamilySet )
+                    return this.family == Family._35xx36xx;
+
+                return this.HexNum.StartsWith ( "35" ) ||
+                       this.HexNum.StartsWith ( "36" );
+            }
+        }
+
+        #endregion
+
         public Mtu ()
         {
             this.BroadCast                  = false;
@@ -340,60 +397,6 @@ namespace Xml
 
         [XmlElement("HexNum")]
         public string HexNum { get; set; }
-
-        [XmlIgnore]
-        public bool IsFamily31xx32xx
-        {
-            get
-            {
-                if ( this.HasFamilySet )
-                    return this.family == Family._31xx32xx;
-
-                string hexnum = this.HexNum.ToLower ();
-            
-                return hexnum.StartsWith ( "31" ) ||
-                       hexnum.StartsWith ( "32" );
-            }
-        }
-        
-        [XmlIgnore]
-        public bool IsFamily33xx
-        {
-            get
-            {
-                if ( this.HasFamilySet )
-                    return this.family == Family._33xx;
-
-                return this.HexNum.ToLower ().StartsWith ( "33" );
-            }
-        }
-        
-        [XmlIgnore]
-        public bool IsFamily342x
-        {
-            get
-            {
-                if ( this.HasFamilySet )
-                    return this.family == Family._342x;
-
-                return this.HexNum.ToLower ().StartsWith ( "342" );
-            }
-        }
-
-        [XmlIgnore]
-        public bool IsFamily35xx36xx
-        {
-            get
-            {
-                if ( this.HasFamilySet )
-                    return this.family == Family._35xx36xx;
-
-                string hexnum = this.HexNum.ToLower ();
-            
-                return hexnum.StartsWith ( "35" ) ||
-                       hexnum.StartsWith ( "36" );
-            }
-        }
 
         [XmlElement("Model")]
         public string Model { get; set; }
@@ -591,24 +594,81 @@ namespace Xml
             get { return this.Version == VERSION.NEW; }
         }
 
+        public string GetFamily ()
+        {
+            // Autodetects the family of MTUs to use
+            if ( ! this.HasFamilySet )
+                this.AssignFamily ();
+
+            return this.family.ToString ().Substring ( 1 ).ToLower ();
+        }
+
         [XmlIgnore]
         public bool HasFamilySet
         {
             get { return this.family != Family.NOTHING; }
         }
 
-        public void SetFamily (
-            string family )
+        public void AssignFamily ()
         {
-            Enum.TryParse<Family> ( "_" + family, out this.family );
-        }
+            StringBuilder stb = new StringBuilder ();
 
-        public string GetFamily ()
-        {
-            if ( this.HasFamilySet )
-                return this.family.ToString ().Substring ( 1 ).ToLower ();
+            // All cases of family IDs
+            int[] nums = new int[] { 31, 32, 33, 342, 34, 35, 36 };
 
-            return string.Empty;
+            foreach ( int num in nums )
+                stb.Append ( $"(?<F{num}>{num})|" );
+            string exp = stb.ToString ().Substring ( 0, stb.Length - 1 ); // Remove last "|"
+
+            stb.Clear ();
+            stb = null;
+
+            // Retrieves the family ID and the last characters of the hexnum of the current MTU
+            // e.g. 3321-XXX-RB -> Id: 3321 , F31:_ , F32:_ , F33: 33 ... , Chars: RB
+            Match match = Regex.Match ( this.HexNum,
+                $@"(?<Id>{exp}).*-.+-(?<Chars>(?i:[0-9a-z]+))" );
+            if ( match.Success )
+            {
+                // NOTE: At the moment the chars are not necessary in the logic for auto-assignment
+                //string chars = match.Groups[ "Chars" ].Value;
+                int id = int.Parse ( match.Groups[ "Id" ].Value );
+
+                // Family 31xx32xx
+                // · Mtu.HexNum starts with "31" or "32"
+                if ( ! match.IsValueNull ( "F31" ) ||
+                     ! match.IsValueNull ( "F32" ) )
+                {
+                    this.family = Family._31xx32xx;
+                }
+                else if ( ! match.IsValueNull ( "F33" ) )
+                {
+                    // Family 33xx that behaves like 31xx32xx
+                    // · Mtu.HexNum starts with "33"
+                    // · Meter.Type contains the character "R" or "M"
+                    // · Meter.Utility is "Gas"
+                    if ( Regex.IsMatch ( this.Port1.TypeString, @".*(?i:m|r).*" ) ||
+                         this.Port1.Utilities.Contains ( "gas" ) )
+                         this.family = Family._31xx32xx;
+                    // Family 33xx
+                    // · Mtu.HexNum starts with "33"
+                    // · Meter.Type does NOT contains the character "R" or "M"
+                    else this.family = Family._33xx;
+                }
+                // Family 342x
+                // · Mtu.HexNum starts with "342"
+                else if ( ! match.IsValueNull ( "F342" ) )
+                {
+                    this.family = Family._342x;
+                }
+                // Family 34xx35xx36xx
+                // · Mtu.HexNum starts with "34" ( except "342" ), "35" or "36"
+                else if ( ! match.IsValueNull ( "F34" ) ||
+                          ! match.IsValueNull ( "F35" ) ||
+                          ! match.IsValueNull ( "F36" ) )
+                {
+                    this.family = Family._35xx36xx;
+                }
+            }
         }
 
         public object SimulateRddInPortTwoIfNeeded ()

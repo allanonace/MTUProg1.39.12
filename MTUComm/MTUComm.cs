@@ -342,8 +342,8 @@ namespace MTUComm
         public MTUComm(ISerial serial, Configuration configuration)
         {
             this.configuration = configuration;
-            this.global = this.configuration.Global;
-            lexi = new Lexi.Lexi ( serial, Data.Get.IsIOS ? 10000 : 20000 );
+            this.global        = this.configuration.Global;
+            this.lexi          = new Lexi.Lexi ( serial );
             
             Singleton.Set = lexi;
         }
@@ -838,6 +838,7 @@ namespace MTUComm
                     if ( ! rddIn1 )
                     {
                         // Old MTU ID
+                        // NOTE: Is general data/not for the first port, but not present if the RDD is on port 1
                         if ( actionType == ActionType.ReplaceMTU ||
                              actionType == ActionType.ReplaceMtuReplaceMeter )
                             CheckIfNotPresentInPort ( ParameterType.OldMtuId, 0 );

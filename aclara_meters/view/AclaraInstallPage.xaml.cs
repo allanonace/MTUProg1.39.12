@@ -53,7 +53,7 @@ namespace aclara_meters.view
                     //{
                     //    Application.Current.MainPage = new NavigationPage(new AclaraViewConfig(dialogs));
                     //});
-                    if (Configuration.CheckLoadXML())
+                    if (Configuration.LoadAndVerifyXMLs())
                     {
                         await DisplayAlert("Attention", "The app will close to apply the configuration", "OK");
                         System.Diagnostics.Process.GetCurrentProcess().Kill();

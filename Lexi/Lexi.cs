@@ -8,6 +8,7 @@ using Lexi.Interfaces;
 using Library;
 using Library.Exceptions;
 using Xml.UnitTest;
+using Xml;
 
 namespace Lexi
 {
@@ -292,7 +293,6 @@ namespace Lexi
             WAIT_BTW_LEXI_ATTEMPTS - Waiting time before making a new LExI write|read attempt after an error = 1
         */
         private const int LEXI_ATTEMPTS_NONE     = 0;
-        private const int LEXI_ATTEMPTS_N        = 4;
         public  const int WAIT_BTW_LEXI_ATTEMPTS = 1;
 
         #endregion
@@ -300,11 +300,9 @@ namespace Lexi
         #region Attributes
 
         private static dynamic map;
-
+        public static int LexiMaxAttempts = Global.MAX_LEXI_ATTEMPTS;
+        public static int LexiMaxTimeout  = Global.MAX_LEXI_TIMEOUT;
         private readonly ISerial m_serial; // Serial port interface used to communicate through Lexi
-
-        private readonly int m_timeout; // Timout limit to wait for MTU response.
-
         private static int numErrors   = 0;
         private static int numAttempts = 0;
         private static int currrentAttemps = 0;
@@ -342,16 +340,9 @@ namespace Lexi
             #endif
         }
 
-        public Lexi()
-        {
-            //set default read wait to response timeout to 400ms
-            m_timeout = 400;
-        }
-
-        public Lexi ( ISerial serial, int timeout )
+        public Lexi ( ISerial serial )
         {
             m_serial = serial ?? throw new ArgumentNullException("serial","No Serial interface defined");
-            m_timeout = timeout;
         }
 
         #endregion
@@ -415,7 +406,7 @@ namespace Lexi
         {
             return await this.Read (
                 address,
-                LEXI_ATTEMPTS_N,
+                LexiMaxAttempts,
                 data,
                 isPartOfWrite );
         }
@@ -490,7 +481,7 @@ namespace Lexi
 
             // Try the specified time of attempts
             byte[] result = null;
-            if ( maxAttempts < 0 ) maxAttempts = LEXI_ATTEMPTS_N;
+            if ( maxAttempts < 0 ) maxAttempts = LexiMaxAttempts;
             int attempts = 0;
             do
             {
@@ -498,7 +489,7 @@ namespace Lexi
 
                 try
                 {
-                    result = await Read_Logic ( m_serial, address, data, m_timeout );
+                    result = await Read_Logic ( m_serial, address, data );
 
                     break;
                 }
@@ -530,8 +521,7 @@ namespace Lexi
         private async Task<byte[]> Read_Logic (
             ISerial serial,
             UInt32 address,
-            uint bytesToRead,
-            int timeout )
+            uint bytesToRead )
         {
             int TEST = new Random ().Next ( 0, 999 );
             Utils.PrintDeep ( Environment.NewLine + "--------LEXI_READ-------| " + TEST + " |--" );
@@ -566,7 +556,7 @@ namespace Lexi
                     " [ " + rawBuffer.Length + " = " + bytesToRead + " + Header " + headerOffset + " + CRC 2 ]" );
 
                 // Whait untill the response buffer data is available or timeout limit is reached
-                long timeout_limit = DateTimeOffset.Now.ToUnixTimeMilliseconds() + (timeout);
+                long timeout_limit = DateTimeOffset.Now.ToUnixTimeMilliseconds () + LexiMaxTimeout;
                 await Task.Run ( async () =>
                 {
                     while ( checkResponseOk ( serial, rawBuffer ) )
@@ -651,7 +641,7 @@ namespace Lexi
         {
             return await this.Write (
                 addressOrLexiCmd,
-                LEXI_ATTEMPTS_N,
+                LexiMaxAttempts,
                 data,
                 bytesResponse,
                 filtersResponse,
@@ -748,7 +738,7 @@ namespace Lexi
 
             // Try the specified time of attempts
             LexiWriteResult result = null;
-            if ( maxAttempts < 0 ) maxAttempts = LEXI_ATTEMPTS_N;
+            if ( maxAttempts < 0 ) maxAttempts = LexiMaxAttempts;
             int attempts = 0;
             do
             {
@@ -762,7 +752,6 @@ namespace Lexi
                         data,
                         bytesResponse,
                         filtersResponse,
-                        m_timeout,
                         lexiAction,
                         avoidACK );
 
@@ -805,7 +794,6 @@ namespace Lexi
             byte[] data,
             uint[] bytesResponse,
             LexiFiltersResponse filtersResponse,
-            int timeout,
             LexiAction lexiAction,
             bool avoidACK )
         {
@@ -857,7 +845,7 @@ namespace Lexi
     
                 // Wait until the response buffer data is available or timeout limit is reached
                 int  bytesRead = 0;
-                long timeout_limit = DateTimeOffset.Now.ToUnixTimeMilliseconds () + timeout;
+                long timeout_limit = DateTimeOffset.Now.ToUnixTimeMilliseconds () + LexiMaxTimeout;
                 try
                 {
                     await Task.Run ( async () =>
@@ -1089,7 +1077,7 @@ namespace Lexi
                 * Example: Addres 600 --> block 2 --> offset 600 - 512 = 88
                 */
                 header[ 0 ] = 0x25;
-                header[ 1 ] = ( byte )(     128 + ( ( address / 256 ) *   2 ) );
+                header[ 1 ] = ( byte )(     128 + ( ( address / 256 ) *   2 ) ); // The division is rounded to an integer
                 header[ 2 ] = ( byte )( address - ( ( address / 256 ) * 256 ) );
                 header[ 3 ] = data[ 0 ];
                 header      = checkSum ( header );

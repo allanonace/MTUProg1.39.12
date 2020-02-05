@@ -473,6 +473,17 @@ namespace Xml
     [XmlRoot("Globals")]
     public class Global
     {
+        #region Constants
+
+        private const int DEF_LEXI_ATTEMPTS = 4;
+        private const int MIN_LEXI_ATTEMPTS = 1;  // Original/initial attempt + 1 = 2
+        public  const int MAX_LEXI_ATTEMPTS = 10; // Original/initial attempt + 10 = 11
+        private const int DEF_LEXI_TIMEOUT  = 10;
+        private const int MIN_LEXI_TIMEOUT  = 5;  // Seconds
+        public  const int MAX_LEXI_TIMEOUT  = 30; // Seconds
+
+        #endregion
+
         public Global ()
         {
             // Default values and comments are extracted from Y20318-TUM_Rev_E.PDF and STAR Programmer source code
@@ -615,6 +626,10 @@ namespace Xml
             // gzip is simply deflate plus a checksum and header/footer. Deflate is faster and smaller
             // So naturally, no checksum is faster but then you also can't detect corrupt streams
             this.Compression                  = string.Empty;         // "", "gzip" and "deflate"
+
+            // LExI communication attempts
+            this.LexiAttempts                 = DEF_LEXI_ATTEMPTS;
+            this.LexiTimeout                  = DEF_LEXI_TIMEOUT;
         
             #region Collections
         
@@ -1032,6 +1047,70 @@ namespace Xml
         
         [XmlElement("Compression")]
         public string Compression { get; set; }
+
+        [XmlIgnore]
+        public int LexiTimeout { get; set; }
+
+        [XmlElement("LexiTimeout")]
+        public string Deserialize_LexiTimeout
+        {
+            set
+            {
+                int v;
+                if ( ! string.IsNullOrEmpty ( value ) &&
+                     int.TryParse ( value, out v ) )
+                {
+                    if      ( v < MIN_LEXI_TIMEOUT ) this.LexiTimeout = MIN_LEXI_TIMEOUT;
+                    else if ( v > MAX_LEXI_TIMEOUT ) this.LexiTimeout = MAX_LEXI_TIMEOUT;
+                    else                             this.LexiTimeout = v;
+                }
+                else this.LexiTimeout = DEF_LEXI_TIMEOUT;
+
+                this.LexiTimeout *= 1000; // From sec to msec
+            }
+            get { return this.LexiTimeout.ToString (); }
+        }
+
+        [XmlIgnore]
+        public int LexiAttempts;
+
+        [XmlElement("LexiAttempts")]
+        public string Deserialize_LexiAttempts
+        {
+            set
+            {
+                int v;
+                if ( ! string.IsNullOrEmpty ( value ) &&
+                     int.TryParse ( value, out v ) )
+                {
+                    if      ( v < MIN_LEXI_ATTEMPTS ) this.LexiAttempts = MIN_LEXI_ATTEMPTS;
+                    else if ( v > MAX_LEXI_ATTEMPTS ) this.LexiAttempts = MAX_LEXI_ATTEMPTS;
+                    else                              this.LexiAttempts = v;
+                }
+                else this.LexiAttempts = DEF_LEXI_ATTEMPTS;
+            }
+            get { return this.LexiAttempts.ToString (); }
+        }
+
+        /*
+        private int value_lexiTimeout;
+        [XmlElement("LexiTimeout")]
+        public dynamic LexiTimeout
+        {
+            set { this.value_lexiTimeout = XmlAux.Set ( value,
+                    DEF_LEXI_TIMEOUT, MIN_LEXI_TIMEOUT, MAX_LEXI_TIMEOUT ); }
+            get { return this.value_lexiTimeout; }
+        }
+
+        private int value_lexiAttempts;
+        [XmlElement("LexiAttempts")]
+        public dynamic LexiAttempts
+        {
+            set { this.value_lexiAttempts = XmlAux.Set ( value,
+                    DEF_LEXI_ATTEMPTS, MIN_LEXI_ATTEMPTS, MAX_LEXI_ATTEMPTS ); }
+            get { return this.value_lexiAttempts; }
+        }
+        */
 
         #endregion
 

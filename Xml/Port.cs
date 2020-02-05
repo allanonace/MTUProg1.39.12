@@ -90,10 +90,14 @@ namespace Xml
         [XmlElement("Type")]
         public string Type { get; set; }
         
-        // Set in Configuration constructor to know exactly the port type
-        // of each Mtu entry, not the Meter ID nor a list of numbers/ids
+        // Set in Configuration constructor to know exactly the port type,
+        // not the Meter ID nor a list of numbers/ids
         [XmlIgnore]
         public string TypeString { get; set; }
+
+        // Set in Configuration constructor to use during the family assignment
+        [XmlIgnore]
+        public List<string> Utilities { get; set; }
 
         [XmlIgnore]
         public bool IsSpecialCaseNumType { get; set; }

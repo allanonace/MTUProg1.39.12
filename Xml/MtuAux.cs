@@ -12,13 +12,13 @@ namespace Xml
 
             bool isNumeric = int.TryParse ( portType, out int portTypeNumber );
 
-            // "3101"
+            // Meter ID ( i.e. "3101" )
             if ( isNumeric )
             {
                 portTypes.Add ( portType );
                 return true;
             }
-            // multiple meter types (i.e. "3101|3102|3103")
+            // Multiple meter IDs (i.e. "3101|3102|3103")
             else if ( portType.Contains ( "|" ) )
             {
                 portTypes.AddRange ( portType.Split ( '|' ) );
@@ -37,10 +37,10 @@ namespace Xml
 
         public static bool IsPredefinedType ( string type )
         {
-            return type.Equals("S4K") ||
-                   type.Equals("4KL") ||
-                   type.Equals("GUT") ||
-                   type.Equals("CH4");
+            return type.Equals("s4k") ||
+                   type.Equals("4kl") ||
+                   type.Equals("gut") ||
+                   type.Equals("ch4");
         }
     }
 }
