@@ -114,6 +114,7 @@ namespace MTUComm
             AlarmList  tempAlarms;
             DemandConf tempDemands;
             User[]     tempUsers;
+            InterfaceConfig tempInterface;
 
             try
             {
@@ -124,6 +125,7 @@ namespace MTUComm
                 tempAlarms     = Utils.DeserializeXml<AlarmList>  ( Path.Combine(configPath, XML_ALARMS  ) );
                 tempDemands    = Utils.DeserializeXml<DemandConf> ( Path.Combine(configPath, XML_DEMANDS ) );
                 tempUsers      = Utils.DeserializeXml<UserList>   ( Path.Combine(configPath, XML_USERS   ) ).List;
+                tempInterface  = Utils.DeserializeXml<InterfaceConfig> ( XML_INTERFACE, true ); // From resources
 
                 // Preload important information for the hardware ( MTU and Meters )
                 PreloadHardwareInfo ( tempMtuTypes, tempMeterTypes );
@@ -143,6 +145,7 @@ namespace MTUComm
             config.Alarms     = tempAlarms;
             config.Demands    = tempDemands;
             config.Users      = tempUsers;
+            config.Interfaces = tempInterface;
 
             // Set ammounts ( attempts and time ) to configure the LExI communication
             Lexi.Lexi.LexiMaxAttempts = config.Global.LexiAttempts;
@@ -155,6 +158,8 @@ namespace MTUComm
             MtuTypes   mtuTypes   = null,
             MeterTypes meterTypes = null )
         {
+            #region Meter Utilities
+
             // Lists all utilities for each Meter type
             // Structure: <Type,Utilities>
             /*
@@ -203,18 +208,17 @@ namespace MTUComm
                 // Chars
                 else
                 {
-                    foreach ( char c in type )
-                    {
-                        string cs = c.ToString ();
+                    if ( ! utilities.ContainsKey ( type ) )
+                        utilities.Add ( type, new List<string> () );
 
-                        if ( ! utilities.ContainsKey ( cs ) )
-                            utilities.Add ( cs, new List<string> () );
-
-                        if ( ! utilities[ cs ].Contains ( utility ) )
-                            utilities[ cs ].Add ( utility );
-                    }
+                    if ( ! utilities[ type ].Contains ( utility ) )
+                        utilities[ type ].Add ( utility );
                 }
             }
+
+            #endregion
+
+            #region Get real Port Type and Utility 
             
             // Preload port types, because some ports use a letter but other a list of Meter IDs
             // Done here because Xml project has no reference to MTUComm ( cross references )
@@ -234,8 +238,13 @@ namespace MTUComm
                     //           We assume that will be one special numerical meter type ( e.g. <Type>122</Type> )
                     //           or a list of characters ( e.g. <Type>MR</Type> )
                     // Option C: Special predefined string
-                    //           Such as "SETFLOW"
+                    //           Such as "SETFLOW" or "GUT"
                     bool isNumeric = MtuAux.GetPortTypes ( port.Type.ToLower (), out portTypes );
+
+                    // FIXME: Avoids MTU compatible with predefined Meter types ( GUT, S4K,.. ), except SETFLOW
+                    if ( MtuAux.IsPredefinedType ( portTypes[ 0 ] ) &&
+                         ! portTypes[ 0 ].Equals ( "setflow" ) )
+                        continue;
 
                     // Some Meters have numeric type and some of them appears twice
                     // in meter.xml, one for a Meter ID and other for a Meter type
@@ -243,17 +252,26 @@ namespace MTUComm
                     port.IsSpecialCaseNumType = meterTypes.ContainsNumericType ( portTypes[ 0 ] );
 
                     // This information will be used during the family assignment for each MTU to be used
-                    port.Utilities = utilities[ portTypes[ 0 ] ];
+                    if ( isNumeric )
+                    {
+                        // Use first Meter ID to retrieve its type
+                        port.Utilities = utilities[ meterTypes.FindByMterId ( int.Parse ( portTypes[ 0 ] ) ).Type.ToLower () ];
+                    }
+                    else
+                    {
+                        // Use the Meter type directly
+                        port.Utilities = utilities[ portTypes[ 0 ] ];
+                    }
 
                     // Set if this Mtu only supports certain Meter IDs ( e.g. <Meter ID="122"> and there is no <Type>122</Type> )
                     if ( isNumeric &&
-                            ! port.IsSpecialCaseNumType )
+                         ! port.IsSpecialCaseNumType )
                         port.CertainMeterIds.AddRange ( portTypes );
 
-                    // The Meter type is string or is a special numerical case ( e.g. <Type>M</Type> or <Type>122</Type> )
+                    // The Meter type is string or is a special numerical case ( e.g. <Type>MR</Type> or <Type>122</Type> )
                     if ( ! isNumeric ||
-                            port.IsSpecialCaseNumType )
-                        port.TypeString = string.Join ( string.Empty, portTypes );
+                         port.IsSpecialCaseNumType )
+                        port.TypeString = string.Join ( string.Empty, portTypes ).ToUpper ();
                     
                     // Type is a number or list of IDs supported
                     else
@@ -273,14 +291,15 @@ namespace MTUComm
                                 allTypes.Append ( c );
                         }
 
-                        port.TypeString = allTypes.ToString ();
+                        port.TypeString = allTypes.ToString ().ToUpper ();
                         allTypes.Clear ();
                     }
-                    
-                    // Utils.Print ( "MTU " + mtu.Id + ": Type " + port.TypeString );
                 }
             }
+
             allTypes = null;
+
+            #endregion
         }
 
         #endregion

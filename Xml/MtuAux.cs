@@ -26,21 +26,27 @@ namespace Xml
             }
             // Predefined string
             else if ( IsPredefinedType ( portType ) )
-                portTypes.Add ( portType );
+                portTypes.Add ( portType.ToLower () );
             // String
             else
                 foreach ( char c in portType )
-                    portTypes.Add ( c.ToString () );
+                    portTypes.Add ( c.ToString ().ToLower());
 
             return false;
         }
 
-        public static bool IsPredefinedType ( string type )
+        // FIXME: This method can be removed and treath all Meter typers in the same way in GetPortTypes, only working with full strings
+        // FIXME: but for the moment it is useful to have this method, to avoid all string except setflow, because we don't know the utility of the rest
+        public static bool IsPredefinedType (
+            string type )
         {
-            return type.Equals("s4k") ||
-                   type.Equals("4kl") ||
-                   type.Equals("gut") ||
-                   type.Equals("ch4");
+            type = type.ToLower ();
+
+            return type.Equals ( "s4k" ) || // e.g. MTU 168 HexNum 4291-065-MBS2W
+                   type.Equals ( "4kl" ) || // 
+                   type.Equals ( "gut" ) || // e.g. MTU 102 HexNum 501-2009-002
+                   type.Equals ( "ch4" ) || // e.g. MTU 169 HexNum 4221-079-YBS2W
+                   type.Equals ( "setflow" );
         }
     }
 }
