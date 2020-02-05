@@ -3738,9 +3738,7 @@ namespace MTUComm
                 Utils.Print("-------RDD_FINISH--------");
 
                 #endregion
-
                 await addMtuLog.LogAddMtu();
-
                 #region Verifying data 
 
                 Utils.Print("----FINAL_READ_START-----");
