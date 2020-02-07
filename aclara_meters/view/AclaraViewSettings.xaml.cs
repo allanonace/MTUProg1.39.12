@@ -32,6 +32,8 @@ namespace aclara_meters.view
         private const string TEXT_INTUNE  = " [ using Intune ]";
         private const string TEXT_LICENSE = "Licensed to: ";
         private const string TEXT_CONFVER = "Configuration version: ";
+        private const string VAR_VERSION   = "ConfigVersion";
+        private const string VAR_DATECHECK = "DateCheck";
 
         private ActionType actionType;
         private IUserDialogs dialogsSaved;
@@ -278,12 +280,20 @@ namespace aclara_meters.view
                     indicator.IsVisible = false;
                     background_scan_page.IsEnabled = true;
                     return;
+
                 case ValidationResult.FAIL:
                     dialog_open_bg.IsVisible = true;
                     turnoff_mtu_background.IsVisible = true;
                     dialogView.CloseDialogs();
                     dialogView.UpdateNoActionText ();
                     dialogView.OpenCloseDialog("dialog_NoAction", true);
+                    return;
+                
+                case ValidationResult.FAMILY_NOT_SUPPORTED:
+                    backdark_bg.IsVisible = false;
+                    indicator.IsVisible   = false;
+                    background_scan_page.IsEnabled = true;
+                    base.ShowAlert ( new MtuDoesNotBelongToAnyFamilyException () );
                     return;
             }
 
@@ -607,29 +617,13 @@ namespace aclara_meters.view
 
         public async void Btn_DownloadConf_Clicked(object sender, EventArgs e)
         {
-            if (await ConfirmDownloadFilesAsync())
+            if ( await ConfirmDownloadFilesAsync () )
             {
-                Waiting(true);
+                Waiting ( true );
 
-                GenericUtilsClass.BackUpConfigFiles();
-                if (await DownloadConfigProcess())
-                {
-                    if (Configuration.LoadAndVerifyXMLs())
-                    {
-                        await SecureStorage.SetAsync("ConfigVersion", NewConfigVersion);
-                        await Application.Current.MainPage.DisplayAlert("Attention", "The application will end, restart it to make changes in the configuration", "OK");
-                        
-                        System.Diagnostics.Process.GetCurrentProcess().Kill();
-                    }
-                    else
-                    {
-                        GenericUtilsClass.RestoreConfigFiles();
-                        await Application.Current.MainPage.DisplayAlert("Attention", 
-                            "The new version configuration files are corrupted, the app will continues with the actual files. Contact your IT administratorn", "OK");
-                    }
-                   
-                }
-                Waiting(false);
+                await DownloadConfigFiles ();
+
+                Waiting ( false );
             }
         }
     
@@ -1021,8 +1015,10 @@ namespace aclara_meters.view
             }
         }
 
-        public async Task<bool> DownloadConfigProcess()
+        public async Task<bool> DownloadConfigFiles ()
         {
+            GenericUtilsClass.BackUpConfigFiles ();
+
             if (Mobile.ConfData.HasIntune)
             {
                 if (Mobile.IsNetAvailable())
@@ -1046,39 +1042,59 @@ namespace aclara_meters.view
                     string result = string.Empty;
                     TaskCompletionSource<string> taskSemaphoreDownload = new TaskCompletionSource<string>();
 
-                    await Task.Run(async () => {
-
+                    await Task.Run(async () =>
+                    {
                         Device.BeginInvokeOnMainThread(async () =>
                         {
                             await Application.Current.MainPage.Navigation.PushAsync(new FtpDownloadSettings(taskSemaphoreDownload));
                         });
                         result = await taskSemaphoreDownload.Task;
 
-
                         Device.BeginInvokeOnMainThread(async () =>
                         {                        
                             if (result == "OK")
                             {
-                                if (Configuration.LoadAndVerifyXMLs())
+                                try
                                 {
-                                    await SecureStorage.SetAsync("ConfigVersion", GenericUtilsClass.CheckFTPConfigVersion());
-                                    await Application.Current.MainPage.DisplayAlert("Attention", "The application will end, restart it to make changes in the configuration", "ok");
+                                    // Verify the configuration files and preload important information for the hardware
+                                    // [ Configuration.cs ] ConfigurationFilesNotFoundException
+                                    // [ Configuration.cs ] ConfigurationFilesCorruptedException
+                                    // [ Configuration.cs ] DeviceMinDateAllowedException
+                                    Configuration config = Singleton.Get.Configuration;
 
-                                    System.Diagnostics.Process.GetCurrentProcess().Kill();
+                                    #if DEBUG
+
+                                    // Force some error cases in debug mode
+                                    DebugOptions debug = config.Debug;
+                                    if ( debug != null )
+                                    {
+                                        if ( debug.ForceErrorConfig_Settings_Date )
+                                            throw new DeviceMinDateAllowedException ();
+                                        else if ( debug.ForceErrorConfig_Settings_Files )
+                                            throw new Exception ();
+                                    }
+
+                                    #endif
+
+                                    await SecureStorage.SetAsync ( VAR_VERSION, GenericUtilsClass.CheckFTPConfigVersion () );
+                                    await SecureStorage.SetAsync ( VAR_DATECHECK, DateTime.Today.ToShortDateString () );
+
+                                    await DisplayAlert ( "Attention", "The app will close to apply the new configuration", "OK" );
+                                    System.Diagnostics.Process.GetCurrentProcess ().Kill ();
                                 }
-                                else
+                                catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
                                 {
-                                    GenericUtilsClass.RestoreConfigFiles();
-                                    await Application.Current.MainPage.DisplayAlert("Attention",
-                                         "The new version configuration files are corrupted, the app will continues with the actual files. Contact your IT administrator", "OK");
+                                    GenericUtilsClass.RestoreConfigFiles ();
+                                    
+                                    if ( e is DeviceMinDateAllowedException )
+                                         base.ShowAlert ( new DeviceMinDateAllowedSettingsException () );
+                                    else base.ShowAlert ( new ConfigFilesCorruptedSettingsException () );
                                 }
                             }
                             else
-                                await Application.Current.MainPage.DisplayAlert("Attention",
-                                          "The app will continues with the actual files", "OK");
-
+                                await Application.Current.MainPage.DisplayAlert ( "Attention",
+                                          "The app will continue with the current files", "OK" );
                         });
-
                     });
                     return false; 
                 }
@@ -1097,7 +1113,7 @@ namespace aclara_meters.view
                 {
 
                     bool CPD = false;
-                    if (GenericUtilsClass.TagGlobal(true,"ConfigPublicDir", out dynamic value))
+                    if (GenericUtilsClass.GetTagFromGlobalXml(true,"ConfigPublicDir", out dynamic value))
                     {
                         if (value != null)
                             bool.TryParse((string)value, out CPD);

@@ -3,20 +3,15 @@ using Acr.UserDialogs;
 using Library;
 using Library.Exceptions;
 using MTUComm;
-using nexus.protocols.ble;
 using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using Xamarin.Essentials;
 using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
-
+using Xml;
+ 
 namespace aclara_meters.view
 {
 
@@ -24,16 +19,16 @@ namespace aclara_meters.view
     {
         #region Constants
 
-        private const string SO_ANDROID = "Android";
-        private const string SO_IOS = "iOS";
-        private const string SO_UNKNOWN = "Unknown";
+        private const string VAR_VERSION   = "ConfigVersion";
+        private const string VAR_DATECHECK = "DateCheck";
+        private const string INTUNE        = "Intune";
+        private const string SO_ANDROID    = "Android";
+        private const string SO_IOS        = "iOS";
+        private const string SO_UNKNOWN    = "Unknown";
 
         #endregion
+
         private Configuration config;
-        private string ConfigVersion;
-        private string NewConfigVersion;
-        private bool checkConfigFiles = false;
-        private string DateCheck;
 
         private bool formsInitFailed;
         public AclaraViewConfig(IUserDialogs dialogs)
@@ -48,71 +43,61 @@ namespace aclara_meters.view
 
         }
  
-        private void LoadConfigurationAndOpenScene(IUserDialogs dialogs)
+        private void LoadConfigurationAndOpenScene (
+            IUserDialogs dialogs )
         {
-            bool Result = true;
+            bool   configFilesBackuped  = false;
+            string currentConfigVersion = SecureStorage.GetAsync ( VAR_VERSION ).Result;
+            string newConfigVersion     = currentConfigVersion;
 
-            if (!GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPath))
+            #region Copy Files
+
+            // Not all necessary configuration files are installed
+            // NOTE: Only the first launch of the app AclaraInstallPage is used
+            if ( ! GenericUtilsClass.HasDeviceAllXmls ( Mobile.ConfigPath ) )
             {
-                Result = InitialConfigProcess();
-                if (!Result)
+                // Try to copy/install the configuration files
+                if ( ! CopyConfigFiles ( ref newConfigVersion ) )
                 {
-                    GenericUtilsClass.SetInstallMode("None");
-                    this.ShowErrorAndKill(new ConfigurationFilesNotFoundException());
-                    return; // The apps will be forced to close / kill
-                }
-                if (!Configuration.LoadAndVerifyXMLs())
-                {
-                    GenericUtilsClass.SetInstallMode("None");
-                    GenericUtilsClass.DeleteConfigFiles(Mobile.ConfigPath);
-                    this.ShowErrorAndKill(new ConfigurationFilesNotFoundException());
+                    GenericUtilsClass.SetInstallMode ( "None" );
+
+                    this.ShowErrorAndKill ( new ConfigFilesNotFoundException () );
                     return;
                 }
-                SecureStorage.SetAsync("ConfigVersion", NewConfigVersion);
-                SecureStorage.SetAsync("DateCheck", DateTime.Today.ToShortDateString());
             }
+            // All necessary configuration files are installed
             else
             {
-                DateCheck = SecureStorage.GetAsync("DateCheck").Result;
-                if (DateCheck != DateTime.Today.ToShortDateString())  // once per day
+                // Check once per day if there is a new version of the configuration files
+                string dateCheck = SecureStorage.GetAsync ( VAR_DATECHECK ).Result;
+                if ( dateCheck != DateTime.Today.ToShortDateString () )
                 {
-                    SecureStorage.SetAsync("DateCheck", DateTime.Today.ToShortDateString());
-                    ConfigVersion = SecureStorage.GetAsync("ConfigVersion").Result;
-                    NewConfigVersion = SecureStorage.GetAsync("ConfigVersion").Result;
-
-                    if (GenericUtilsClass.TagGlobal(false, "CheckConfigFiles", out dynamic value) &&
-                         value != null)
+                    if ( GenericUtilsClass.GetTagFromGlobalXml ( false, "CheckConfigFiles", out dynamic value ) &&
+                         value != null )
                     {
-                        bool.TryParse((string)value, out checkConfigFiles);
-
-                        if (checkConfigFiles)
+                        bool.TryParse ( ( string )value, out bool checkConfigFiles );
+                        if ( checkConfigFiles )
                         {
-                            if (Mobile.ConfData.HasFTP ||
-                                 Mobile.ConfData.HasIntune)
-                                NewConfigVersion = GenericUtilsClass.CheckFTPConfigVersion();
-                            else NewConfigVersion = GenericUtilsClass.CheckPubConfigVersion();
-                            checkConfigFiles = false;
-
-                            if (!string.IsNullOrEmpty(NewConfigVersion) && !NewConfigVersion.Equals(ConfigVersion))
+                            if ( Mobile.ConfData.HasFTP ||
+                                 Mobile.ConfData.HasIntune )
+                                 newConfigVersion = GenericUtilsClass.CheckFTPConfigVersion ();
+                            else newConfigVersion = GenericUtilsClass.CheckPubConfigVersion ();
+                            
+                            // The current version of the configuration files is different from the "new" version available
+                            if ( ! newConfigVersion.Equals ( currentConfigVersion ) )
                             {
-                                checkConfigFiles = true;
-                                // Backup current and update config files
-                                GenericUtilsClass.BackUpConfigFiles();
-                                Result = UpdateConfigFiles();
-                                if (!Result)
+                                configFilesBackuped = true;
+
+                                // Backup current version of the config files
+                                GenericUtilsClass.BackUpConfigFiles ();
+
+                                // Update config files with the "new" version detected
+                                if ( this.UpdateConfigFiles () )
                                 {
-                                    GenericUtilsClass.RestoreConfigFiles();
-                                    this.ShowErrorAndKill(new ConfigurationFilesNewVersionException());
+                                    GenericUtilsClass.RestoreConfigFiles ();
+
+                                    this.ShowErrorAndKill ( new ConfigFilesNewVersionException () );
                                     return;
-                                }
-                                else
-                                {
-                                    if(!Configuration.LoadAndVerifyXMLs())
-                                    {
-                                        GenericUtilsClass.RestoreConfigFiles();
-                                        this.ShowErrorAndKill(new ConfigurationFilesNewVersionException());
-                                        return;
-                                    }
                                 }
                             }
                         }
@@ -120,61 +105,105 @@ namespace aclara_meters.view
                 }
             }
 
-            if (Result)
-            {
-                ConfigVersion = SecureStorage.GetAsync("ConfigVersion").Result;
+            // Update the value of the current version with the ( maybe )
+            // new version, which starts with the same value as the current one
+            currentConfigVersion = newConfigVersion;
 
-                // Loads configuration files
-                if (!this.InitializeConfiguration())
+            #endregion
+
+            #region Load Configuration
+
+            try
+            {
+                // Verify the configuration files and preload important information for the hardware
+                // [ Configuration.cs ] ConfigurationFilesNotFoundException
+                // [ Configuration.cs ] ConfigurationFilesCorruptedException
+                // [ Configuration.cs ] DeviceMinDateAllowedException
+                this.InitializeConfig ();
+
+                #if DEBUG
+
+                // Force some error cases in debug mode
+                DebugOptions debug = config.Debug;
+                if ( debug != null )
                 {
-                    if (checkConfigFiles)
-                        GenericUtilsClass.RestoreConfigFiles();
+                    if ( debug.ForceErrorConfig_Init_Date )
+                        throw new DeviceMinDateAllowedException ();
+                    else if ( debug.ForceErrorConfig_Init_Files )
+                        throw new Exception ();
+                }
+
+                #endif
+            }
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
+            {
+                if ( ! ( e is DeviceMinDateAllowedException ) )
+                {
+                    // Error updating
+                    if ( configFilesBackuped )
+                    {
+                        GenericUtilsClass.RestoreConfigFiles ();
+
+                        e = new ConfigFilesNewVersionException ();
+                    }
+                    // Error in a new installation
                     else
                     {
-                        GenericUtilsClass.DeleteConfigFiles(Mobile.ConfigPath);
-                        GenericUtilsClass.SetInstallMode("None");                      
-                    }
+                        GenericUtilsClass.SetInstallMode ( "None" );
+                        GenericUtilsClass.DeleteConfigFiles ( Mobile.ConfigPath );
 
-                    // Finishes because the app will be killed
-                    return;
-                }
-
-                if (!String.IsNullOrEmpty(NewConfigVersion))
-                {
-                    ConfigVersion = NewConfigVersion;
-                    SecureStorage.SetAsync("ConfigVersion", ConfigVersion);
-                }
-
-                Utils.Print($"Config version: { ConfigVersion} ");
-                if (!Mobile.ConfData.HasIntune) Utils.Print("Local parameters loaded..");
-                else Utils.Print("Intune parameters loaded..");
-                if (Mobile.ConfData.HasIntune || Mobile.ConfData.HasFTP)
-                {
-                    Utils.Print("FTP: " + Mobile.ConfData.FtpDownload_Host + ":" + Mobile.ConfData.FtpDownload_Port + " - "
-                        + Mobile.ConfData.FtpDownload_User + " [ " + Mobile.ConfData.FtpDownload_Pass + " ]");
-                    if (Mobile.ConfData.IsCertLoaded)
-                    {
-                        Utils.Print("Certificate: " + Mobile.ConfData.certificate.Subject + " [ " + Mobile.ConfData.certificate.NotAfter + " ]");
+                        e = new ConfigFilesCorruptedException ();
                     }
                 }
-
-                if (!Data.Get.IsFromScripting)
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        FormsApp.StartInteractive = true;
-                        Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogs));
-                    });
-                else
-                {
-                    HandleUrl(FormsApp.DataUrl);
-                }
+                
+                this.ShowErrorAndKill ( e );
+                return;
             }
-        }
-        private bool InitialConfigProcess()
-        {
+            
+            // Information to be used to verify if there is a new version of the configuration files
+            SecureStorage.SetAsync ( VAR_VERSION, newConfigVersion );
+            SecureStorage.SetAsync ( VAR_DATECHECK, DateTime.Today.ToShortDateString () );
 
+            // Output of some informational data to improve debugging
+            Utils.Print ( $"Config version: { currentConfigVersion } " );
+            
+            if ( ! Mobile.ConfData.HasIntune )
+                 Utils.Print ( "Local parameters loaded.." );
+            else Utils.Print ( "Intune parameters loaded.." );
+
+            if ( Mobile.ConfData.HasIntune ||
+                 Mobile.ConfData.HasFTP )
+            {
+                Utils.Print ( "FTP: " + Mobile.ConfData.FtpDownload_Host + ":" +
+                    Mobile.ConfData.FtpDownload_Port + " - "
+                    + Mobile.ConfData.FtpDownload_User +
+                    " [ " + Mobile.ConfData.FtpDownload_Pass + " ]");
+
+                if ( Mobile.ConfData.IsCertLoaded )
+                    Utils.Print ( "Certificate: " + Mobile.ConfData.certificate.Subject +
+                        " [ " + Mobile.ConfData.certificate.NotAfter + " ]" );
+            }
+
+            #endregion
+
+            #region Go to MainMenu
+
+            // Load the main menu scene/window
+            // Interactive mode
+            if ( FormsApp.StartInteractive = ! Data.Get.IsFromScripting )
+                Device.BeginInvokeOnMainThread ( () =>
+                    Application.Current.MainPage = new NavigationPage ( new AclaraViewLogin ( dialogs ) ) );
+            // Scripted mode
+            else HandleUrl ( FormsApp.DataUrl );
+
+            #endregion
+        }
+
+        private bool CopyConfigFiles (
+            ref string newConfigVersion )
+        {
             string Mode = GenericUtilsClass.ChekInstallMode();
-            if (Mode.Equals("Intune"))
+            if ( Mode.Equals ( INTUNE ) )
             {
                 if (Mobile.IsNetAvailable())
                 {
@@ -182,8 +211,8 @@ namespace aclara_meters.view
                     MamServ.UtilMAMService();
                     if (Mobile.ConfData.HasIntune)
                     {
-                        NewConfigVersion = GenericUtilsClass.CheckFTPConfigVersion();
-                        if (!string.IsNullOrEmpty(NewConfigVersion))
+                        newConfigVersion = GenericUtilsClass.CheckFTPConfigVersion ();
+                        if ( ! string.IsNullOrEmpty ( newConfigVersion ) )
                         {
                             if (!GenericUtilsClass.DownloadConfigFiles(out string sFileCert))
                             {
@@ -218,12 +247,13 @@ namespace aclara_meters.view
                 Mobile.ConfData.HasFTP = false;
 
                 // Check if all configuration files are available in public folder
+                // FIXME: PARECE QUE SOLO EN MANUAL SE ESTA COMPROBANDO SI ESTAN DISPONIBLES TODOS LOS FICHEROS DE CONFIGURACION
                 if (GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPublicPath))
                 {
-                    NewConfigVersion = GenericUtilsClass.CheckPubConfigVersion();
+                    newConfigVersion = GenericUtilsClass.CheckPubConfigVersion ();
 
                     bool CPD = false;
-                    if (GenericUtilsClass.TagGlobal(true, "ConfigPublicDir", out dynamic value))
+                    if (GenericUtilsClass.GetTagFromGlobalXml(true, "ConfigPublicDir", out dynamic value))
                     {
                         if (value != null)
                             bool.TryParse((string)value, out CPD);
@@ -241,49 +271,36 @@ namespace aclara_meters.view
                 else
                 {
                     GenericUtilsClass.SetInstallMode("None");
-                    this.ShowErrorAndKill(new ConfigurationFilesNotFoundException());                    
+                    this.ShowErrorAndKill(new ConfigFilesNotFoundException());                    
                     return false;
                 }
             }
             return false; // mode FTP without config files 
         }
 
-        public bool InitializeConfiguration()
+        public void InitializeConfig ()
         {
-            try
-            {            
-                config = Configuration.GetInstanceWithParams(string.Empty);   
-                Singleton.Set = new Logger();
+            config = Configuration.GetInstance ();
+            Singleton.Set = new Logger ();
 
-                switch (Device.RuntimePlatform)
-                {
-                    case Device.Android:
-                        config.setPlatform(SO_ANDROID);
-                        config.setAppName(FormsApp.AppName);
-                        config.setVersion(FormsApp.AppVersion_str);
-                        config.setDeviceUUID(FormsApp.DeviceId);
-                        break;
-                    case Device.iOS:
-                        config.setPlatform(SO_IOS);
-                        config.setAppName(FormsApp.AppName);
-                        config.setVersion(FormsApp.AppVersion_str);
-                        config.setDeviceUUID(FormsApp.DeviceId);
-                        break;
-                    default:
-                        config.setPlatform(SO_UNKNOWN);
-                        break;
-                }
-            }
-            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
+            switch ( Device.RuntimePlatform )
             {
-                if ( Errors.IsOwnException ( e ) )
-                     ShowErrorAndKill ( e );
-                else ShowErrorAndKill ( new ConfigurationFilesCorruptedException () );
-
-                return false;
+                case Device.Android:
+                    config.setPlatform(SO_ANDROID);
+                    config.setAppName(FormsApp.AppName);
+                    config.setVersion(FormsApp.AppVersion_str);
+                    config.setDeviceUUID(FormsApp.DeviceId);
+                    break;
+                case Device.iOS:
+                    config.setPlatform(SO_IOS);
+                    config.setAppName(FormsApp.AppName);
+                    config.setVersion(FormsApp.AppVersion_str);
+                    config.setDeviceUUID(FormsApp.DeviceId);
+                    break;
+                default:
+                    config.setPlatform(SO_UNKNOWN);
+                    break;
             }
-
-            return true;
         }
 
         #region Base64
@@ -301,6 +318,7 @@ namespace aclara_meters.view
         }
 
         #endregion
+
         #region Scripting
 
         public async Task HandleUrl(Uri url)
@@ -376,19 +394,14 @@ namespace aclara_meters.view
 
         #endregion
 
-
-        private void ShowErrorAndKill(
-       Exception e)
+        private void ShowErrorAndKill (
+            Exception e)
         {
             // Avoids executing the HandleUrl method
             this.formsInitFailed = true;
 
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                Application.Current.MainPage = new NavigationPage(new ErrorInitView(e));
-            });
+            base.ShowErrorAndKill ( e );
         }
-
 
         private bool UpdateConfigFiles()
         {
@@ -408,7 +421,7 @@ namespace aclara_meters.view
             else if (Mode=="Manual" && GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPublicPath))
             {
                 bool CPD = false;
-                if (GenericUtilsClass.TagGlobal(true, "ConfigPublicDir", out dynamic value))
+                if (GenericUtilsClass.GetTagFromGlobalXml(true, "ConfigPublicDir", out dynamic value))
                 {
                     if (value != null)
                         bool.TryParse((string)value, out CPD);

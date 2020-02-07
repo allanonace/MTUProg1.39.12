@@ -731,12 +731,20 @@ namespace aclara_meters.view
                     indicator.IsVisible = false;
                     background_scan_page.IsEnabled = true;
                     return;
+
                 case ValidationResult.FAIL:
                     dialog_open_bg.IsVisible = true;
                     turnoff_mtu_background.IsVisible = true;
                     dialogView.CloseDialogs();
                     dialogView.UpdateNoActionText ();
                     dialogView.OpenCloseDialog("dialog_NoAction", true);
+                    return;
+                
+                case ValidationResult.FAMILY_NOT_SUPPORTED:
+                    backdark_bg.IsVisible = false;
+                    indicator.IsVisible   = false;
+                    background_scan_page.IsEnabled = true;
+                    base.ShowAlert ( new MtuDoesNotBelongToAnyFamilyException () );
                     return;
             }
 

@@ -18,6 +18,7 @@
     <Error id="109" message="There are no records to retrieve for the Historical Read process" no_error="true" />
     <Error id="110" message="Preparing values for the log. Check puck position and try again" footer="Preparing log" />
     <Error id="111" message="The value to write in BCD format for the Meter ID is greater ( _var_ ) than the number of available bytes" footer="Meter ID length" />
+    <Error id="112" message="The MTU does not belong to any of the families currently supported" no_error="true" />
 
     <!-- Meter -->
     <Error id="200" message="The Meter.xml file does not contain the Meter ID specified" footer="Meter not in Meter.xml" />
@@ -87,24 +88,26 @@
     <Error id="705" message="The MTU encryption index has reached its limit" footer="Encryption index limit" no_error="true" />
 
     <!-- Configuration Files -->
-    <Error id="800" message="Some of the configuration files are not present in the root folder. Contact your IT administrator" />
-    <Error id="801" message="There is a problem with the configuration files and some of them are corrupted. Contact your IT administrator" />
-    <Error id="802" message="The certificate that you tried to install is not a valid certificate file ( *.cer )" />
+    <Error id="800" message="Some of the configuration files are not present in the root folder. Contact your IT administrator" no_error="true" />
+    <Error id="801" message="There is a problem with the configuration files and some of them are corrupted or may not have a port type defined. Contact your IT administrator" no_error="true" />
+    <Error id="802" message="The certificate that you tried to install is not a valid certificate file ( *.cer ). Contact your IT administrator" no_error="true" />
     <Error id="803" message="It is not possible to use the currently installed certificate. Contact your IT administrator" />
-    <Error id="804" message="Download or install a new certificate because the one that is currently used has expired" no_error="true" />
+    <Error id="804" message="Download or install a new certificate because the one that is currently used has expired. Contact your IT administrator" no_error="true" />
     <Error id="805" message="Not all necessary permissions have been granted on the Android device" no_error="true" />
     <Error id="806" message="There is a problem with the FTP and configuration files could not be downloaded. Contact your IT administrator" />
     <Error id="807" message="The device has not internet connection" no_error="true" />
-    <Error id="808" message="The current date of the device is lower than allowed" no_error="true" />
-    <Error id="809" message="Missing credentials for SFTP" />
-    <Error id="810" message="App can't communicate with the FTP" no_error="true" />
+    <Error id="808" message="The current device date is less than allowed. Contact your IT administrator" no_error="true" />
+    <Error id="809" message="Missing credentials for the SFTP" />
+    <Error id="810" message="The app can't communicate with the FTP" no_error="true" />
     <Error id="811" message="Sending activity logs to the FTP has failed, only _var_ files have been uploaded" />
 	  <Error id="812" message="Changed configuration files"/>
-    <Error id="813" message="The new version configuration files are corrupted, the app will continues with the actual ones when restart it. Contact your IT administrator"/>
+    <Error id="813" message="The new version configuration files are corrupted and the app will continues with the actual ones when restart it. Contact your IT administrator"/>
     <Error id="814" message="Credentials from Intune missing" />
     <Error id="815" message="There is a problem with the camera to scan or take photos" />
     <Error id="816" message="Modification of the content of Global.xml file has failed" />
     <Error id="817" message="Port type missing in MTU ID _var_" />
+    <Error id="818" message="The configuration files are corrupted and the app will continue with the current files. Contact your IT administrator" no_error="true" />
+    <Error id="819" message="The current device date is less than allowed and the app will continues with the actual ones when restart it. Contact your IT administrator" no_error="true" />
     
     <!-- Configuration Files -->
     <Error id="850" message="The interface for the specified MTU ID was not found" /> <!-- message_release="" /> -->

@@ -135,7 +135,7 @@ namespace UnitTest.Tests
                 Data.Set ( "UnitTestData", testData );
 
                 // Loads configuration files
-                this.config = Configuration.GetInstanceWithParams ( this.GetPath () );
+                this.config = Configuration.GetInstance ( this.GetPath () );
 
                 // Prepare data that would be set during app initialization
                 Data.Set ( "IsFromScripting", false );

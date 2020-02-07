@@ -51,8 +51,8 @@ namespace MTUComm
             { new PreparingLogInterfaceException (),            110 },
             // The value to write in BCD format for the Meter ID is greater ( ... ) than the number of available bytes
             { new NumberToBcdIsLargerThanBytesRegister (),      111 },
-            // Was not 
-            //{ new CannotWrite (),      111 },
+            // The MTU does not belong to any of the families currently supported
+            { new MtuDoesNotBelongToAnyFamilyException (),      112 },
         
             // Meter [ 2xx ]
             //------
@@ -182,9 +182,9 @@ namespace MTUComm
             // Configuration Files and System [ 8xx ]
             //-------------------------------
             // Some of the configuration files are not present in the root folder. Contact your IT administrator
-            { new ConfigurationFilesNotFoundException (),       800 },
-            // There is a problem with the configuration files and some of them are corrupted. Contact your IT administrator
-            { new ConfigurationFilesCorruptedException (),      801 },
+            { new ConfigFilesNotFoundException (),              800 },
+            // There is a problem with the configuration files and some of them are corrupted or may not have a the port type defined. Contact your IT administrator
+            { new ConfigFilesCorruptedException (),             801 },
             // The certificate that you tried to install is not a valid certificate file ( *.cer )
             { new CertificateFileNotValidException (),          802 },
             // It is not possible to use the currently installed certificate. Contact your IT administrator
@@ -208,7 +208,7 @@ namespace MTUComm
  		    // Changed configuration files
             { new ConfigFilesChangedException (),               812 }, // NOT USED
             // New version files corrupted
-            { new ConfigurationFilesNewVersionException (),     813 },
+            { new ConfigFilesNewVersionException (),            813 },
             // Intune credentials missing
             { new IntuneCredentialsException (),                814 },
             // Exception with camera
@@ -217,6 +217,10 @@ namespace MTUComm
             { new GlobalChangedException (),                    816 },
             // Exception MTU without portType
             { new PortTypeMissingMTUException (),               817 },
+            // The configuration files are corrupted and the app will continue with the current files. Contact your IT administrator
+            { new ConfigFilesCorruptedSettingsException (),     818 },
+            // The current device date is less than allowed and the app will continues with the actual ones when restart it. Contact your IT administrator
+            { new DeviceMinDateAllowedSettingsException (),     819 },
             
             // DEBUG - Configuration Files and System [ 85x ]
             //-------------------------------
@@ -494,7 +498,6 @@ namespace MTUComm
             bool kill = false )
         {
             Error error = this.AddErrorByException ( e, portIndex );
-
             PageLinker.ShowErrorAlert ( ERROR_INFO, error, kill );
             
             // Method can be invoked when Configuration is not instantiated yet

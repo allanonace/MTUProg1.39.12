@@ -9,10 +9,10 @@ namespace aclara_meters.view
         public ErrorInitView (
             Exception e )
         {
-            InitializeComponent();
+            InitializeComponent ();
 
             //Turn off the Navigation bar
-            NavigationPage.SetHasNavigationBar(this, false);
+            NavigationPage.SetHasNavigationBar ( this, false );
             
             Errors.LogErrorNowAndKill ( e );
         }

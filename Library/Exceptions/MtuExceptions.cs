@@ -107,6 +107,11 @@
     {
         public NumberToBcdIsLargerThanBytesRegister ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
     }
+
+    public class MtuDoesNotBelongToAnyFamilyException : OwnExceptionsBase
+    {
+        public MtuDoesNotBelongToAnyFamilyException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
     
     #endregion
 
@@ -676,19 +681,19 @@
 
     #region Configuration Files and System [ 8xx ]
 
-    public class ConfigurationFilesNotFoundException : OwnExceptionsBase
+    public class ConfigFilesNotFoundException : OwnExceptionsBase
     {
-        public ConfigurationFilesNotFoundException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+        public ConfigFilesNotFoundException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
     }
     
-    public class ConfigurationFilesCorruptedException : OwnExceptionsBase
+    public class ConfigFilesCorruptedException : OwnExceptionsBase
     {
-        public ConfigurationFilesCorruptedException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+        public ConfigFilesCorruptedException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
     }
 
-    public class ConfigurationFilesNewVersionException : OwnExceptionsBase
+    public class ConfigFilesNewVersionException : OwnExceptionsBase
     {
-        public ConfigurationFilesNewVersionException(string message = "", int port = 1, string messagePopup = "") : base(message, port, messagePopup) { }
+        public ConfigFilesNewVersionException(string message = "", int port = 1, string messagePopup = "") : base(message, port, messagePopup) { }
     }
 
     public class IntuneCredentialsException : OwnExceptionsBase
@@ -797,5 +802,17 @@
     {
         public PortTypeMissingMTUException(string message = "", int port = 1, string messagePopup = "") : base(message, port, messagePopup) { }
     }
+
+    
+    public class ConfigFilesCorruptedSettingsException : OwnExceptionsBase
+    {
+        public ConfigFilesCorruptedSettingsException(string message = "", int port = 1, string messagePopup = "") : base(message, port, messagePopup) { }
+    }
+    
+    public class DeviceMinDateAllowedSettingsException : OwnExceptionsBase
+    {
+        public DeviceMinDateAllowedSettingsException(string message = "", int port = 1, string messagePopup = "") : base(message, port, messagePopup) { }
+    }
+    
     #endregion
 }

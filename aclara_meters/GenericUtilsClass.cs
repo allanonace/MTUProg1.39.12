@@ -362,6 +362,10 @@ namespace aclara_meters
                     return true;
 
             }
+
+            if ( name.Equals ( "debugoptions" + XML_EXT ) )
+                return true;
+
             return false;
         }
 
@@ -576,7 +580,7 @@ namespace aclara_meters
             }
         }
 
-        public static bool TagGlobal(bool bPublic, string sTag, out dynamic value)
+        public static bool GetTagFromGlobalXml(bool bPublic, string sTag, out dynamic value)
         {
           
             string uri;
@@ -633,18 +637,15 @@ namespace aclara_meters
             string sPathBackup = Path.Combine(Mobile.ConfigPath, "Backup");
 
             CopyConfigFiles(true, Mobile.ConfigPath, sPathBackup, out string sFileCert);
-
         }
+
         public static void RestoreConfigFiles()
         {
-            
             string sPathBackup = Path.Combine(Mobile.ConfigPath, "Backup");
 
             CopyConfigFiles(true, sPathBackup, Mobile.ConfigPath, out string sFileCert);
 
             Directory.Delete(sPathBackup);
-
         }
-
     }
 }

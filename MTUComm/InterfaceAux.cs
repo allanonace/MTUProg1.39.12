@@ -36,13 +36,26 @@ namespace MTUComm
         private static void GetInterfaceBytMtuId (
             Mtu mtu )
         {
-            InterfaceConfig xmlInterfaces = Singleton.Get.Configuration.Interfaces;
+            Configuration   config        = Singleton.Get.Configuration;
+            InterfaceConfig xmlInterfaces = config.Interfaces;
 
             // Automatically detect, only the first time, the family to use with the current MTU
             string family = mtu.GetFamily ();
 
+            #if DEBUG
+
+            // Force some error cases in debug mode
+            DebugOptions debug = config.Debug;
+            if ( debug != null )
+            {
+                if ( debug.ForceMtu_UnknownMap )
+                    family = string.Empty;
+            }
+
+            #endif
+
             if ( string.IsNullOrEmpty ( family ) )
-                throw new Exception ();
+                throw new MtuDoesNotBelongToAnyFamilyException ();
             
             iInfo = xmlInterfaces.Interfaces.Find ( x => x.Family.Equals ( family ) );
 

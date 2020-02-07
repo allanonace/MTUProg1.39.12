@@ -19,11 +19,12 @@ namespace MTUComm
 
         private const string XML_MTUS      = "mtu.xml";
         private const string XML_METERS    = "meter.xml";
-        public const string XML_GLOBAL     = "global.xml";
+        public  const string XML_GLOBAL    = "global.xml";
         private const string XML_INTERFACE = "Interface.xml";
         private const string XML_ALARMS    = "alarm.xml";
         private const string XML_DEMANDS   = "demandconf.xml";
         private const string XML_USERS     = "user.xml";
+        private const string XML_DEBUG     = "debugoptions.xml";
 
         #endregion
 
@@ -42,6 +43,7 @@ namespace MTUComm
         public User[] Users { get; private set; }
         public DemandConf Demands { get; private set; }
         public AlarmList Alarms { get; private set; }
+        public DebugOptions Debug { get; private set; }
 
         #endregion
 
@@ -56,45 +58,13 @@ namespace MTUComm
             device = "PC";
         }
 
-        private void Initialize (
-            bool avoidXmlError = false )
-        {
-            try
-            {
-                // Loads configuration files ( xml's ) and
-                // preloads important information for the hardware ( MTU and Meters )
-                LoadAndVerifyXMLs ();
-
-                // Regenerate certificate from base64 string
-                Mobile.ConfData.GenerateCertFromStore ();
-                //Mobile.configData.GenerateCert ();
-                //Mobile.configData.LoadCertFromKeychain ();
-                
-                // Check global min date allowed
-                if ( ! string.IsNullOrEmpty ( Global.MinDate ) &&
-                     DateTime.Compare ( DateTime.ParseExact ( Global.MinDate, "MM/dd/yyyy", null ), DateTime.Today ) < 0 )
-                    throw new DeviceMinDateAllowedException ();
-            }
-            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
-            {
-                if ( ! avoidXmlError )
-                {
-                    if ( Errors.IsOwnException ( e ) )
-                        throw e;
-                    else if ( e is FileNotFoundException )
-                        throw new ConfigurationFilesNotFoundException ();
-                    else
-                        throw new ConfigurationFilesCorruptedException ();
-                }
-            }
-        }
-
-        public static Configuration GetInstanceWithParams ( string path = "", bool avoidXmlError = false )
+        public static Configuration GetInstance (
+            string path = "" )
         {
             if ( ! Singleton.Has<Configuration> () )
             {
                 Singleton.Set = new Configuration ( path );
-                Singleton.Get.Configuration.Initialize ( avoidXmlError );
+                ( ( Configuration )Singleton.Get.Configuration ).Initialize ();
 
                 // NOTE: It is not possible to use Mobile static property through an instance
                 //Singleton.Set = new Mobile ();
@@ -105,36 +75,75 @@ namespace MTUComm
             return Singleton.Get.Configuration;
         }
 
-        public static bool LoadAndVerifyXMLs ()
+        private void Initialize ()
+        {
+            try
+            {
+                // Loads configuration files ( XMLs ) and
+                // preloads important information for the hardware ( MTU and Meters )
+                LoadAndVerifyXMLs ();
+
+                // Regenerate certificate from base64 string
+                Mobile.ConfData.GenerateCertFromStore ();
+                //Mobile.configData.GenerateCert ();
+                //Mobile.configData.LoadCertFromKeychain ();
+            }
+            catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
+            {
+                if ( Errors.IsOwnException ( e ) )
+                     throw e;
+                else throw new ConfigFilesCorruptedException ();
+            }
+        }
+
+        private static void LoadAndVerifyXMLs ()
         {
             string configPath = Mobile.ConfigPath;
-            MtuTypes   tempMtuTypes;
-            MeterTypes tempMeterTypes;
-            Global     tempGlobal;
-            AlarmList  tempAlarms;
-            DemandConf tempDemands;
-            User[]     tempUsers;
+            MtuTypes        tempMtuTypes;
+            MeterTypes      tempMeterTypes;
+            Global          tempGlobal;
+            AlarmList       tempAlarms;
+            DemandConf      tempDemands;
+            User[]          tempUsers;
+            DebugOptions    tempDebug = null;
             InterfaceConfig tempInterface;
 
             try
             {
                 // Load configuration files ( xml's )
-                tempMtuTypes   = Utils.DeserializeXml<MtuTypes>   ( Path.Combine(configPath, XML_MTUS    ) );
-                tempMeterTypes = Utils.DeserializeXml<MeterTypes> ( Path.Combine(configPath, XML_METERS  ) );
-                tempGlobal     = Utils.DeserializeXml<Global>     ( Path.Combine(configPath, XML_GLOBAL  ) );
-                tempAlarms     = Utils.DeserializeXml<AlarmList>  ( Path.Combine(configPath, XML_ALARMS  ) );
-                tempDemands    = Utils.DeserializeXml<DemandConf> ( Path.Combine(configPath, XML_DEMANDS ) );
-                tempUsers      = Utils.DeserializeXml<UserList>   ( Path.Combine(configPath, XML_USERS   ) ).List;
+                tempMtuTypes   = Utils.DeserializeXml<MtuTypes>   ( Path.Combine ( configPath, XML_MTUS    ) );
+                tempMeterTypes = Utils.DeserializeXml<MeterTypes> ( Path.Combine ( configPath, XML_METERS  ) );
+                tempGlobal     = Utils.DeserializeXml<Global>     ( Path.Combine ( configPath, XML_GLOBAL  ) );
+                tempAlarms     = Utils.DeserializeXml<AlarmList>  ( Path.Combine ( configPath, XML_ALARMS  ) );
+                tempDemands    = Utils.DeserializeXml<DemandConf> ( Path.Combine ( configPath, XML_DEMANDS ) );
+                tempUsers      = Utils.DeserializeXml<UserList>   ( Path.Combine ( configPath, XML_USERS   ) ).List;
                 tempInterface  = Utils.DeserializeXml<InterfaceConfig> ( XML_INTERFACE, true ); // From resources
+
+                #if DEBUG
+
+                try { tempDebug = Utils.DeserializeXml<DebugOptions> ( Path.Combine ( configPath, XML_DEBUG ) ); }
+                catch ( Exception ) { } // This file is optional
+
+                // Is useful to have the instance created to modify flags with the immediate tool of VisualStudio
+                if ( tempDebug == null )
+                    tempDebug = new DebugOptions ();
+                
+                #endif
 
                 // Preload important information for the hardware ( MTU and Meters )
                 PreloadHardwareInfo ( tempMtuTypes, tempMeterTypes );
             }
             catch ( Exception )
             {
-                //throw new ConfigurationFilesCorruptedException ();
-                return false;
+                throw new ConfigFilesCorruptedException ();
             }
+
+            // Check global min date allowed
+            if ( ! string.IsNullOrEmpty ( tempGlobal.MinDate ) &&
+                 DateTime.Compare (
+                    DateTime.ParseExact ( tempGlobal.MinDate, "MM/dd/yyyy", null ),
+                    DateTime.Today ) < 0 )
+                throw new DeviceMinDateAllowedException ();
 
             Configuration config = Singleton.Get.Configuration;
 
@@ -146,12 +155,11 @@ namespace MTUComm
             config.Demands    = tempDemands;
             config.Users      = tempUsers;
             config.Interfaces = tempInterface;
+            config.Debug      = tempDebug;
 
-            // Set ammounts ( attempts and time ) to configure the LExI communication
+            // Set ammounts ( attempts and timeout ) to configure the LExI communication
             Lexi.Lexi.LexiMaxAttempts = config.Global.LexiAttempts;
             Lexi.Lexi.LexiMaxTimeout  = config.Global.LexiTimeout;
-
-            return true;
         }
 
         private static void PreloadHardwareInfo (
@@ -189,15 +197,14 @@ namespace MTUComm
             92     : electric
             129    : electric
             */
-            Dictionary<string,List<string>> utilities = new Dictionary<string,List<string>>();
+            Dictionary<string,List<string>> utilities = new Dictionary<string,List<string>> ();
             foreach ( Meter meter in meterTypes.Meters )
             {
                 string type    = meter.Type.ToLower ();
                 string utility = meter.Utility.ToLower ();
 
-                // Special cases ( predefined string or numerical Meter Type )
-                if ( type.Equals ( "setflow" ) ||
-                     int.TryParse (type, out int ok ) )
+                // Numerical Meter Type
+                if ( int.TryParse (type, out int ok ) )
                 {
                     if ( ! utilities.ContainsKey ( type ) )
                         utilities.Add ( type, new List<string> () );
@@ -205,7 +212,7 @@ namespace MTUComm
                     if ( ! utilities[ type ].Contains ( utility ) )
                         utilities[ type ].Add ( utility );
                 }
-                // Chars
+                // Characters
                 else
                 {
                     if ( ! utilities.ContainsKey ( type ) )
@@ -218,7 +225,7 @@ namespace MTUComm
 
             #endregion
 
-            #region Get real Port Type and Utility 
+            #region Get real Port Type and Utility
             
             // Preload port types, because some ports use a letter but other a list of Meter IDs
             // Done here because Xml project has no reference to MTUComm ( cross references )
@@ -251,17 +258,12 @@ namespace MTUComm
                     // NOTE: Use only the first one for the detection process
                     port.IsSpecialCaseNumType = meterTypes.ContainsNumericType ( portTypes[ 0 ] );
 
-                    // This information will be used during the family assignment for each MTU to be used
+                    // The Meter Utility will be used during the family assignment for each MTU to be used
+                    // Use first Meter ID to retrieve its type
                     if ( isNumeric )
-                    {
-                        // Use first Meter ID to retrieve its type
-                        port.Utilities = utilities[ meterTypes.FindByMterId ( int.Parse ( portTypes[ 0 ] ) ).Type.ToLower () ];
-                    }
-                    else
-                    {
-                        // Use the Meter type directly
-                        port.Utilities = utilities[ portTypes[ 0 ] ];
-                    }
+                         port.Utilities = utilities[ meterTypes.FindByMterId ( int.Parse ( portTypes[ 0 ] ) ).Type.ToLower () ];
+                    // Use the Meter type directly
+                    else port.Utilities = utilities[ portTypes[ 0 ] ];
 
                     // Set if this Mtu only supports certain Meter IDs ( e.g. <Meter ID="122"> and there is no <Type>122</Type> )
                     if ( isNumeric &&
@@ -276,11 +278,11 @@ namespace MTUComm
                     // Type is a number or list of IDs supported
                     else
                     {
+                        // Get all different types from all supported Meters
                         foreach ( string id in portTypes )
                         {
                             string types = meterTypes.FindByMterId ( int.Parse ( id ) ).Type;
 
-                            // Get all different types from all supported Meters
                             // Type 1: ABC
                             // Type 2: DRE
                             // Type 3: MFR
@@ -301,6 +303,20 @@ namespace MTUComm
 
             #endregion
         }
+
+        #if DEBUG
+
+        // NOTE: Useful methods to use with the immediate tool of VisualStudio
+
+        public static Global XmlGlobal      { get { return Configuration.GetInstance ().Global; } }
+        public static MtuTypes XmlMtus      { get { return Configuration.GetInstance ().MtuTypes; } }
+        public static MeterTypes XmlMeters  { get { return Configuration.GetInstance ().MeterTypes; } }
+        public static AlarmList XmlAlarms   { get { return Configuration.GetInstance ().Alarms; } }
+        public static DemandConf XmlDemands { get { return Configuration.GetInstance ().Demands; } }
+        public static User[] XmlUsers       { get { return Configuration.GetInstance ().Users; } }
+        public static DebugOptions XmlDebug { get { return Configuration.GetInstance ().Debug; } }
+
+        #endif
 
         #endregion
 

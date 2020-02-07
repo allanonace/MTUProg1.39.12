@@ -14,6 +14,7 @@ using aclara_meters.Helpers;
 using aclara_meters.Models;
 using Acr.UserDialogs;
 using Library;
+using Library.Exceptions;
 using MTUComm;
 using nexus.protocols.ble.scan;
 using Plugin.Settings;
@@ -1136,12 +1137,20 @@ namespace aclara_meters.view
                     backdark_bg.IsVisible = false;
                     indicator.IsVisible = false;
                     return;
+                    
                 case ValidationResult.FAIL:
+                    indicator.IsVisible = false;
                     dialog_open_bg.IsVisible = true;
                     turnoff_mtu_background.IsVisible = true;
                     dialogView.CloseDialogs();
                     dialogView.UpdateNoActionText ();
                     dialogView.OpenCloseDialog ( "dialog_NoAction", true );
+                    return;
+
+                case ValidationResult.FAMILY_NOT_SUPPORTED:
+                    backdark_bg.IsVisible = false;
+                    indicator.IsVisible   = false;
+                    base.ShowAlert ( new MtuDoesNotBelongToAnyFamilyException () );
                     return;
             }
 

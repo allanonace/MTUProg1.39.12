@@ -53,7 +53,8 @@ namespace MTUComm
         {
             OK,
             FAIL,
-            EXCEPTION
+            EXCEPTION,
+            FAMILY_NOT_SUPPORTED
         }
 
         /* Enum: NodeDiscoveryResult
@@ -505,10 +506,12 @@ namespace MTUComm
             // MTUComm.Exceptions.MtuTypeIsNotFoundException
             catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
-                Errors.LogRemainExceptions ( e );
-
                 if ( this.OnError != null )
-                     this.OnError ();
+                {
+                    Errors.LogRemainExceptions ( e );
+
+                    this.OnError ();
+                }
                 else throw e; // For the basic reading, that has no OnFinish nor OnError events
             }
         }
@@ -4355,7 +4358,7 @@ namespace MTUComm
             this.mtu = configuration.GetMtuTypeById ( ( int )Data.Get.MtuBasicInfo.Type );
  
             if ( mtuHasChanged )
-            {              
+            {
                 Data.Set ( "MemoryMap", GetMemoryMap ( true ) );
                 InterfaceAux.ResetInfo();
             }

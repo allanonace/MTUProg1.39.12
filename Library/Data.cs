@@ -97,9 +97,13 @@ namespace Library
 
             if ( e.IsSystemException () ) // Only cache .NET errors
             {
-                Utils.Print ( "Set Last Exception: " + e.Message );
+                Utils.Print ( "Set Last System Exception: " + e.Message );
 
                 Data.Set ( "LastException", e );
+            }
+            else
+            {
+                Utils.Print ( "Last Own Exception: " + e.Message );
             }
 
             return true;

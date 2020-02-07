@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using MTUComm;
 using Library;
+using Library.Exceptions;
+using aclara_meters.view;
 
 using ActionType       = MTUComm.Action.ActionType;
 using ValidationResult = MTUComm.MTUComm.ValidationResult;
@@ -147,8 +149,10 @@ namespace aclara_meters.util
 
                 return await basicRead.RunNavValidation ( typeTarget );
             }
-            catch ( Exception )
+            catch ( Exception e )
             {
+                if ( e is MtuDoesNotBelongToAnyFamilyException )
+                    return ValidationResult.FAMILY_NOT_SUPPORTED;
                 return ValidationResult.EXCEPTION;
             }
         }
@@ -160,6 +164,24 @@ namespace aclara_meters.util
                 "E."  + Lexi.Lexi.NumErrors  .ToString ( "000" ) +
                 " A." + Lexi.Lexi.NumAttempts.ToString ( "000" ) +
                 ( ( ! string.IsNullOrEmpty ( message ) ) ? " | " + message : string.Empty );
+        }
+    
+        protected void ShowErrorAndKill (
+            Exception e )
+        {
+            Device.BeginInvokeOnMainThread ( () =>
+            {
+                Application.Current.MainPage = new NavigationPage ( new ErrorInitView ( e ) );
+            });
+        }
+
+        protected void ShowAlert (
+            Exception e )
+        {
+            Device.BeginInvokeOnMainThread ( () =>
+            {
+                Errors.LogErrorNowAndContinue ( e );
+            });
         }
     }
 }

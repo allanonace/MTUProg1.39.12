@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using aclara_meters.util;
 using Acr.UserDialogs;
 using Library;
 using Library.Exceptions;
 using MTUComm;
-using Xamarin.Essentials;
 using Xamarin.Forms;
+using Xml;
 
 namespace aclara_meters.view
 {
@@ -29,12 +29,13 @@ namespace aclara_meters.view
                 btn_Intune.IsVisible = false;
         }
 
-        public async void Btn_Cancel_Clicked(object sender, EventArgs e)
+        public async void Btn_Cancel_Clicked(object sender, EventArgs args )
         {
             await DisplayAlert("Attention", "The app will close, you must decide the installation mode for the app", "OK");
             System.Diagnostics.Process.GetCurrentProcess().Kill();
         }
-        public async void Btn_FTP_Clicked(object sender, EventArgs e)
+
+        public async void Btn_FTP_Clicked(object sender, EventArgs args )
         {
             string result;
             if (!Mobile.IsNetAvailable())
@@ -49,22 +50,40 @@ namespace aclara_meters.view
             switch(result)
             {
                 case "OK":
-                    //Device.BeginInvokeOnMainThread(() =>
-                    //{
-                    //    Application.Current.MainPage = new NavigationPage(new AclaraViewConfig(dialogs));
-                    //});
-                    if (Configuration.LoadAndVerifyXMLs())
+                    try
                     {
-                        await DisplayAlert("Attention", "The app will close to apply the configuration", "OK");
-                        System.Diagnostics.Process.GetCurrentProcess().Kill();
+                        // Verify the configuration files and preload important information for the hardware
+                        // [ Configuration.cs ] ConfigurationFilesNotFoundException
+                        // [ Configuration.cs ] ConfigurationFilesCorruptedException
+                        // [ Configuration.cs ] DeviceMinDateAllowedException
+                        Configuration config = Configuration.GetInstance ();
+
+                        #if DEBUG
+
+                        // Force some error cases in debug mode
+                        DebugOptions debug = config.Debug;
+                        if ( debug != null )
+                        {
+                            if ( debug.ForceErrorConfig_New_Date )
+                                throw new DeviceMinDateAllowedException ();
+                            else if ( debug.ForceErrorConfig_New_Files )
+                                throw new Exception ();
+                        }
+
+                        #endif
+
+                        await DisplayAlert ( "Attention", "The app will close to apply the new configuration", "OK" );
+                        System.Diagnostics.Process.GetCurrentProcess ().Kill ();
                     }
-                    else
+                    catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
                     {
                         GenericUtilsClass.SetInstallMode("None");
                         GenericUtilsClass.DeleteConfigFiles(Mobile.ConfigPath);
-                        await DisplayAlert("Attention",
-                            "There is a problem with the configuration files downloaded from SFTP, "+ Environment.NewLine +
-                            "some of them are corrupted or maybe some MTUs don't have port type defined. Contact your IT administrator", "OK");                        
+                        
+                        if ( ! Errors.IsOwnException ( e ) )
+                            e = new ConfigFilesCorruptedException ();
+
+                        base.ShowErrorAndKill ( e );                        
                     }
                     return;
 
@@ -78,9 +97,9 @@ namespace aclara_meters.view
                     GenericUtilsClass.SetInstallMode("None");
                     return;
             }
-       
         }
-        public async void Btn_Intune_Clicked(object sender, EventArgs e)
+        
+        public async void Btn_Intune_Clicked(object sender, EventArgs args )
         {
             if (!Mobile.IsNetAvailable())
             {
@@ -94,7 +113,7 @@ namespace aclara_meters.view
            
             System.Diagnostics.Process.GetCurrentProcess().Kill();
         }
-        public async void Btn_Manual_Clicked(object sender, EventArgs e)
+        public async void Btn_Manual_Clicked(object sender, EventArgs args )
         {
             GenericUtilsClass.SetInstallMode("Manual");
             await DisplayAlert("Attention", "Now you must copy the config files in the public folder of the app, then restart the app", "OK");

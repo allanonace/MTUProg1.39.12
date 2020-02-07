@@ -2845,7 +2845,8 @@ namespace aclara_meters.view
             }
         }
 
-        private async Task SwitchToControler ( ActionType page )
+        private async Task SwitchToControler (
+            ActionType actionTarget )
         {
             backdark_bg.IsVisible = true;
             indicator.IsVisible = true;
@@ -2859,13 +2860,14 @@ namespace aclara_meters.view
                 await shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
             }
 
-            switch ( await base.ValidateNavigation ( page ) )
+            switch ( await base.ValidateNavigation ( actionTarget ) )
             {
                 case ValidationResult.EXCEPTION:
                     backdark_bg.IsVisible = false;
                     indicator.IsVisible = false;
                     background_scan_page.IsEnabled = true;
                     return;
+
                 case ValidationResult.FAIL:
                     dialog_open_bg.IsVisible = true;
                     turnoff_mtu_background.IsVisible = true;
@@ -2873,11 +2875,18 @@ namespace aclara_meters.view
                     dialogView.UpdateNoActionText ();
                     dialogView.OpenCloseDialog("dialog_NoAction", true);
                     return;
+                
+                case ValidationResult.FAMILY_NOT_SUPPORTED:
+                    backdark_bg.IsVisible = false;
+                    indicator.IsVisible   = false;
+                    background_scan_page.IsEnabled = true;
+                    base.ShowAlert ( new MtuDoesNotBelongToAnyFamilyException () );
+                    return;
             }
 
-            this.actionTypeNew = page;
+            this.actionTypeNew = actionTarget;
 
-            switch ( page )
+            switch ( actionTarget )
             {
                 case ActionType.DataRead:
                 case ActionType.ValveOperation:
@@ -2900,7 +2909,7 @@ namespace aclara_meters.view
 
                         Device.BeginInvokeOnMainThread(() =>
                         {
-                            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved, page), false);
+                            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved, actionTarget), false);
 
                         })
                     );
@@ -2918,7 +2927,7 @@ namespace aclara_meters.view
 
                             #region Check ActionVerify
 
-                            turnOnOffIsOn = ( page == ActionType.TurnOnMtu );
+                            turnOnOffIsOn = ( actionTarget == ActionType.TurnOnMtu );
 
                             if ( this.global.ActionVerify )
                             {
@@ -2960,40 +2969,40 @@ namespace aclara_meters.view
                     break;
                 case ActionType.AddMtu:
                     #region AddMTU
-                    await ControllerAction(page, "dialog_AddMTU");
+                    await ControllerAction(actionTarget, "dialog_AddMTU");
 
 
                     #endregion
                     break;
                 case ActionType.ReplaceMTU:
                     #region Replace Mtu Controller
-                    await ControllerAction(page, "dialog_replacemeter_one");
+                    await ControllerAction(actionTarget, "dialog_replacemeter_one");
 
 
                     #endregion
                     break;
                 case ActionType.ReplaceMeter:
                     #region Replace Meter Controller
-                    await ControllerAction(page, "dialog_meter_replace_one");
+                    await ControllerAction(actionTarget, "dialog_meter_replace_one");
 
                     #endregion
                     break;
                 case ActionType.AddMtuAddMeter:
                     #region Add Mtu | Add Meter Controller
-                    await ControllerAction(page, "dialog_AddMTUAddMeter");
+                    await ControllerAction(actionTarget, "dialog_AddMTUAddMeter");
 
                     #endregion
                     break;
                 case ActionType.AddMtuReplaceMeter:
                     #region Add Mtu | Replace Meter Controller
-                    await ControllerAction(page, "dialog_AddMTUReplaceMeter");
+                    await ControllerAction(actionTarget, "dialog_AddMTUReplaceMeter");
 
                     #endregion
                     break;
                 case ActionType.ReplaceMtuReplaceMeter:
                     #region Replace Mtu | Replace Meter Controller
 
-                    await ControllerAction(page, "dialog_ReplaceMTUReplaceMeter");
+                    await ControllerAction(actionTarget, "dialog_ReplaceMTUReplaceMeter");
 
 
                     #endregion
