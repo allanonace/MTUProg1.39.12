@@ -159,7 +159,7 @@ namespace aclara_meters.util
     
         protected string LogAttempts (
             string message )
-        {
+        {            
             return
                 "E."  + Lexi.Lexi.NumErrors  .ToString ( "000" ) +
                 " A." + Lexi.Lexi.NumAttempts.ToString ( "000" ) +

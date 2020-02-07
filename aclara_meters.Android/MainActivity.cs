@@ -158,13 +158,13 @@ namespace aclara_meters.Droid
                 ListPerm.Add(Manifest.Permission.ReadExternalStorage);
 
             }
-            if (CheckSelfPermission(Manifest.Permission.GetAccounts) != Permission.Granted)
-            {
-                ListPerm.Add(Manifest.Permission.GetAccounts);
-                ListPerm.Add(Manifest.Permission.ManageAccounts);
-                ListPerm.Add(Manifest.Permission.UseCredentials);
+            //if (CheckSelfPermission(Manifest.Permission.GetAccounts) != Permission.Granted)
+            //{
+            //    ListPerm.Add(Manifest.Permission.GetAccounts);
+            //    ListPerm.Add(Manifest.Permission.ManageAccounts);
+            //    ListPerm.Add(Manifest.Permission.UseCredentials);
 
-            }
+            //}
 
             if (CheckSelfPermission(Manifest.Permission.Camera) != Permission.Granted)
             {

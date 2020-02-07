@@ -351,6 +351,7 @@ namespace Lexi
 
         public static void ShowPopupAttemps ()
         {
+            return;
             if ( currrentAttemps > 0 )
                 errorsLog.AppendLine ( "Error with " + currrentAttemps + " attempt/s" );
 

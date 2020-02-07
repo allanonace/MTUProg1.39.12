@@ -3723,7 +3723,7 @@ namespace MTUComm
 
                 // Write changes into MTU
                 await this.WriteMtuModifiedRegisters ( map );
-                await addMtuLog.LogAddMtu ();
+                
                 
                 Utils.Print ( "---WRITE_TO_MTU_FINISH---" );
 
@@ -3750,7 +3750,7 @@ namespace MTUComm
                 Utils.Print("-------RDD_FINISH--------");
 
                 #endregion
-
+                await addMtuLog.LogAddMtu();
                 #region Verifying data 
 
                 Utils.Print("----FINAL_READ_START-----");
