@@ -36,21 +36,21 @@ namespace aclara_meters.view
 
             this.FocusEntryFields ();
 
+#if DEBUG
+            tbx_remote_host.Text = "159.89.29.176";
+            tbx_user_pass.Text = "aclara1234";
+            tbx_user_name.Text = "aclara";
+            tbx_remote_path.Text = "/home/aclara/prod";
+            tbx_remote_port.Text = "22";
+#endif
+
             if ( config.HasFTP )
             {
                 tbx_remote_host.Text = config.FtpDownload_Host;
                 tbx_user_name  .Text = config.FtpDownload_User;
                 tbx_remote_path.Text = config.FtpDownload_Path;
                 tbx_remote_port.Text = config.FtpDownload_Port.ToString ();
-            }
-
-            #if DEBUG
-            tbx_remote_host.Text = "159.89.29.176";
-            tbx_user_pass  .Text = "aclara1234";
-            tbx_user_name  .Text = "aclara";
-            tbx_remote_path.Text = "/home/aclara/prod";
-            tbx_remote_port.Text = "22";
-            #endif
+            }           
 
             return;
         }
