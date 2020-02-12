@@ -975,11 +975,7 @@ namespace MTUComm
         private dynamic GetDataValue (
             APP_FIELD field )
         {
-            var param = Data.Get[ field.ToString () ];
-
-            if ( param != null )
-                return param;
-            return null;
+            return Data.Get[ field.ToString () ];
         }
 
         #endregion

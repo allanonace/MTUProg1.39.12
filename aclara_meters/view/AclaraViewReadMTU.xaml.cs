@@ -623,12 +623,14 @@ namespace aclara_meters.view
             #endif
 
             //Create Ation when opening Form
-            MTUComm.Action add_mtu = new MTUComm.Action (
+            MTUComm.Action readMtu = new MTUComm.Action (
                 FormsApp.ble_interface,
                 MTUComm.Action.ActionType.ReadMtu,
-                FormsApp.credentialsService.UserName );
-  
-            add_mtu.OnProgress += ((s, e) =>
+                FormsApp.credentialsService.UserName,
+                string.Empty,
+                true ); // Reset information to allow working with different MTUs without leaving the scene/window
+            
+            readMtu.OnProgress += ((s, e) =>
             {
                 string mensaje = e.Message;
     
@@ -649,13 +651,13 @@ namespace aclara_meters.view
                 });
             });
 
-            add_mtu.OnFinish -= OnFinish;
-            add_mtu.OnFinish += OnFinish;
+            readMtu.OnFinish -= OnFinish;
+            readMtu.OnFinish += OnFinish;
 
-            add_mtu.OnError  -= OnError;
-            add_mtu.OnError  += OnError;
+            readMtu.OnError  -= OnError;
+            readMtu.OnError  += OnError;
 
-            await add_mtu.Run ();
+            await readMtu.Run ();
         }
 
         public async Task OnFinish ( object sender, Delegates.ActionFinishArgs args )

@@ -1031,6 +1031,7 @@ namespace aclara_meters.view
                 }
                 else
                 {
+                    GenericUtilsClass.RestoreConfigFiles ();
                     await Application.Current.MainPage.DisplayAlert("Attention", "There is not connection at this moment, try again later", "OK");
                     return false;
                 }
@@ -1100,6 +1101,7 @@ namespace aclara_meters.view
                 }
                 else
                 {
+                    GenericUtilsClass.RestoreConfigFiles ();
                     await Application.Current.MainPage.DisplayAlert("Attention", "There is not connection at this moment, try again later", "OK");
                     return false;
                 }
@@ -1129,7 +1131,10 @@ namespace aclara_meters.view
 
                 }
                 else
-                    await Application.Current.MainPage.DisplayAlert("Attention", "There is not configuration files in public folder,copy files and try again", "OK");
+                {
+                    GenericUtilsClass.RestoreConfigFiles ();
+                    await Application.Current.MainPage.DisplayAlert("Attention", "There is not configuration files in public folder, copy files and try again", "OK");
+                }
 
                 return false;
             }

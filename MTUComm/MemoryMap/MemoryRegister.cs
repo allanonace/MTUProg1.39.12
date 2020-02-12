@@ -537,8 +537,8 @@ namespace MTUComm.MemoryMap
             // Read current value
             byte systemFlags = ( await this.lexi.Read ( ( uint )this.address, 1, true ) )[ 0 ];
 
-            Utils.Print( "Register -> ValueWriteToMtu_Bit -> Current value map: " + this.id + " -> " + this.ValueRaw );
-            Utils.Print( "Register -> ValueWriteToMtu_Bit -> Current value MTU: " + this.id + " -> " + Utils.ByteToBits ( systemFlags ) + " [ Hex: " + systemFlags.ToString ( "D3" ) + " ]" );
+            Utils.PrintDeep ( "Register -> ValueWriteToMtu_Bit -> Current value map: " + this.id + " -> " + this.ValueRaw );
+            Utils.PrintDeep ( "Register -> ValueWriteToMtu_Bit -> Current value MTU: " + this.id + " -> " + Utils.ByteToBits ( systemFlags ) + " [ Hex: " + systemFlags.ToString ( "D3" ) + " ]" );
 
             bool valueInMap = ( bool )( object )this.ValueRaw;
 
@@ -547,7 +547,7 @@ namespace MTUComm.MemoryMap
                  systemFlags = ( byte ) ( systemFlags |    1 << ( int )bit   );
             else systemFlags = ( byte ) ( systemFlags & ~( 1 << ( int )bit ) );
             
-            Utils.Print( "Register -> ValueWriteToMtu_Bit -> Write full byte to MTU: " + this.id + " -> " + Utils.ByteToBits ( systemFlags ) + " [ Hex: " + systemFlags.ToString ( "D3" ) + " ] to bit: " + bit );
+            Utils.PrintDeep ( "Register -> ValueWriteToMtu_Bit -> Write full byte to MTU: " + this.id + " -> " + Utils.ByteToBits ( systemFlags ) + " [ Hex: " + systemFlags.ToString ( "D3" ) + " ] to bit: " + bit );
             
             await this.lexi.Write (
                 ( uint )this.address,

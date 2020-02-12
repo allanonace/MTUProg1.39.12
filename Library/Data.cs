@@ -103,7 +103,7 @@ namespace Library
             }
             else
             {
-                Utils.Print ( "Last Own Exception: " + e.Message );
+                Utils.PrintDeep ( "Last Own Exception: " + e.Message );
             }
 
             return true;

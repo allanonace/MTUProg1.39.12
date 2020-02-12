@@ -864,7 +864,7 @@ namespace Lexi
                                  serial.BytesRead ()[ responseOffset + 1 ] == bytesRead - responseOffset - // ACK Info Size = FullResponse - Echo
                                  ( ( ! avoidACK ) ? 4 : 2 ) ) // If the ACK should be avoided, only subtract the CRC bytes = [ - ACK - ACK Info Size ] - CRCx2
                             {
-                                Utils.Print ( "Lexi.Write.. Number of bytes are equal to some response [ " + bytesRead + " -> Data " +
+                                Utils.PrintDeep ( "Lexi.Write.. Number of bytes are equal to some response [ " + bytesRead + " -> Data " +
                                     ( bytesRead - responseOffset - 4 ) + " ]" );
                                 
                                 // This response could have some conditions to validate
@@ -893,7 +893,7 @@ namespace Lexi
                                     if ( ! ok )
                                         goto CONTINUE;
 
-                                    Utils.Print ( "Lexi.Write.. Conditions validated and response accepted" );
+                                    Utils.PrintDeep ( "Lexi.Write.. Conditions validated and response accepted" );
                                 }
 
                                 // Remove tail of zeros
@@ -907,8 +907,8 @@ namespace Lexi
                             if ( DateTimeOffset.Now.ToUnixTimeMilliseconds () > timeout_limit )
                             {
                                 if ( bytesRead <= responseOffset )
-                                     Utils.Print ( "Lexi.Write -> Only or partially the Echo ( " + bytesRead + " <= " + responseOffset + " )" );
-                                else Utils.Print ( "Lexi.Write -> The number of bytes of data is less than expected ( " + bytesRead + " > " + responseOffset + " )" );
+                                     Utils.PrintDeep ( "Lexi.Write -> Only or partially the Echo ( " + bytesRead + " <= " + responseOffset + " )" );
+                                else Utils.PrintDeep ( "Lexi.Write -> The number of bytes of data is less than expected ( " + bytesRead + " > " + responseOffset + " )" );
 
                                 throw new TimeoutException ();
                             }
@@ -925,7 +925,7 @@ namespace Lexi
                          e is TimeoutException &&
                          bytesResponse.Contains ( ( uint )( bytesRead + 2 ) ) ) // + ACK and ACK Info Size
                     {
-                        Utils.Print ( "Lexi.Write.. Special case without ACK validated" );
+                        Utils.PrintDeep ( "Lexi.Write.. Special case without ACK validated" );
 
                         bytesRead += 2;
 

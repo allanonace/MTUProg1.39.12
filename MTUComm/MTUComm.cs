@@ -3601,7 +3601,7 @@ namespace MTUComm
 
                 #if DEBUG
 
-                Utils.Print ( "Write '" + reg.id + "' to MTU" );
+                Utils.PrintDeep ( "Write '" + reg.id + "' to MTU" );
 
                 #endif
 
@@ -3612,7 +3612,7 @@ namespace MTUComm
                     #if DEBUG
                     
                     var val = await reg.GetValue ();
-                    Utils.Print ( "Write '" + reg.id + "': " + val );
+                    Utils.PrintDeep ( "Write '" + reg.id + "': " + val );
 
                     #endif
                 }

@@ -607,7 +607,8 @@ namespace MTUComm
             ISerial serial,
             ActionType type,
             String user = "",
-            String outputfile = "" )
+            String outputfile = "",
+            bool forceToRelaunch = false )
         {
             // outputfile = new FileInfo ( outputfile ).Name; // NO
             // System.IO.Path.GetFileName(outputfile)); // NO
@@ -633,8 +634,7 @@ namespace MTUComm
 
             this.additionalScriptParameters = new List<Parameter> ();
 
-            // Only save reference for the current action,
-            // not for nested or auxiliary actions ( as BasicRead )
+            // The basic read action always forces to reset all data of the previous actions
             if ( this.type == ActionType.BasicRead )
             {
                 alreadyInDataMainAction = false;
@@ -649,6 +649,8 @@ namespace MTUComm
                     InterfaceAux.ResetInfo ();
                 }
             }
+            // Only the first action sets the singleton reference,
+            // because the actions could be composed of multiple chained actions
             else if ( ! alreadyInDataMainAction )
             {
                 alreadyInDataMainAction = true;
@@ -656,6 +658,14 @@ namespace MTUComm
                 Singleton.Set = this;
 
                 this.currentMtu = this.config.GetMtuTypeById ( ( int )Data.Get.MtuBasicInfo.Type );
+            }
+            // Some actions ( ReadMTU and RF-Check ) allow to relaunch the action without leaving the
+            // scene/window and in those cases the singleton reference to the action must be reset
+            // NOTE: For each affected action, 'this.currentMtu' must be set with the new MTU detected
+            else if ( forceToRelaunch )
+            {
+                Singleton.Remove<Action> ();
+                Singleton.Set = this;
             }
         }
 
@@ -937,6 +947,10 @@ namespace MTUComm
                 Stopwatch timer = Stopwatch.StartNew ();
                 #endif
 
+                // This is necessary to allow relaunching the action with different MTUs
+                // It is used in OnFinish 'Mtu currentMtu = Singleton.Get.Action.CurrentMtu'
+                this.currentMtu = args.Mtu;
+
                 // Load parameters using the interface file
                 ActionResult result = await CreateActionResultUsingInterface ( args.Map, args.Mtu );
 
@@ -1116,6 +1130,10 @@ namespace MTUComm
         {
             try
             {
+                // This is necessary to allow relaunching the action with different MTUs
+                // It is used in OnFinish 'Mtu currentMtu = Singleton.Get.Action.CurrentMtu'
+                this.currentMtu = args.Mtu;
+
                 // Load parameters using the interface file
                 ActionResult rdd_allParamsFromInterface     = await CreateActionResultUsingInterface ( args.Map, args.Mtu, ActionType.ValveOperation );
                 ActionResult readMtu_allParamsFromInterface = await CreateActionResultUsingInterface ( args.Map, args.Mtu );

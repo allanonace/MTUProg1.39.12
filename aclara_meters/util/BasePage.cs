@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 using MTUComm;
@@ -60,24 +61,17 @@ namespace aclara_meters.util
         {
             StackLayout main = ( StackLayout )this.FindByName ( "ReadMTUChangeView" );
 
-            var random = new Random();
-            var list = new List<char> { '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-            int index = random.Next(list.Count);
-            char cTextWr = list[index];
-            index = random.Next(list.Count);
-            char cTextOld = list[index];
-
-            AutoFillTextbox_Logic ( main, cTextWr, cTextOld );
+            AutoFillTextbox_Logic ( main );
 
             await Task.Delay ( 1000 );
 
-            // NOTE: First fill pickrs because some textbox ( e.g. MeterReading ) need it
-            AutoFillTextbox_Logic ( main, cTextWr, cTextOld );
+            // NOTE: Some textbox need a second step ( e.g. MeterReading )
+            AutoFillTextbox_Logic ( main );
         }
 
         protected void AutoFillTextbox_Logic (
-            StackLayout mainElement, char cTextWr, char cTextOld )
-        {            
+            StackLayout mainElement )
+        {
             List<BorderlessEntry>  listTbx = new List<BorderlessEntry> ();
             List<BorderlessPicker> listPck = new List<BorderlessPicker> ();
 
@@ -93,12 +87,11 @@ namespace aclara_meters.util
                 {
                     pck.SelectedIndex = 0;
                 }
-                catch ( Exception )
-                {
-                    // only in debug
-                }
+                catch ( Exception ) { }
             }
 
+            int numToUse = 2;
+            StringBuilder stb = new StringBuilder ();
             foreach ( BorderlessEntry tbx in listTbx
                 .Where ( tbx =>
                     tbx.IsEnabled &&
@@ -107,16 +100,29 @@ namespace aclara_meters.util
             {
                 try
                 {
-                    tbx.Text = new string(cTextWr, tbx.MaxLength);
-                    if (tbx.Display.ToLower().Contains("old"))
-                        tbx.Text = new string(cTextOld, tbx.MaxLength);
+                    // New fields even, old fields odd ( e.g. 2 and 1 respectively )
+                    string numStr = ( ( ! string.IsNullOrEmpty ( tbx.Display ) &&
+                                        tbx.Display.ToLower ().Contains ( "old" ) ) ?
+                                            numToUse - 1 : numToUse ).ToString ();
+
+                    stb.Clear ();
+                    int maxLength = ( tbx.MaxLength >= int.MaxValue ) ? 5 : tbx.MaxLength;
+                    for ( int i = ( int )Math.Ceiling ( ( decimal )maxLength / numStr.Length ); i >= 0; i-- )
+                        stb.Append ( numStr );
                     
+                    tbx.Text = stb.ToString ().Substring ( 0, maxLength );
+
+                    numToUse += 2;
                 }
+                // NOTE: Can fail if the control does not have set a max length value
                 catch ( Exception )
                 {
-                    // NOTE: Can fail if the control does not have set a max length value
+
                 }
             }
+
+            stb.Clear ();
+            stb = null;
         }
 
         private void GetChildrensTextbox (

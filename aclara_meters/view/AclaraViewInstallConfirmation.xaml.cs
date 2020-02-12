@@ -198,12 +198,14 @@ namespace aclara_meters.view
             #endif
 
             //Create Ation when opening Form
-            MTUComm.Action add_mtu = new MTUComm.Action (
+            MTUComm.Action rfcheck = new MTUComm.Action (
                 FormsApp.ble_interface,
                 MTUComm.Action.ActionType.MtuInstallationConfirmation,
-                FormsApp.credentialsService.UserName );
+                FormsApp.credentialsService.UserName,
+                string.Empty,
+                true ); // Reset information to allow working with different MTUs without leaving the scene/window
 
-            add_mtu.OnProgress += ((s, e) =>
+            rfcheck.OnProgress += ((s, e) =>
             {
                 string mensaje = e.Message;
 
@@ -221,13 +223,13 @@ namespace aclara_meters.view
                 });
             });
 
-            add_mtu.OnFinish -= OnFinish;
-            add_mtu.OnFinish += OnFinish;
+            rfcheck.OnFinish -= OnFinish;
+            rfcheck.OnFinish += OnFinish;
 
-            add_mtu.OnError -= OnError;
-            add_mtu.OnError += OnError;
+            rfcheck.OnError -= OnError;
+            rfcheck.OnError += OnError;
 
-            await add_mtu.Run();
+            await rfcheck.Run ();
         }
 
         public async Task OnFinish ( object sender, Delegates.ActionFinishArgs args )
