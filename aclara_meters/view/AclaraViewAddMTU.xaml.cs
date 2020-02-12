@@ -10,15 +10,15 @@ using Acr.UserDialogs;
 using Library;
 using Library.Exceptions;
 using MTUComm;
-using MTUComm.actions;
 using Plugin.Media.Abstractions;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xml;
 using ZXing.Net.Mobile.Forms;
-using ActionType = MTUComm.Action.ActionType;
-using FIELD = MTUComm.actions.AddMtuForm.FIELD;
-using MTUStatus = MTUComm.Action.MTUStatus;
+
+using ActionType       = MTUComm.Action.ActionType;
+using APP_FIELD        = MTUComm.ScriptAux.APP_FIELD;
+using MTUStatus        = MTUComm.Action.MTUStatus;
 using ValidationResult = MTUComm.MTUComm.ValidationResult;
 
 namespace aclara_meters.view
@@ -155,7 +155,6 @@ namespace aclara_meters.view
         ZXingScannerPage scanPage;
         private Configuration config;
         private MTUComm.Action add_mtu;
-        private AddMtuForm addMtuForm;
         private int detectedMtuType;
         private Mtu currentMtu;
         private Global global;
@@ -238,8 +237,6 @@ namespace aclara_meters.view
 
             this.detectedMtuType = (int)this.mtuBasicInfo.Type;
             currentMtu = this.config.GetMtuTypeById(this.detectedMtuType);
-
-            this.addMtuForm = new AddMtuForm(currentMtu);
 
             this.add_mtu = new MTUComm.Action(
                 FormsApp.ble_interface,
@@ -551,7 +548,6 @@ namespace aclara_meters.view
             {
                 #region Conditions
 
-                this.currentMtu = this.addMtuForm.mtu;
                 this.mtuBasicInfo = Data.Get.MtuBasicInfo;
 
                 #endregion
@@ -3912,13 +3908,12 @@ namespace aclara_meters.view
         private void AddMtu ( object sender, EventArgs e )
         {
             string msgError = string.Empty;
+
             if ( !this.ValidateFields ( ref msgError ) )
             {
                 DisplayAlert ( "Error", msgError, "OK" );
                 return;
             }
-
-           
 
             if (!_userTapped)
             {
@@ -4018,8 +4013,10 @@ namespace aclara_meters.view
             }
                 
             // Port 2
-            if ( ( addMtuForm.UsePort2 = mtu.TwoPorts && this.port2IsActivated ) &&
-                    ! mtu.Port2.IsSetFlow )
+            Data.Set ( "UsePort2", mtu.TwoPorts && this.port2IsActivated );
+
+            if ( Data.Get.UsePort2 &&
+                 ! mtu.Port2.IsSetFlow )
             {
                 value_acn_2 = this.tbx_AccountNumber_2           .Text;
                 value_wor_2 = this.tbx_WorkOrder_2               .Text;
@@ -4120,11 +4117,10 @@ namespace aclara_meters.view
             value_lon = this.tbx_MtuGeolocationLong.Text;
             value_alt = this.mtuGeolocationAlt;
 
+            #endregion
 
             // Reset needed when same actions is launched more than one time ( Exception/error )
-            this.addMtuForm.RemoveParameters ();
-
-            #endregion
+            Data.Reset ();
 
             #region Set parameters Port 1
 
@@ -4132,68 +4128,68 @@ namespace aclara_meters.view
             if ( ! mtu.Port1.IsSetFlow )
             {
                 // Account Number / Service Port ID
-                this.addMtuForm.AddParameter ( FIELD.ACCOUNT_NUMBER, value_acn );
+                Data.SetTemp ( APP_FIELD.AccountNumber.ToString (), value_acn );
 
                 // Work Order / Field Order
                 if ( global.WorkOrderRecording )
-                    this.addMtuForm.AddParameter ( FIELD.WORK_ORDER, value_wor );
+                    Data.SetTemp ( APP_FIELD.WorkOrder.ToString (), value_wor );
 
                 // Old MTU ID
                 if ( this.actionType == ActionType.ReplaceMTU ||
                     this.actionType == ActionType.ReplaceMtuReplaceMeter )
-                    this.addMtuForm.AddParameter ( FIELD.MTU_ID_OLD, value_omt );
+                    Data.SetTemp ( APP_FIELD.OldMtuId.ToString (), value_omt );
 
                 // ( New ) Meter Serial Number
                 if ( global.UseMeterSerialNumber )
-                    this.addMtuForm.AddParameter ( FIELD.METER_NUMBER, value_msn );
+                    Data.SetTemp ( APP_FIELD.MeterNumber.ToString (), value_msn );
 
                 // ( New ) Meter Reading / Initial Reading
-                this.addMtuForm.AddParameter ( FIELD.METER_READING, value_mre );
+                Data.SetTemp ( APP_FIELD.MeterReading.ToString (), value_mre );
 
                 // Meter Type
-                this.addMtuForm.AddParameter ( FIELD.METER_TYPE, value_mty );
+                Data.SetTemp ( APP_FIELD.Meter.ToString (), value_mty );
 
                 // Read Interval
-                this.addMtuForm.AddParameter ( FIELD.READ_INTERVAL, value_rin );
+                Data.SetTemp ( APP_FIELD.ReadInterval.ToString (), value_rin );
 
                 // Snap Reads
                 if ( global.AllowDailyReads &&
                      mtu.DailyReads &&
                      ! mtu.IsFamily33xx )
-                    this.addMtuForm.AddParameter ( FIELD.SNAP_READS, value_sre );
+                    Data.SetTemp ( APP_FIELD.SnapReads.ToString (), value_sre );
 
                 // Action is about Replace Meter
                 if ( isReplaceMeter )
                 {
                     // Old Meter Serial Number
                     if ( global.UseMeterSerialNumber )
-                        this.addMtuForm.AddParameter ( FIELD.METER_NUMBER_OLD, value_oms );
+                        Data.SetTemp ( APP_FIELD.MeterNumberOld.ToString (), value_oms );
                 
                     // Old Meter Working
                     if ( global.MeterWorkRecording )
-                        this.addMtuForm.AddParameter ( FIELD.METER_WORKING_OLD, value_omw );
+                        Data.SetTemp ( APP_FIELD.OldMeterWorking.ToString (), value_omw );
                 
                     // Old Meter Reading / Initial Reading
                     if ( global.OldReadingRecording )
-                        this.addMtuForm.AddParameter ( FIELD.METER_READING_OLD, value_omr );
+                        Data.SetTemp ( APP_FIELD.MeterReadingOld.ToString (), value_omr );
                         
                     // Replace Meter|Register
                     if ( global.RegisterRecording )
-                        this.addMtuForm.AddParameter ( FIELD.REPLACE_METER_REG, value_rpl );
+                        Data.SetTemp ( APP_FIELD.ReplaceMeterRegister.ToString (), value_rpl );
                 }
             }
             // RDD
             else
             {
                 // Account Number / Service Port ID
-                this.addMtuForm.AddParameter ( FIELD.ACCOUNT_NUMBER, value_acn );
+                Data.SetTemp ( APP_FIELD.AccountNumber.ToString (), value_acn );
 
                 // Work Order / Field Order
                 if ( global.WorkOrderRecording )
-                    this.addMtuForm.AddParameter ( FIELD.WORK_ORDER, value_wor );
+                    Data.SetTemp ( APP_FIELD.WorkOrder.ToString (), value_wor );
                 
                 // Meter Type
-                this.addMtuForm.AddParameter ( FIELD.METER_TYPE, value_rdd );
+                Data.SetTemp ( APP_FIELD.Meter.ToString (), value_rdd );
             }
 
             // General fields, also for RDD
@@ -4201,77 +4197,77 @@ namespace aclara_meters.view
             if ( global.TimeToSync &&
                  mtu.TimeToSync    &&
                  mtu.FastMessageConfig )
-                this.addMtuForm.AddParameter ( FIELD.TWO_WAY, value_two );
+                Data.SetTemp ( APP_FIELD.TwoWay.ToString (), value_two );
 
             // Alarms
             if ( value_alr != null &&
                  mtu.RequiresAlarmProfile )
-                this.addMtuForm.AddParameter ( FIELD.ALARM, value_alr );
+                Data.SetTemp ( APP_FIELD.Alarm.ToString (), value_alr );
 
             // Demands
             if ( value_dmd != null &&
                  mtu.MtuDemand &&
                  mtu.FastMessageConfig )
-                this.addMtuForm.AddParameter ( FIELD.DEMAND, value_dmd );
+                Data.SetTemp ( APP_FIELD.Demand.ToString (), value_dmd );
 
             #endregion
 
             #region Set parameters Port 2
 
-            if ( addMtuForm.UsePort2 )
+            if ( Data.Get.UsePort2 )
             {
                 // No RDD
                 if ( ! mtu.Port2.IsSetFlow )
                 {
                     // Account Number / Service Port ID
-                    this.addMtuForm.AddParameter ( FIELD.ACCOUNT_NUMBER_2, value_acn_2, 1 );
+                    Data.SetTemp ( APP_FIELD.AccountNumber_2.ToString (), value_acn_2 );
 
                     // Work Order / Field Order
                     if ( global.WorkOrderRecording )
-                        this.addMtuForm.AddParameter ( FIELD.WORK_ORDER_2, value_wor_2, 1 );
+                        Data.SetTemp ( APP_FIELD.WorkOrder_2.ToString (), value_wor_2 );
 
                     // ( New ) Meter Serial Number
                     if ( global.UseMeterSerialNumber )
-                        this.addMtuForm.AddParameter ( FIELD.METER_NUMBER_2, value_msn_2, 1 );
+                        Data.SetTemp ( APP_FIELD.MeterNumber_2.ToString (), value_msn_2 );
 
                     // ( New ) Meter Reading / Initial Reading
-                    this.addMtuForm.AddParameter ( FIELD.METER_READING_2, value_mre_2, 1 );
+                    Data.SetTemp ( APP_FIELD.MeterReading_2.ToString (), value_mre_2 );
 
                     // Meter Type
-                    this.addMtuForm.AddParameter ( FIELD.METER_TYPE_2, value_mty_2, 1 );
+                    Data.SetTemp ( APP_FIELD.Meter_2.ToString (), value_mty_2 );
                     
                     // Action is about Replace Meter
                     if ( isReplaceMeter )
                     {
                         // Old Meter Serial Number
                         if ( global.UseMeterSerialNumber )
-                            this.addMtuForm.AddParameter ( FIELD.METER_NUMBER_OLD_2, value_oms_2, 1 );
+                            Data.SetTemp ( APP_FIELD.MeterNumberOld_2.ToString (), value_oms_2 );
                     
                         // Old Meter Working
                         if ( global.MeterWorkRecording )
-                            this.addMtuForm.AddParameter ( FIELD.METER_WORKING_OLD_2, value_omw_2, 1 );
+                            Data.SetTemp ( APP_FIELD.OldMeterWorking_2.ToString (), value_omw_2 );
                     
                         // Old Meter Reading / Initial Reading
                         if ( global.OldReadingRecording )
-                            this.addMtuForm.AddParameter ( FIELD.METER_READING_OLD_2, value_omr_2, 1 );
+                            Data.SetTemp ( APP_FIELD.MeterReadingOld_2.ToString (), value_omr_2 );
                             
                         // Replace Meter|Register
                         if ( global.RegisterRecording )
-                            this.addMtuForm.AddParameter ( FIELD.REPLACE_METER_REG_2, value_rpl_2, 1 );
+                            Data.SetTemp ( APP_FIELD.ReplaceMeterRegister_2.ToString (), value_rpl_2 );
                     }
                 }
                 // RDD
                 else
                 {
                     // Account Number / Service Port ID
-                    this.addMtuForm.AddParameter ( FIELD.ACCOUNT_NUMBER_2, value_acn_2, 1 );
+                    Data.SetTemp ( APP_FIELD.AccountNumber_2.ToString (), value_acn_2 );
 
                     // Work Order / Field Order
                     if ( global.WorkOrderRecording )
-                        this.addMtuForm.AddParameter ( FIELD.WORK_ORDER_2, value_wor_2, 1 );
+                        Data.SetTemp ( APP_FIELD.WorkOrder_2.ToString (), value_wor_2 );
                     
                     // Meter Type
-                    this.addMtuForm.AddParameter ( FIELD.METER_TYPE_2, value_rdd, 1 );
+                    Data.SetTemp ( APP_FIELD.Meter_2.ToString (), value_rdd );
                 }
             }
 
@@ -4297,9 +4293,9 @@ namespace aclara_meters.view
                 double lon = Convert.ToDouble ( value_lon );
                 double alt = Convert.ToDouble ( ( ! string.IsNullOrEmpty ( value_alt ) ) ? value_alt : new string ( '1', 10 ) );
 
-                this.addMtuForm.AddParameter ( FIELD.GPS_LATITUDE,  lat );
-                this.addMtuForm.AddParameter ( FIELD.GPS_LONGITUDE, lon );
-                this.addMtuForm.AddParameter ( FIELD.GPS_ALTITUDE,  alt );
+                Data.SetTemp ( APP_FIELD.GpsLatitude .ToString (), lat );
+                Data.SetTemp ( APP_FIELD.GpsLongitude.ToString (), lon );
+                Data.SetTemp ( APP_FIELD.GpsAltitude .ToString (), alt );
             }
 
             List<Parameter> optionalParams = new List<Parameter>();
@@ -4321,7 +4317,7 @@ namespace aclara_meters.view
                     optionalParams.Add(new Parameter(t.Name, t.Display,$"{System.DateTime.Today.ToShortDateString()} {t.Time.ToString()}", string.Empty, 0, true));
 
             if ( optionalParams.Count > 0 )
-                this.addMtuForm.AddParameter ( FIELD.OPTIONAL_PARAMS, optionalParams );
+                Data.SetTemp ( APP_FIELD.Optional.ToString (), optionalParams );
 
             #endregion
 
@@ -4335,12 +4331,8 @@ namespace aclara_meters.view
 
             #endregion
 
-            // TODO: Use Library.Data as first step to remove AddMtuForm from the system
-            foreach ( KeyValuePair<string,Parameter> entry in addMtuForm.Dictionary )
-                Data.SetTemp ( entry.Key, entry.Value.Value );
-
             // Launch action!
-            await add_mtu.Run ( this.addMtuForm );
+            await add_mtu.Run ();
         }
 
         private void OnProgress ( object sender, MTUComm.Delegates.ProgressArgs e )

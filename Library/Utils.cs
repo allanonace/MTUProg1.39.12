@@ -21,7 +21,7 @@ namespace Library
 
         #region Log
 
-        public const bool DEEP_MODE = false;
+        public static bool DEEP_MODE = false;
     
         public static void PrintDeep (
             object element,

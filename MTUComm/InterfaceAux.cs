@@ -56,6 +56,8 @@ namespace MTUComm
 
             if ( string.IsNullOrEmpty ( family ) )
                 throw new MtuDoesNotBelongToAnyFamilyException ();
+            else
+                Utils.Print ( "Family selected: MTU " + mtu.Id + " -> " + family );
             
             iInfo = xmlInterfaces.Interfaces.Find ( x => x.Family.Equals ( family ) );
 

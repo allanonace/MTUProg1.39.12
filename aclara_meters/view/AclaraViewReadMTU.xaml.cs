@@ -688,9 +688,9 @@ namespace aclara_meters.view
                                 {
                                     string description;
                                     
-                                    // For Read action when no Meter is installed on readed MTU
+                                    // For when no Meter is installed in the port
                                     if ( param != null )
-                                            description = param.Value;
+                                         description = param.Value;
                                     else description = copyCurrentMtu.Ports[i].GetProperty ( pParameter.Name );
                                     
                                     FinalReadListView.Add(new ReadMTUItem()

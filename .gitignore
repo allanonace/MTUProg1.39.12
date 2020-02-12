@@ -16,6 +16,7 @@ bin/
 csx/
 rcf/
 Backup/
+var/
 
 # Aclara repository with two projects, that forces to create this
 # folder to replicate the remote structure and be able to push project files

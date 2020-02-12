@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 using Library;
 using Library.Exceptions;
 using Xml;
@@ -16,7 +17,7 @@ namespace MTUComm
         #region Constants
 
         private const int    MAX_RDD_FW = 12;
-        private const string PT2_SUFIX  = "_2";
+        private const string PT2_SUFFIX = "_2";
         private const string HOUR       = " Hour";
         private const string HOURS      = " Hours";
         private const string MIN        = " Min";
@@ -31,7 +32,6 @@ namespace MTUComm
         private const string MSG_RDD    = "Should be one of the possible values ( 'CLOSE', 'OPEN', 'PARTIAL OPEN' )";
         private const string MSG_OMW    = "Should be one of the possible values ( 'Yes', 'No', 'Broken' )";
         private const string MSG_MRR    = "Should be one of the possible values ( 'Meter', 'Register', 'Both' )";
-        private const string MSG_TWO    = "Should be one of the possible values ( 'True' for Fast, 'False' for Slow )";
 
         public enum OldMeterWorking
         {
@@ -96,14 +96,20 @@ namespace MTUComm
             SnapReads,
             TwoWay,
             Alarm,
-            //Demand,
+            Demand,
             
             ForceTimeSync,
+
+            GpsLatitude,
+            GpsLongitude,
+            GpsAltitude,
 
             NumOfDays,
 
             RDDPosition,
             RDDFirmware,
+
+            Optional,
         }
 
         public readonly static Dictionary<ParameterType,APP_FIELD> IdsAclara =
@@ -122,15 +128,21 @@ namespace MTUComm
                 { ParameterType.Fast2Way,             APP_FIELD.TwoWay          },
                 { ParameterType.Alarm,                APP_FIELD.Alarm           },
                 { ParameterType.ForceTimeSync,        APP_FIELD.ForceTimeSync   },
+                { ParameterType.Custom,               APP_FIELD.Optional        },
+                
                 { ParameterType.MeterSerialNumber,    APP_FIELD.MeterNumber     },
                 { ParameterType.NewMeterSerialNumber, APP_FIELD.MeterNumber     },
                 { ParameterType.OldMeterSerialNumber, APP_FIELD.MeterNumberOld  },
+                
                 { ParameterType.MeterReading,         APP_FIELD.MeterReading    },
                 { ParameterType.NewMeterReading,      APP_FIELD.MeterReading    },
                 { ParameterType.OldMeterReading,      APP_FIELD.MeterReadingOld },
+                
                 { ParameterType.OldMeterWorking,      APP_FIELD.OldMeterWorking },
                 { ParameterType.ReplaceMeterRegister, APP_FIELD.ReplaceMeterRegister },
+                
                 { ParameterType.DaysOfRead,           APP_FIELD.NumOfDays       },
+                
                 { ParameterType.RDDPosition,          APP_FIELD.RDDPosition     },
                 { ParameterType.RDDFirmwareVersion,   APP_FIELD.RDDFirmware     },
             };
@@ -139,9 +151,10 @@ namespace MTUComm
 
         #region Logic
 
-        public static ( bool UsePort2, Dictionary<APP_FIELD,( dynamic Value, int Port )> Data ) TranslateAclaraParams (
+        public static ( bool UsePort2InScript, Dictionary<APP_FIELD,( dynamic Value, int Port )> Data ) TranslateAclaraParams (
             Parameter[] scriptParams )
         {
+            // Parameter type, value and port ( by default 0 = port 1 )
             Dictionary<APP_FIELD,( dynamic Value, int Port )> translatedParams =
                 new Dictionary<APP_FIELD,( dynamic Value, int Port )> ();
 
@@ -168,24 +181,18 @@ namespace MTUComm
 
             string nameTypeAclara = param.Type.ToString ();
 
-            // Translate aclara tag/parameter to app tag
+            // Verify if the parameter type exists, without using the port2 suffix because
+            // all parameters with type for second port, have also for the first one
             if ( ! Enum.TryParse<ParameterType> ( nameTypeAclara, out typeAclara ) ||
                  ! IdsAclara.ContainsKey ( typeAclara ) )
-            {
-                // Allow non-reserved tags
-                //AddAdditionalParameter ( nameTypeAclara, parameter.Value, parameter.Port );
-                
-                //Errors.LogErrorNow ( new ProcessingParamsScriptException () );
-
                 return APP_FIELD.NOTHING;
-            }
             else
             {
                 APP_FIELD typeOwn = IdsAclara[ typeAclara ];
 
-                // If is for port two, find the correct enum element adding two ( "_2" ) as sufix
+                // If is for port two, find the correct enum element adding two ( "_2" ) as suffix
                 if ( param.Port == 1 )
-                    Enum.TryParse<APP_FIELD> ( typeOwn.ToString () + PT2_SUFIX, out typeOwn );
+                    Enum.TryParse<APP_FIELD> ( typeOwn.ToString () + PT2_SUFFIX, out typeOwn );
 
                 return typeOwn;
             }
@@ -194,14 +201,14 @@ namespace MTUComm
         public static Dictionary<APP_FIELD,dynamic> ValidateParams (
             Mtu mtu,
             Action action,
-            ( bool UsePort2, Dictionary<APP_FIELD,( dynamic Value, int Port )> Data ) translatedParams,
-            bool port2Activated )
+            ( bool usePort2InScript, Dictionary<APP_FIELD,( dynamic Value, int Port )> Data ) translatedParams,
+            bool mtuPort2Enabled )
         {
-            Configuration config         = Singleton.Get.Configuration;
-            Global        global         = config.Global;
-            ActionType    actionType     = action.Type;
-            var           data           = translatedParams.Data;
-            bool          scriptUsePort2 = translatedParams.UsePort2;
+            Configuration config           = Singleton.Get.Configuration;
+            Global        global           = config.Global;
+            ActionType    actionType       = action.Type;
+            var           data             = translatedParams.Data;
+            bool          usePort2InScript = translatedParams.usePort2InScript;
 
             List<Meter> meters;
             Meter meterPort1 = null;
@@ -209,9 +216,11 @@ namespace MTUComm
             bool isAutodetectMeter = false;
 
             // These actions do not need to get the meter types
-            bool isNotWrite = actionType == ActionType.ReadMtu    ||
+            bool isNotWrite = actionType == ActionType.ReadFabric ||
+                              actionType == ActionType.ReadMtu    ||
                               actionType == ActionType.TurnOffMtu ||
                               actionType == ActionType.TurnOnMtu  ||
+                              actionType == ActionType.RFCheck    ||
                               actionType == ActionType.MtuInstallationConfirmation ||
                               actionType == ActionType.DataRead   ||
                               actionType == ActionType.ValveOperation;
@@ -227,21 +236,22 @@ namespace MTUComm
                 action.Type == ActionType.ReplaceMTU ||
                 action.Type == ActionType.ReplaceMtuReplaceMeter );
 
-            #region Get Meters
+            #region Get or Auto-detect Meters
 
             // Only write actions ( Add and Replace ) need to detect Meters
             if ( isNotWrite )
                 goto AFTER_GET_METERS;
 
             // Script is for one port but MTU has two and second is enabled
-            if ( ! scriptUsePort2 &&
-                 port2Activated   && // Return true in a one port 138 MTU
+            if ( ! usePort2InScript &&
+                 mtuPort2Enabled   && // Return true in a one port 138 MTU
                  mtu.TwoPorts )      // and for that reason I have to check also this
                 throw new ScriptForOnePortButTwoEnabledException ();
             
             // Script is for two ports but MTU has not second port or is disabled
-            else if ( scriptUsePort2 &&
-                      ! port2Activated )
+            else if ( usePort2InScript &&
+                      ( ! mtu.TwoPorts ||
+                        ! mtuPort2Enabled ) )
                 throw new ScriptForTwoPortsButMtuOnlyOneException ();
 
             #region Port 1
@@ -273,7 +283,7 @@ namespace MTUComm
     
                     // At least one Meter was found
                     if ( meters.Count > 0 )
-                        data.Add ( APP_FIELD.Meter, ( ( meterPort1 = meters[ 0 ] ).Id.ToString (), 0 ) );
+                        data.Add ( APP_FIELD.Meter, ( ( meterPort1 = meters[ 0 ] ), 0 ) );
                     
                     // No meter was found using the selected parameters
                     else throw new ScriptingAutoDetectMeterException ();
@@ -294,6 +304,9 @@ namespace MTUComm
                 // Current MTU does not support selected Meter
                 else if ( ! port.IsThisMeterSupported ( meterPort1 ) )
                     throw new ScriptingAutoDetectNotSupportedException ();
+
+                // Convert from AddMtuForm.Parameter, with a Meter inside, to a Meter
+                data[ APP_FIELD.Meter ] = ( meterPort1, 0 );
                 
                 // Set values for the Meter selected InterfaceTamper the script
                 port.MeterProtocol   = meterPort1.EncoderType;
@@ -306,7 +319,7 @@ namespace MTUComm
 
             // Auto-detect Meter using NumberOfDials, DriveDialSize and UnitOfMeasure
             if ( mtu.TwoPorts &&
-                 port2Activated )
+                 mtuPort2Enabled )
             {
                 if ( ! data.ContainsKey ( APP_FIELD.Meter_2 ) )
                 {
@@ -334,7 +347,7 @@ namespace MTUComm
                         
                         // At least one Meter was found
                         if ( meters.Count > 0 )
-                            data.Add ( APP_FIELD.Meter_2, ( ( meterPort2 = meters[ 0 ] ).Id.ToString (), 1 ) );
+                            data.Add ( APP_FIELD.Meter_2, ( ( meterPort2 = meters[ 0 ] ), 1 ) );
                         
                         // No meter was found using the selected parameters
                         else throw new ScriptingAutoDetectMeterException ( string.Empty, 2 );
@@ -355,6 +368,9 @@ namespace MTUComm
                     // Current MTU does not support selected Meter
                     else if ( ! port.IsThisMeterSupported ( meterPort2 ) )
                         throw new ScriptingAutoDetectNotSupportedException ( string.Empty, 2 );
+                    
+                    // Convert from AddMtuForm.Parameter, with a Meter inside, to a Meter
+                    data[ APP_FIELD.Meter ] = ( meterPort2, 1 );
                     
                     // Set values for the Meter selected InterfaceTamper the script
                     port.MeterProtocol   = meterPort2.EncoderType;
@@ -646,14 +662,14 @@ namespace MTUComm
                         // Param totally useless in this action type
                         // Do not use
                         if ( isNotWrite ||
-                             global.TimeToSync &&
-                             mtu.TimeToSync    &&
-                             mtu.FastMessageConfig )
+                             ! global.TimeToSync ||
+                             ! mtu.TimeToSync    ||
+                             ! mtu.FastMessageConfig )
                             continue;
                         
                         // In STAR Programmer this value is used as boolean ( true=Fast, false=Slow )
                         if ( fail = ! bool.TryParse ( valueStr, out bool result ) )
-                            msgDescription = MSG_TWO;
+                            valueStr = ( ( global.Fast2Way ) ? ScriptAux.TwoWay.FAST : ScriptAux.TwoWay.SLOW ).ToString ();
                         else
                             valueStr = ( ( result ) ? ScriptAux.TwoWay.FAST : ScriptAux.TwoWay.SLOW ).ToString ();
                         break;
@@ -695,20 +711,18 @@ namespace MTUComm
                         if ( actionType != ActionType.DataRead )
                             continue;
 
-                        switch ( valueStr )
+                        // Use the default value
+                        else if ( EmptyNum ( valueStr.Trim () ) ||
+                                  ! Regex.IsMatch ( valueStr, @"^(1|8|32|64|96)$" ) )
                         {
-                            case "1":
-                            case "8":
-                            case "32":
-                            case "64":
-                            case "96":
-                            // Ok
-                            break;
-                            default:
                             fail = true;
-                            msgDescription = MSG_DAYS;
-                            break;
+                            valueStr = global.NumOfDays.ToString ();
                         }
+
+                        // Verify the the default value
+                        if ( fail &&
+                             ( fail = ! Regex.IsMatch ( valueStr, @"^(1|8|32|64|96)$" ) ) )
+                            msgDescription = MSG_DAYS;
                         break;
                         #endregion
                         #region Valve Position [ Only RemoteDisconnect ]
@@ -733,9 +747,14 @@ namespace MTUComm
                              actionType != ActionType.ValveOperation )
                             continue;
                         
+                        // Use the default value
                         else if ( fail = NoELTxt ( valueStr, MAX_RDD_FW ) )
-                            msgDescription =
-                                String.Format ( MSG_ELONLY, MAX_RDD_FW );
+                            valueStr = global.RDDFirmwareVersion;
+
+                        // Verify the default value
+                        if ( fail &&
+                             ( fail = NoELTxt ( valueStr, MAX_RDD_FW ) ) )
+                            msgDescription = String.Format ( MSG_ELONLY, MAX_RDD_FW );
                         break;
                         #endregion
                     }
@@ -780,6 +799,39 @@ namespace MTUComm
 
                 throw new ProcessingParamsScriptException ( msgErrorStr, 1, msgErrorPopupStr );
             }
+
+            #endregion
+
+            #region Alarms and Demands
+
+            // Only write actions ( Add and Replace ) need to detect Meters
+            if ( isNotWrite )
+                goto AFTER_ALARMS_DEMANDS;
+            
+            // Auto-detect scripting Alarm profile
+            if ( mtu.RequiresAlarmProfile )
+            {
+                Alarm alarm = config.Alarms.FindByMtuType_Scripting ( ( int )Data.Get.MtuBasicInfo.Type );
+                if ( alarm != null )
+                    data.Add ( APP_FIELD.Alarm, ( alarm, 0 ) );
+                
+                // For current MTU does not exist "Scripting" profile inside Alarm.xml
+                else throw new ScriptingAlarmForCurrentMtuException ();
+            }
+
+            // Auto-detect scripting Demand profile
+            if ( mtu.MtuDemand &&
+                 mtu.FastMessageConfig )
+            {
+                Demand demand = config.Demands.FindByMtuType_Scripting ( ( int )Data.Get.MtuBasicInfo.Type );
+                if ( demand != null )
+                    data.Add ( APP_FIELD.Demand, ( demand, 0 ) );
+                
+                // For current MTU does not exist "Scripting" profile inside DemandConf.xml
+                else throw new ScriptingDemandForCurrentMtuException ();
+            }
+
+            AFTER_ALARMS_DEMANDS:
 
             #endregion
 

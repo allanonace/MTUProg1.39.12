@@ -4,7 +4,7 @@ namespace MTUComm.Observer
 {
     public interface IObservable
     {
-        bool Subscribe        ( string eventId, IObserver observer, bool removeOnFinish = true, string sufixToUse = "" );
+        bool Subscribe        ( string eventId, IObserver observer, bool removeOnFinish = true, string suffixToUse = "" );
         void Publish          ( string eventId, TYPE eventType, params object[] parameters );
         void PublishInCascade ( string eventId, TYPE eventType, params object[] parameters );
         void Unsubscribe      ( string eventId, IObserver observer );

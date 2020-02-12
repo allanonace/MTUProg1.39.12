@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Lexi.Interfaces;
 using Library;
-using MTUComm.actions;
+using MTUComm;
 using Xml;
 using Library.Exceptions;
 using System.IO;
@@ -15,7 +15,7 @@ using System.Diagnostics;
 
 using NodeDiscoveryResult = MTUComm.MTUComm.NodeDiscoveryResult;
 using ValidationResult = MTUComm.MTUComm.ValidationResult;
-using FIELD = MTUComm.actions.AddMtuForm.FIELD;
+using FIELD = MTUComm.ScriptAux.APP_FIELD;
 using ParameterType = MTUComm.Parameter.ParameterType;
 
 namespace MTUComm
@@ -142,7 +142,6 @@ namespace MTUComm
         private const string IFACE_PUCK      = "Puck";
         private const string IFACE_GLOBAL    = "Global";
         private const string IFACE_MEMORYMAP = "MemoryMap";
-        private const string IFACE_FORM      = "Form";
         private const string IFACE_DATA      = "Data";
         private const string IFACE_MREADING  = "MeterReading";
         private const string IFACE_READERROR = "ReadingError";
@@ -680,12 +679,14 @@ namespace MTUComm
             this.additionalScriptParameters.Add ( parameter );
         }
 
+        /*
         public void AddParameter ( MtuForm form )
         {
             Parameter[] addMtuParams = form.GetParameters ();
             foreach ( Parameter parameter in addMtuParams )
                 scriptParameters.Add (parameter);
         }
+        */
 
         public Parameter[] GetParameters()
         {
@@ -764,9 +765,7 @@ namespace MTUComm
         /// <remarks>
         /// TODO: Modify all the write logic ( Add/Replace ) to use the log interface.
         /// </remarks>
-        /// <param name="mtuForm">Write actions stores the set data in an intermediate form object</param>
-        public async Task Run (
-            MtuForm mtuForm = null )
+        public async Task Run ()
         {
             if ( canceled )
             {
@@ -810,13 +809,10 @@ namespace MTUComm
                         this.mtucomm.OnAddMtu += OnAddMtu;
 
                         // TODO: For the moment we should prepare a form object for unit tests
-                        if ( Data.Get.UNIT_TEST )
-                            mtuForm = this.PrepareAddForm ();
+                        //if ( Data.Get.UNIT_TEST )
+                        //    mtuForm = this.PrepareAddForm ();
 
-                        // Interactive and Scripting
-                        if ( mtuForm != null )
-                             parameters.AddRange ( new object[] { (AddMtuForm)mtuForm, this.user, this } );
-                        else parameters.Add ( this );
+                        parameters.Add ( this );
                         break;
 
                     case ActionType.TurnOffMtu:
@@ -856,8 +852,10 @@ namespace MTUComm
             }
         }
 
-        private AddMtuForm PrepareAddForm ()
+        // NOTE: ONLY USED IN UNIT TESTING
+        private dynamic PrepareAddForm ()
         {
+            /*
             AddMtuForm form = new AddMtuForm ( this.currentMtu );
 
             // Iterates AddMtuForm types enumeration, searching in Library.Data for each
@@ -880,6 +878,9 @@ namespace MTUComm
             }
 
             return form;
+            */
+            
+            return null;
         }
 
         public void Cancel ( string cancelReason = "410 DR Defective Register" )
@@ -979,17 +980,16 @@ namespace MTUComm
         /// </summary>
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.</returns>
-        /// <seealso cref="MTUComm.AddMtu(Action)"/>
+        /// <seealso cref="MTUComm.AddMtu_Scripting(Action)"/>
         /// <seealso cref="MTUComm.AddMtu(dynamic, string, Action)"/>
         private async Task OnAddMtu ( Delegates.ActionArgs args )
         {
             try
             {
-                dynamic form = args.Extra[ 0 ];
-                AddMtuLog addMtuLog = args.Extra[ 1 ];
+                AddMtuLog addMtuLog = args.Extra[ 0 ];
 
                 // Load parameters using the interface file
-                ActionResult result = await CreateActionResultUsingInterface ( args.Map, args.Mtu, form );
+                ActionResult result = await CreateActionResultUsingInterface ( args.Map, args.Mtu );
 
                 // Write result in the activity log
                 addMtuLog.LogReadMtu ( result );
@@ -1065,7 +1065,7 @@ namespace MTUComm
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.</returns>
         /// <seealso cref="MTUComm.DataRead"/>
-        /// <seealso cref="MTUComm.DataRead(Action)"/>
+        /// <seealso cref="MTUComm.DataRead_Scripting(Action)"/>
         private async Task OnDataRead ( Delegates.ActionArgs args )
         {
             try
@@ -1092,7 +1092,7 @@ namespace MTUComm
                 }
 
                 // Load parameters using the interface file
-                ActionResult dataRead_allParamsFromInterface = await CreateActionResultUsingInterface ( args.Map, args.Mtu, null, ActionType.DataRead );
+                ActionResult dataRead_allParamsFromInterface = await CreateActionResultUsingInterface ( args.Map, args.Mtu, ActionType.DataRead );
                 ActionResult readMtu_allParamsFromInterface  = await CreateActionResultUsingInterface ( args.Map, args.Mtu );
 
                 // Write result in the DataRead file
@@ -1117,7 +1117,7 @@ namespace MTUComm
             try
             {
                 // Load parameters using the interface file
-                ActionResult rdd_allParamsFromInterface     = await CreateActionResultUsingInterface ( args.Map, args.Mtu, null, ActionType.ValveOperation );
+                ActionResult rdd_allParamsFromInterface     = await CreateActionResultUsingInterface ( args.Map, args.Mtu, ActionType.ValveOperation );
                 ActionResult readMtu_allParamsFromInterface = await CreateActionResultUsingInterface ( args.Map, args.Mtu );
 
                 // Write result in the RemoteDisconnect file
@@ -1298,7 +1298,6 @@ namespace MTUComm
         /// </summary>
         /// <param name="map"><see cref="MemoryMap"/> generated during the action</param>
         /// <param name="mtu"><see cref="Mtu"/> that represents current MTU</param>
-        /// <param name="form">Write actions stores the set data in an intermediate form object</param>
         /// <param name="actionType">Type of the action</param>
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.
@@ -1309,7 +1308,6 @@ namespace MTUComm
         private async Task<ActionResult> CreateActionResultUsingInterface (
             dynamic map  = null,
             Mtu     mtu  = null,
-            MtuForm form = null,
             ActionType actionType = ActionType.ReadMtu )
         {
             Parameter paramToAdd;
@@ -1365,7 +1363,6 @@ namespace MTUComm
                                 case IFACE_ACTION: value      = this .GetProperty  ( sourceProperty ); break; // Current action
                                 case IFACE_MTU   : value      = mtu  .GetProperty  ( sourceProperty ); break; // Current MTU
                                 case IFACE_PUCK  : value      = puck .GetProperty  ( sourceProperty ); break;
-                                case IFACE_FORM  : paramToAdd = form .GetParameter ( sourceProperty ); break; // actions.AddMtuForm class
                                 case IFACE_GLOBAL: value      = gType.GetProperty  ( sourceProperty ).GetValue ( global, null ).ToString(); break; // Global class
                                 case IFACE_DATA  : if ( ! Data.Contains ( sourceProperty ) || // Library.Data class
                                                         string.IsNullOrEmpty ( value = Data.Get[ sourceProperty ].ToString () ) )
@@ -1377,20 +1374,11 @@ namespace MTUComm
                             if ( ! string.IsNullOrEmpty ( value ) ||
                                  parameter.AllowEmpty )
                             {
-                                if ( ! sourceWhere.Equals ( IFACE_FORM ) )
-                                {
-                                    string display = ( parameter.Display.ToLower ().StartsWith ( "global." ) ) ?
-                                                        gType.GetProperty ( parameter.Display.Split ( new char[] { '.' } )[1] ).GetValue ( global, null ).ToString () :
-                                                        parameter.Display;
+                                string display = ( parameter.Display.ToLower ().StartsWith ( "global." ) ) ?
+                                                    gType.GetProperty ( parameter.Display.Split ( new char[] { '.' } )[1] ).GetValue ( global, null ).ToString () :
+                                                    parameter.Display;
 
-                                    paramToAdd = new Parameter ( parameter.Name, display, value, parameter.Source );
-                                }
-                                // To change "name" attribute to show in IFACE_FORM case
-                                else
-                                {
-                                    paramToAdd.CustomParameter = parameter.Name;
-                                    paramToAdd.Source = parameter.Source;
-                                }
+                                paramToAdd = new Parameter ( parameter.Name, display, value, parameter.Source );
                             }
                         
                             if ( paramToAdd != null )
@@ -1430,8 +1418,18 @@ namespace MTUComm
                 //retryIndex = retryTotal;
             }
             
+            // These actions do not need to get the meter types
+            bool isNotWrite = actionType == ActionType.ReadFabric ||
+                              actionType == ActionType.ReadMtu    ||
+                              actionType == ActionType.TurnOffMtu ||
+                              actionType == ActionType.TurnOnMtu  ||
+                              actionType == ActionType.RFCheck    ||
+                              actionType == ActionType.MtuInstallationConfirmation ||
+                              actionType == ActionType.DataRead   ||
+                              actionType == ActionType.ValveOperation;
+
             // Add additional parameters ( from script ) for all actions except for the Add
-            if ( form == null )
+            if ( isNotWrite )
                 foreach ( Parameter param in this.AdditionalScriptParameters )
                     result.AddParameter ( param );
 
@@ -1741,7 +1739,7 @@ namespace MTUComm
                 Utils.PrintDeep ( "Interface.Validation: " +
                     ( ( isPort ) ? "Root " : "Port." + portIndex + " " ) +
                     parameter.Name +
-                    " already validated = " + ( ( !resultOk ) ? "False" : "True" ) +
+                    " Sentence Validated = " + ( ( !resultOk ) ? "False" : "True" ) +
                     " [ " + conditionStr + " ]" );
 
                 return resultOk;
@@ -1826,12 +1824,15 @@ namespace MTUComm
 
                     #region Get value
 
-                    int result = 0;
+                    int  result = 0;
+                    bool newCondition = false;
 
                     // Checks if the whole condition/part of the sentence is already validated
                     if ( !isPort && !this.validatedConditions    .TryGetValue ( condition.CondFull, out result ) ||
                           isPort && !this.validatedConditionsPort.TryGetValue ( condition.CondFull, out result ) )
                     {
+                        newCondition = true;
+
                         string   currentValue = string.Empty;
                         string[] condMembers  = condition.Key.Split ( new char[]{ '.' } ); // Class.Property
                         string   condProperty = ( condMembers.Length > 1 ) ? condMembers[ 1 ] : condMembers[ 0 ]; // Property
@@ -1849,7 +1850,7 @@ namespace MTUComm
                                             break;
                             default: // Dynamic MemoryMap
                                 // Recover register from MTU memory map
-                                // Some registers have port sufix but other not
+                                // Some registers have port suffix but other not
                                 if ( map.ContainsMember ( port + condProperty ) )
                                     currentValue = ( await map[ port + condProperty ].GetValue () ).ToString ();
                                 else if ( map.ContainsMember ( condProperty ) )
@@ -1885,30 +1886,22 @@ namespace MTUComm
                         Utils.PrintDeep ( "Interface.Validation: " + 
                             ( ( isPort ) ? "Root " : "Port." + portIndex + " " ) +
                             parameter.Name +
-                            " condition validated = " + ( ( result == 0 ) ? "False" : "True" ) +
+                            " Condition Validated = " + ( ( result == 0 ) ? "False" : "True" ) +
                             " [ " + condition.CondFull + " ]" );
                     }
 
                     #endregion
 
-                    //Utils.PrintDeep ("Interface.Validation:   " + condition.Key + " == " + condition.Value + " -> " + result +
-                    //    " [ Parent: " + ( currentNestedLevel - 1 ) + " , FinalResultIndex: " + currentFinalResult + " ]" );
-
                     // Concatenate results
-                    if ( ! condition.InitNewBlock )
-                    {
-                        if      ( condition.IsOr  ) finalResults[ currentFinalResult ] += result; // If one condition validate, pass
-                        else if ( condition.IsAnd ) finalResults[ currentFinalResult ] *= result; // All conditions have to validate
+                    if      ( condition.IsOr  ) finalResults[ currentFinalResult ] += result; // If one condition validate, pass
+                    else if ( condition.IsAnd ) finalResults[ currentFinalResult ] *= result; // All conditions have to validate
 
+                    if ( newCondition )
                         Utils.PrintDeep ( "Interface.Validation: " +
                             ( ( isPort ) ? "Root " : "Port." + portIndex + " " ) +
                             parameter.Name +
                             " Add Condition = " + ( ( result == 0 ) ? "False" : "True" ) +
                             " [ " + condition.CondFull + " ]" );
-                    }
-                    else finalResults[ currentFinalResult ] = result;
-
-                    //Utils.PrintDeep ("Interface.Validation:   Final = " + result + " -> FinalResult[" + currentFinalResult + "] = " + finalResults[ currentFinalResult ] );
                 }
                 
                 #endregion
@@ -2029,7 +2022,7 @@ namespace MTUComm
                 Utils.PrintDeep ( "Interface.Validation: " +
                     ( ( isPort ) ? "Root " : "Port." + portIndex + " " ) +
                     parameter.Name +
-                    " Add Setence = " + ( ( !resultOk ) ? "False" : "True" ) +
+                    " Add Sentence = " + ( ( !resultOk ) ? "False" : "True" ) +
                     " [ " + conditionStr + " ]" );
             }
 

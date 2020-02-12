@@ -22,12 +22,12 @@ namespace MTUComm.Observer
             public Func<object[],dynamic> OnCompleted { get; private set; }
             public Func<object[],dynamic> OnError     { get; private set; }
 
-            public Event ( IObserver observer, bool removeOnFinish, string sufixToUse )
+            public Event ( IObserver observer, bool removeOnFinish, string suffixToUse )
             {
                 this.observer       = observer;
                 this.removeOnFinish = removeOnFinish;
 
-                if ( string.IsNullOrEmpty ( sufixToUse ) )
+                if ( string.IsNullOrEmpty ( suffixToUse ) )
                 {
                     this.OnNext      = ( prs ) => this.observer.EventOnNext      ( prs );
                     this.OnCompleted = ( prs ) => this.observer.EventOnCompleted ( prs );
@@ -36,9 +36,9 @@ namespace MTUComm.Observer
                 else
                 {
                     Type type = this.observer.GetType ();
-                    type.GetMethod ( METHOD_ID_NEXT      + sufixToUse, new Type[] { typeof( object[] ) } );
-                    type.GetMethod ( METHOD_ID_COMPLETED + sufixToUse, new Type[] { typeof( object[] ) } );
-                    type.GetMethod ( METHOD_ID_ERROR     + sufixToUse, new Type[] { typeof( object[] ) } );
+                    type.GetMethod ( METHOD_ID_NEXT      + suffixToUse, new Type[] { typeof( object[] ) } );
+                    type.GetMethod ( METHOD_ID_COMPLETED + suffixToUse, new Type[] { typeof( object[] ) } );
+                    type.GetMethod ( METHOD_ID_ERROR     + suffixToUse, new Type[] { typeof( object[] ) } );
                 }
             }
         }
@@ -74,8 +74,8 @@ namespace MTUComm.Observer
         /// <param name="eventId">Event identifier</param>
         /// <param name="observer">Observer instance</param>
         /// <param name="removeOnFinish">If set to <c>true</c> the pair event-observer will be removed on finish</param>
-        /// <param name="sufixToUse">Sufix to use to support multiple event methods in the same class</param>
-        public static bool Subscribe ( string eventId, IObserver observer, bool removeOnFinish = true, string sufixToUse = "" )
+        /// <param name="suffixToUse">Suffix to use to support multiple event methods in the same class</param>
+        public static bool Subscribe ( string eventId, IObserver observer, bool removeOnFinish = true, string suffixToUse = "" )
         {
             // Create list for the new event
             if ( ! events.ContainsKey ( eventId ) )
@@ -87,7 +87,7 @@ namespace MTUComm.Observer
             // allowing to register more than one time same object to same event
             if ( ! list.Any ( evnt => evnt.observer == observer ) )
             {
-                list.Add ( new Event ( observer, removeOnFinish, sufixToUse ) );
+                list.Add ( new Event ( observer, removeOnFinish, suffixToUse ) );
                 return true;
             }
             return false;

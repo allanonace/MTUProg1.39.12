@@ -646,13 +646,13 @@ namespace Xml
                     // · Mtu.HexNum starts with "33"
                     // · Meter.Type contains the character "R" or "M"
                     // · Meter.Utility is "Gas"
-                    if ( Regex.IsMatch ( this.Port1.TypeString, @".*(?i:m|r).*" ) ||
+                    if ( Regex.IsMatch ( this.Port1.TypeString, @".*(?i:m|r).*" ) &&
                          this.Port1.Utilities.Contains ( "gas" ) )
-                         this.family = Family._31xx32xx;
+                        this.family = Family._31xx32xx;
                     // Family 33xx
-                    // · Mtu.HexNum starts with "33"
-                    // · Meter.Type does NOT contains the character "R" or "M"
-                    else this.family = Family._33xx;
+                    // · The rest of MTU that do not meet the conditions of the previous group
+                    else
+                        this.family = Family._33xx;
                 }
                 // Family 342x
                 // · Mtu.HexNum starts with "342"

@@ -11,13 +11,11 @@ using Lexi;
 using Lexi.Interfaces;
 using Library;
 using Library.Exceptions;
-using MTUComm.actions;
 using MTUComm.MemoryMap;
 using Xml;
 
 using ActionType               = MTUComm.Action.ActionType;
 using APP_FIELD                = MTUComm.ScriptAux.APP_FIELD;
-using FIELD                    = MTUComm.actions.AddMtuForm.FIELD;
 using EventLogQueryResult      = MTUComm.EventLogList.EventLogQueryResult;
 using ParameterType            = MTUComm.Parameter.ParameterType;
 using ENCRYPTION               = Xml.Mtu.ENCRYPTION;
@@ -362,12 +360,12 @@ namespace MTUComm
         /// </summary>
         /// <param name="type">Action to be performed</param>
         /// <returns>Indicates whether the action can be executed or not.</returns>
-        /// <seealso cref="AddMtu(Action)"/>
+        /// <seealso cref="AddMtu_Scripting(Action)"/>
         /// <seealso cref="AddMtu(dynamic, string, Action)"/>
-        /// <seealso cref="DataRead(Action)"/>
+        /// <seealso cref="DataRead_Scripting(Action)"/>
         /// <seealso cref="DataRead"/>
         /// <seealso cref="InstallConfirmation"/>
-        /// <seealso cref="RemoteDisconnect(Action)"/>
+        /// <seealso cref="RemoteDisconnect_Scripting(Action)"/>
         /// <seealso cref="RemoteDisconnect"/>
         /// <seealso cref="ReadFabric"/>
         /// <seealso cref="ReadMtu"/>
@@ -430,12 +428,12 @@ namespace MTUComm
         /// </summary>
         /// <param name="type">Action to be performed</param>
         /// <param name="args">Arguments required for some actions</param>
-        /// <seealso cref="AddMtu(Action)"/>
+        /// <seealso cref="AddMtu_Scripting(Action)"/>
         /// <seealso cref="AddMtu(dynamic, string, Action)"/>
-        /// <seealso cref="DataRead(Action)"/>
+        /// <seealso cref="DataRead_Scripting(Action)"/>
         /// <seealso cref="DataRead"/>
         /// <seealso cref="InstallConfirmation"/>
-        /// <seealso cref="RemoteDisconnect(Action)"/>
+        /// <seealso cref="RemoteDisconnect_Scripting(Action)"/>
         /// <seealso cref="RemoteDisconnect"/>
         /// <seealso cref="ReadFabric"/>
         /// <seealso cref="ReadMtu"/>
@@ -474,21 +472,21 @@ namespace MTUComm
                     case ActionType.ReplaceMTU            :
                     case ActionType.ReplaceMeter          :
                     case ActionType.ReplaceMtuReplaceMeter:
-                        // Interactive and Scripting
-                        if ( args.Length > 1 )
-                             await Task.Run ( () => AddMtu ( ( AddMtuForm )args[ 0 ], ( string )args[ 1 ], ( Action )args[ 2 ] ) );
+                        // Scripting and Interactive
+                        if ( Data.Get.IsFromScripting )
+                             await Task.Run ( () => AddMtu_Scripting ( ( Action )args[ 0 ] ) );
                         else await Task.Run ( () => AddMtu ( ( Action )args[ 0 ] ) );
                         break;
                     case ActionType.DataRead:
                         // Scripting and Interactive
-                        if ( args.Length == 1 )
-                             await Task.Run ( () => DataRead ( ( Action )args[ 0 ] ) );
+                        if ( Data.Get.IsFromScripting )
+                             await Task.Run ( () => DataRead_Scripting ( ( Action )args[ 0 ] ) );
                         else await Task.Run ( () => DataRead () );
                         break;
                     case ActionType.ValveOperation:
                         // Scripting and Interactive
-                        if ( args.Length == 1 )
-                             await Task.Run ( () => RemoteDisconnect ( ( Action )args[ 0 ] ) );
+                        if ( Data.Get.IsFromScripting )
+                             await Task.Run ( () => RemoteDisconnect_Scripting ( ( Action )args[ 0 ] ) );
                         else await Task.Run ( () => RemoteDisconnect () );
                         break;
                     case ActionType.MtuInstallationConfirmation:
@@ -550,7 +548,7 @@ namespace MTUComm
         /// <summary>
         /// Validation method for the RF-Check process, executed before switching to its scene/window.
         /// <para>
-        /// See <see cref="RemoteDisconnect(Action)"/> and <see cref="RemoteDisconnect"/> for the Remote Disconnect logic.
+        /// See <see cref="RemoteDisconnect_Scripting(Action)"/> and <see cref="RemoteDisconnect"/> for the Remote Disconnect logic.
         /// </para>
         /// </summary>
         /// <param name="textError">Text of the error detected, for the pop-up message.</param>
@@ -572,7 +570,7 @@ namespace MTUComm
         /// <summary>
         /// Validation method for the RF-Check process, executed before switching to its scene/window.
         /// <para>
-        /// See <see cref="DataRead(Action)"/> and <see cref="DataRead()"/> for the Historical Read logic.
+        /// See <see cref="DataRead_Scripting(Action)"/> and <see cref="DataRead()"/> for the Historical Read logic.
         /// </para>
         /// </summary>
         /// <param name="textError">Text of the error detected, for the pop-up message.</param>
@@ -677,11 +675,14 @@ namespace MTUComm
                 dynamic map = this.GetMemoryMap ( true );
 
                 // Check if the second port is enabled
-                bool port2enabled = await map.P2StatusFlag.GetValue ();
+                bool mtuPort2Enabled = await map.P2StatusFlag.GetValue ();
+
+                // There are present in the script some param for port 2 and the port is enabled
+                Data.SetTemp ( "UsePort2", mtuPort2Enabled && translatedParams.UsePort2InScript );
 
                 // Validate script parameters ( removing the unnecessary ones )
                 Dictionary<APP_FIELD,dynamic> psSelected = ScriptAux.ValidateParams (
-                    this.mtu, action, translatedParams, port2enabled );
+                    this.mtu, action, translatedParams, mtuPort2Enabled );
 
                 // Add parameters to Library.Data
                 foreach ( var entry in psSelected )
@@ -820,7 +821,7 @@ namespace MTUComm
                     if ( this.global.TimeToSync &&
                          this.mtu.TimeToSync    &&
                          this.mtu.FastMessageConfig )
-                        CheckIfNotPresentWithDef ( ParameterType.Fast2Way, "True" );  // default FAST
+                        CheckIfNotPresentWithDef ( ParameterType.Fast2Way, global.Fast2Way );
                     
                     #endregion
                     #region Port 1
@@ -971,7 +972,10 @@ namespace MTUComm
 
                     if ( hasRDD )
                     {
-                        CheckIfNotPresent ( ParameterType.RDDFirmwareVersion );
+                        // FIXME: COMPROBAR PORQUE NO ESTOY MUY SEGURO DE QUE NO HAYA QUE INDICAR EL PUERTO 2
+                        CheckIfNotPresentWithDef (
+                            ParameterType.RDDFirmwareVersion,
+                            global.RDDFirmwareVersion );
                         CheckIfNotPresent ( ParameterType.RDDPosition );
                     }
 
@@ -1210,7 +1214,7 @@ namespace MTUComm
         /// <exception cref="MemoryMapParseXmlException">( From GetMemoryMap )</exception>
         /// <exception cref="PuckCantCommWithMtuException">( Generic error )</exception>
         /// <exception cref="DataRead () exceptions..."></exception>
-        private async Task DataRead (
+        private async Task DataRead_Scripting (
             Action action )
         {
             try
@@ -1243,7 +1247,7 @@ namespace MTUComm
         /// Process performed only by MTUs with the tag MtuDemand set to true in mtu.xml file,
         /// recovering all the MeterReading events saved in the MTU for the number of days indicated.
         /// <para>
-        /// See <see cref="DataRead(Action)"/> for the entry point of the DataRead process in scripted mode.
+        /// See <see cref="DataRead_Scripting(Action)"/> for the entry point of the DataRead process in scripted mode.
         /// </para>
         /// <para>&#160;</para>
         /// <para/><para>
@@ -2124,16 +2128,16 @@ namespace MTUComm
         /// <param name="action">Instance of the Action class to retrieve script parameters</param>
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.</returns>
-        private async Task RemoteDisconnect (
+        private async Task RemoteDisconnect_Scripting (
             Action action )
         {
             try
             {
                 // Validates script parameters and set values in Library.Data
-                dynamic map = await this.ValidateParams ( action );
+                await this.ValidateParams ( action );
 
                 // Init DataRead logic using translated parameters
-                await this.RemoteDisconnect (true);
+                await this.RemoteDisconnect ( true );
             }
             catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
@@ -2171,7 +2175,7 @@ namespace MTUComm
         /// <summary>
         /// The logic for the Remote Disconnection process, also known as Valve Operation.
         /// <para>
-        /// See <see cref="RemoteDisconnect(Action)"/> and <see cref="RemoteDisconnect()"/>
+        /// See <see cref="RemoteDisconnect_Scripting(Action)"/> and <see cref="RemoteDisconnect()"/>
         /// for the entry points of the Remote Disconnect process executed directly.
         /// </para>
         /// </summary>
@@ -2643,644 +2647,16 @@ namespace MTUComm
         /// <exception cref="MemoryMapParseXmlException">( From GetMemoryMap )</exception>
         /// <exception cref="PuckCantCommWithMtuException">( Generic error )</exception>
         /// <exception cref="AddMtu (dynamic,string,Action) exceptions..."></exception>
-        private async Task AddMtu ( Action action )
+        private async Task AddMtu_Scripting (
+            Action action )
         {
-            truquitoAction   = action;
-            Parameter[] ps;//   = action.GetParameters ();
-            dynamic     form = new AddMtuForm ( this.mtu );
-            form.UsePort2    = false;
-            bool scriptUseP2 = false;
-
-            // Action is about Replace Meter
-            bool isReplaceMeter = (
-                action.Type == ActionType.ReplaceMeter ||
-                action.Type == ActionType.ReplaceMtuReplaceMeter ||
-                action.Type == ActionType.AddMtuReplaceMeter );
-
-            // Action is about Replace MTU
-            bool isReplaceMtu = (
-                action.Type == ActionType.ReplaceMTU ||
-                action.Type == ActionType.ReplaceMtuReplaceMeter );
-            
-            List<Meter> meters;
-            Meter meterPort1 = null;
-            Meter meterPort2 = null;
-            
             try
             {
-                bool port2IsActivated = await this.GetMemoryMap ( true ).P2StatusFlag.GetValue ();
+                // Validates script parameters and set values in Library.Data
+                await this.ValidateParams ( action );
 
-                // Check if any required parameter is not present, but does nothing else
-                // because in the validation region all unnecessary parameters will be removed
-                if ( ! this.ValidateRequiredParams ( action, out string errorRequired ) )
-                    throw new ScriptingTagMissingException ( errorRequired );
-
-                ps = action.GetParameters();
-
-                // Recover parameters from script and translate from Aclara nomenclature to our own
-                foreach ( Parameter parameter in ps )
-                {
-                    // Launches exception 'TranslatingParamsScriptException'
-                    // Launches exception 'SameParameterRepeatScriptException'
-                    form.AddParameterTranslatingAclaraXml ( parameter );
-                    
-                    if ( parameter.Port == 1 )
-                        form.UsePort2 = true;
-                }
-   
-                scriptUseP2    = form.UsePort2;
-                form.UsePort2 &= this.mtu.TwoPorts;
-
-                #region Mandatory Meter Serial Number [ DEACTIVATED ]
-
-                /*
-                // The parameters MeterSerialNumber and NewMeterSerialNumber are mapped to FIELD.METER_NUMBER
-                // NOTE: In scripted mode does not should be used global.UseMeterSerialNumber, doing MeterSerialNumber mandatory
-                if ( ! form.ContainsParameter ( FIELD.METER_NUMBER ) )
-                    throw new MandatoryMeterSerialHiddenScriptException ();
-                
-                if ( action.IsReplace &&
-                     ! form.ContainsParameter ( FIELD.METER_NUMBER_OLD ) )
-                    throw new MandatoryMeterSerialHiddenScriptException ();
-                
-                if ( scriptUseP2 )
-                {
-                    if ( ! form.ContainsParameter ( FIELD.METER_NUMBER_2 ) )
-                        throw new MandatoryMeterSerialHiddenScriptException ();
-                    
-                    if ( action.IsReplace &&
-                         ! form.ContainsParameter ( FIELD.METER_NUMBER_OLD_2 ) )
-                        throw new MandatoryMeterSerialHiddenScriptException ();
-                }
-                */
-
-                #endregion
-
-                #region Auto-detect Meters
-
-                // Script is for one port but MTU has two and second is enabled
-                if ( ! scriptUseP2    &&
-                     port2IsActivated && // Return true in a one port 138 MTU
-                     this.mtu.TwoPorts ) // and for that reason I have to check also this
-                    throw new ScriptForOnePortButTwoEnabledException ();
-                
-                // Script is for two ports but MTU has not second port or is disabled
-                else if ( scriptUseP2 &&
-                          ! port2IsActivated )
-                    throw new ScriptForTwoPortsButMtuOnlyOneException ();
-    
-                bool isAutodetectMeter = false;
-
-                // Port 1
-                if ( ! form.ContainsParameter ( FIELD.METER_TYPE ) )
-                {
-                    // Missing tags
-                    if ( ! form.ContainsParameter ( FIELD.NUMBER_OF_DIALS ) )
-                        Errors.AddError ( new NumberOfDialsTagMissingScript () );
-                    
-                    if ( ! form.ContainsParameter ( FIELD.DRIVE_DIAL_SIZE ) )
-                        Errors.AddError ( new DriveDialSizeTagMissingScript () );
-                        
-                    if ( ! form.ContainsParameter ( FIELD.UNIT_MEASURE ) )
-                        Errors.AddError ( new UnitOfMeasureTagMissingScript () );
-                    
-                    if ( form.ContainsParameter ( FIELD.NUMBER_OF_DIALS ) &&
-                         form.ContainsParameter ( FIELD.DRIVE_DIAL_SIZE ) &&
-                         form.ContainsParameter ( FIELD.UNIT_MEASURE    ) )
-                    {
-                        isAutodetectMeter = true;
-                    
-                        meters = configuration.MeterTypes.FindByDialDescription (
-                            int.Parse ( form.NumberOfDials.Value ),
-                            int.Parse ( form.DriveDialSize.Value ),
-                            form.UnitOfMeasure.Value,
-                            this.mtu.Flow );
-        
-                        // At least one Meter was found
-                        if ( meters.Count > 0 )
-                            form.AddParameter ( FIELD.METER_TYPE, ( meterPort1 = meters[ 0 ] ) );
-                        
-                        // No meter was found using the selected parameters
-                        else throw new ScriptingAutoDetectMeterException ();
-                    }
-                    // Script does not contain some of the needed tags ( NumberOfDials,... )
-                    else throw new ScriptingAutoDetectTagsMissingScript ();
-                }
-                // Check if the selected Meter exists and current MTU support it
-                else
-                {
-                    meterPort1 = configuration.getMeterTypeById ( int.Parse ( form.Meter.Value ) );
-                    Port port  = this.mtu.Port1;
-                    
-                    // Is not valid Meter ID ( not present in Meter.xml )
-                    if ( meterPort1.IsEmpty )
-                        throw new ScriptingAutoDetectMeterMissing ();
-
-                    // Check if current MTU supports the selected Meter
-                    else if ( ! port.IsThisMeterSupported ( meterPort1 ) )
-                        throw new ScriptingAutoDetectNotSupportedException ();
-                    
-                    form.UpdateParameter ( FIELD.METER_TYPE, meterPort1 );
-                }
-    
-                // Port 2
-                if ( this.mtu.TwoPorts &&
-                     port2IsActivated )
-                {
-                    if ( ! form.ContainsParameter ( FIELD.METER_TYPE_2 ) )
-                    {
-                        // Missing tags
-                        if ( ! form.ContainsParameter ( FIELD.NUMBER_OF_DIALS_2 ) )
-                            Errors.AddError ( new NumberOfDialsTagMissingScript ( string.Empty, 2 ) );
-                        
-                        if ( ! form.ContainsParameter ( FIELD.DRIVE_DIAL_SIZE_2 ) )
-                            Errors.AddError ( new DriveDialSizeTagMissingScript ( string.Empty, 2 ) );
-                            
-                        if ( ! form.ContainsParameter ( FIELD.UNIT_MEASURE_2 ) )
-                            Errors.AddError ( new UnitOfMeasureTagMissingScript ( string.Empty, 2 ) );
-                    
-                        if ( form.ContainsParameter ( FIELD.NUMBER_OF_DIALS_2 ) &&
-                             form.ContainsParameter ( FIELD.DRIVE_DIAL_SIZE_2 ) &&
-                             form.ContainsParameter ( FIELD.UNIT_MEASURE_2    ) )
-                        {
-                            meters = configuration.MeterTypes.FindByDialDescription (
-                                int.Parse ( form.NumberOfDials_2.Value ),
-                                int.Parse ( form.DriveDialSize_2.Value ),
-                                form.UnitOfMeasure_2.Value,
-                                this.mtu.Flow );
-                            
-                            // At least one Meter was found
-                            if ( meters.Count > 0 )
-                                form.AddParameter ( FIELD.METER_TYPE_2, ( meterPort2 = meters[ 0 ] ) );
-                            
-                            // No meter was found using the selected parameters
-                            else throw new ScriptingAutoDetectMeterException ( string.Empty, 2 );
-                        }
-                        // Script does not contain some of the needed tags ( NumberOfDials,... )
-                        else throw new ScriptingAutoDetectTagsMissingScript ( string.Empty, 2 );
-                    }
-                    // Check if the selected Meter exists and current MTU support it
-                    else
-                    {
-                        meterPort2 = configuration.getMeterTypeById ( int.Parse ( form.Meter_2.Value ) );
-                        Port port  = this.mtu.Port2;
-                        
-                        // Is not valid Meter ID ( not present in Meter.xml )
-                        if ( meterPort2.IsEmpty )
-                            throw new ScriptingAutoDetectMeterMissing ( string.Empty, 2 );
-                        
-                        // Current MTU does not support selected Meter
-                        else if ( ! port.IsThisMeterSupported ( meterPort2 ) )
-                            throw new ScriptingAutoDetectNotSupportedException ( string.Empty, 2 );
-                        
-                        form.UpdateParameter ( FIELD.METER_TYPE_2, meterPort2 );
-                    }
-                }
-
-                #endregion
-
-                #region Validation
-
-                #region Methods
-
-                dynamic Empty = new Func<dynamic,bool> ( ( v ) =>
-                                        !(v is string) && v == null || v is string && string.IsNullOrEmpty ( v ) );
-    
-                dynamic EmptyNum = new Func<string,bool> ( ( v ) =>
-                                        string.IsNullOrEmpty ( v ) || ! Validations.IsNumeric ( v ) );
-
-                // Value equals to maximum length
-                dynamic NoEqNum = new Func<string,int,bool> ( ( v, maxLength ) =>
-                                    ! Validations.NumericText ( v, maxLength ) );
-                                    
-                dynamic NoEqTxt = new Func<string,int,bool> ( ( v, maxLength ) =>
-                                    ! Validations.Text ( v, maxLength ) );
-    
-                // Value equals or lower to maximum length
-                dynamic NoELNum = new Func<string,int,bool> ( ( v, maxLength ) =>
-                                    ! Validations.NumericText ( v, maxLength, 1, true, true, false ) );
-                                    
-                dynamic NoELTxt = new Func<string,int,bool> ( ( v, maxLength ) =>
-                                    ! Validations.Text ( v, maxLength, 1, true, true, false ) );
-
-                #endregion
-            
-                // Validate each parameter and remove those that are not going to be used
-
-                string  value    = string.Empty;
-                dynamic valueDyn = null;
-                string msgDescription  = string.Empty;
-                StringBuilder msgError = new StringBuilder ();
-                StringBuilder msgErrorPopup = new StringBuilder ();
-                foreach ( KeyValuePair<FIELD,Parameter> item in form.RegisteredParamsByField )
-                {
-                    FIELD type = item.Key;
-                    Parameter parameter = item.Value;
-                
-                    bool fail = false;
-                    
-                    if ( fail = Empty ( parameter.Value ) )
-                        msgDescription = "cannot be empty";
-                    else
-                    {
-                        value = parameter.Value.ToString ();
-                    
-                        // Validates each parameter before continue with the action
-                        switch ( type )
-                        {
-                            #region Activity Log Id
-                            case FIELD.ACTIVITY_LOG_ID:
-                            if ( fail = EmptyNum ( value ) )
-                                msgDescription = "should be a valid numeric value";
-                            break;
-                            #endregion
-                            #region Account Number
-                            case FIELD.ACCOUNT_NUMBER:
-                            case FIELD.ACCOUNT_NUMBER_2:
-                            // In scripted mode not taking into account global.AccountLength
-                            if ( fail = EmptyNum ( value ) )
-                                msgDescription = "should be a valid numeric value";
-
-                            //if ( fail = NoEqNum ( value, global.AccountLength ) )
-                            //    msgDescription = "should be equal to global.AccountLength (" + global.AccountLength + ")";
-                            break;
-                            #endregion
-                            #region Work Order
-                            case FIELD.WORK_ORDER:
-                            case FIELD.WORK_ORDER_2:
-                            // Do not use
-                            if ( ! global.WorkOrderRecording )
-                            {
-                                if ( parameter.Port == 0 )
-                                     form.RemoveParameter ( FIELD.WORK_ORDER   );
-                                else form.RemoveParameter ( FIELD.WORK_ORDER_2 );
-
-                                continue;
-                            }
-
-                            else if ( fail = NoELTxt ( value, global.WorkOrderLength ) )
-                                msgDescription =
-                                    "should be equal to or less than global.WorkOrderLength (" + global.WorkOrderLength + ")";
-                            break;
-                            #endregion
-                            #region MTU Id Old
-                            case FIELD.MTU_ID_OLD:
-                            // Do not use
-                            if ( ! isReplaceMtu )
-                            {
-                                form.RemoveParameter ( FIELD.MTU_ID_OLD );
-
-                                continue;
-                            }
-
-                            else if ( fail = NoEqNum ( value, global.MtuIdLength ) )
-                                msgDescription =
-                                    "should be equal to global.MtuIdLength (" + global.MtuIdLength + ")";
-                            break;
-                            #endregion
-                            #region Meter Serial Number
-                            case FIELD.METER_NUMBER:
-                            case FIELD.METER_NUMBER_2:
-                            case FIELD.METER_NUMBER_OLD:
-                            case FIELD.METER_NUMBER_OLD_2:
-                            // Do not use
-                            if ( ! global.UseMeterSerialNumber )
-                            {
-                                if ( parameter.Port == 0 )
-                                {
-                                    switch ( parameter.Type )
-                                    {
-                                        case ParameterType.MeterSerialNumber:
-                                        case ParameterType.NewMeterSerialNumber:
-                                        form.RemoveParameter ( FIELD.METER_NUMBER );
-                                        break;
-                                        
-                                        case ParameterType.OldMeterSerialNumber:
-                                        form.RemoveParameter ( FIELD.METER_NUMBER_OLD );
-                                        break;
-                                    }
-                                }
-                                else
-                                {
-                                    switch ( parameter.Type )
-                                    {
-                                        case ParameterType.MeterSerialNumber:
-                                        case ParameterType.NewMeterSerialNumber:
-                                        form.RemoveParameter ( FIELD.METER_NUMBER_2 );
-                                        break;
-                                        
-                                        case ParameterType.OldMeterSerialNumber:
-                                        form.RemoveParameter ( FIELD.METER_NUMBER_OLD_2 );
-                                        break;
-                                    }
-                                }
-
-                                continue;
-                            }
-
-                            else if ( fail = NoELTxt ( value, global.MeterNumberLength ) )
-                                msgDescription =
-                                    "should be equal to or less than global.MeterNumberLength (" + global.MeterNumberLength + ")";
-                            break;
-                            #endregion
-                            #region Meter Reading
-                            case FIELD.METER_READING:
-                            case FIELD.METER_READING_2:
-                            // Do not ask for new Meter reading if the port is for Encoders/Ecoders
-                            if ( parameter.Port == 0 &&
-                                 ( meterPort1.IsForEncoderOrEcoder || 
-                                   meterPort1.IsForRDD ) ||
-                                 parameter.Port == 1 && 
-                                 ( meterPort2.IsForEncoderOrEcoder ||
-                                   meterPort2.IsForRDD ) )
-                            {
-                                form.RemoveParameter ( ( parameter.Port == 0 ) ?
-                                    FIELD.METER_READING : FIELD.METER_READING_2 );
-                                
-                                continue;
-                            }
-                            else if ( ! isAutodetectMeter )
-                            {
-                                // If necessary fill left to 0's up to LiveDigits
-                                if ( parameter.Port == 0 )
-                                     value = meterPort1.FillLeftLiveDigits ( value );
-                                else value = meterPort2.FillLeftLiveDigits ( value );
-                            }
-                            else
-                            {
-                                if ( parameter.Port == 0 )
-                                {
-                                    if ( ! ( fail = meterPort1.NumberOfDials <= -1 || 
-                                                    NoELNum ( value, meterPort1.NumberOfDials ) ) )
-                                    {
-                                        // If value is lower than NumberOfDials, fill left to 0's up to NumberOfDials
-                                        if ( NoEqNum ( value, meterPort1.NumberOfDials ) )
-                                            value = meterPort1.FillLeftNumberOfDials ( value );
-                                        
-                                        // Apply Meter mask
-                                        value = meterPort1.ApplyReadingMask ( value );
-                                    }
-                                    else break;
-                                }
-                                else
-                                {
-                                    if ( ! ( fail = meterPort2.NumberOfDials <= -1 ||
-                                                    NoELNum ( value, meterPort2.NumberOfDials ) ) )
-                                    {
-                                        // If value is lower than NumberOfDials, fill left to 0's up to NumberOfDials
-                                        if ( NoEqNum ( value, meterPort2.NumberOfDials ) )
-                                            value = meterPort2.FillLeftNumberOfDials ( value );
-                                        
-                                        // Apply Meter mask
-                                        value = meterPort2.ApplyReadingMask ( value );
-                                    }
-                                    else break;
-                                }
-                            }
-                            
-                            Meter meter = ( parameter.Port == 0 ) ? meterPort1 : meterPort2;
-                            fail = NoEqNum ( value, meter.LiveDigits );
-                            
-                            if ( fail )
-                            {
-                                if ( ! isAutodetectMeter )
-                                     msgDescription = "should be equal to or less than Meter.LiveDigits (" + meter.LiveDigits + ")";
-                                else msgDescription = "should be equal to or less than Meter.NumberOfDials (" + meter.NumberOfDials + ")";
-                            }
-                            break;
-                            #endregion
-                            #region Meter Reading Old
-                            case FIELD.METER_READING_OLD:
-                            case FIELD.METER_READING_OLD_2:
-                            // Param totally useless in this action type
-                            // Do not use
-                            if ( ! isReplaceMeter ||
-                                 ! global.OldReadingRecording )
-                            {
-                                form.RemoveParameter ( ( parameter.Port == 0 ) ?
-                                    FIELD.METER_READING_OLD : FIELD.METER_READING_OLD_2 );
-
-                                continue;
-                            }
-
-                            else if ( fail = NoELNum ( value, 12 ) )
-                                msgDescription = "should be equal to or less than 12";
-                            break;
-                            #endregion
-                            #region Old Meter Working
-                            case FIELD.METER_WORKING_OLD:
-                            case FIELD.METER_WORKING_OLD_2:
-                            // Do not use
-                            if ( ! isReplaceMeter ||
-                                 ! this.global.MeterWorkRecording )
-                            {
-                                if ( parameter.Port == 0 )
-                                     form.RemoveParameter ( FIELD.METER_WORKING_OLD   );
-                                else form.RemoveParameter ( FIELD.METER_WORKING_OLD_2 );
-
-                                continue;
-                            }
-                            
-                            // Allowed values: Yes, No, Broken
-                            if ( fail = ! ( Enum.TryParse<ScriptAux.OldMeterWorking> (
-                                                value.ToUpper (), out var cmd_omw ) ) )
-                                msgDescription = "Should be one of the possible values ( 'Yes', 'No', 'Broken' )";
-                            break;
-                            #endregion
-                            #region Replace Meter|Register
-                            case FIELD.REPLACE_METER_REG:
-                            case FIELD.REPLACE_METER_REG_2:
-                            // Do not use
-                            if ( ! isReplaceMeter ||
-                                 ! this.global.RegisterRecording )
-                            {
-                                if ( parameter.Port == 0 )
-                                     form.RemoveParameter ( FIELD.REPLACE_METER_REG   );
-                                else form.RemoveParameter ( FIELD.REPLACE_METER_REG_2 );
-
-                                continue;
-                            }
-
-                            // Allowed values: Meter, Register, Both
-                            if ( fail = ! ( Enum.TryParse<ScriptAux.MeterRegisterRecording> (
-                                                value.ToUpper (), out var cmd_mrr ) ) )
-                                msgDescription = "Should be one of the possible values ( 'Meter', 'Register', 'Both' )";
-                            break;
-                            #endregion
-                            #region Meter Type
-                            case FIELD.METER_TYPE:
-                            case FIELD.METER_TYPE_2:
-                            //...
-                            valueDyn = parameter.Value;
-                            break;
-                            #endregion
-                            #region Read Interval
-                            case FIELD.READ_INTERVAL:
-                            if ( fail = ! ScriptAux.PrepareReadIntervalList ( mtu, ref value ) )
-                                msgDescription = "should be one of the possible values and using Hr/s or Min";
-                            break;
-                            #endregion
-                            #region Snap Reads
-                            case FIELD.SNAP_READS:
-                            // Do not use
-                            if ( ! global.AllowDailyReads ||
-                                 ! mtu.DailyReads ||
-                                 mtu.IsFamily33xx )
-                            {
-                                form.RemoveParameter ( FIELD.SNAP_READS );
-
-                                continue;
-                            }
-
-                            // Use default value
-                            if ( ! global.IndividualDailyReads )
-                            {
-                                int defDailyReads = global.DailyReadsDefault;
-                                value = ( ( defDailyReads >= 0 &&
-                                            defDailyReads <= 23 ) ?
-                                    defDailyReads : 13 ).ToString ();
-                            }
-                            else
-                            {
-                                if ( ! ( fail = EmptyNum ( value ) ) )
-                                {
-                                    if ( int.TryParse ( value, out int dailyReads ) )
-                                         fail &= dailyReads < 0 || dailyReads > 23;
-                                    else fail = true;
-                                }
-
-                                if ( fail )
-                                    msgDescription = "should be a valid numeric value";
-                            }
-                            break;
-                            #endregion
-                            #region Two-Way
-                            case FIELD.TWO_WAY:
-                            // Do not use
-                            if ( ! this.global.TimeToSync ||
-                                 ! this.mtu.TimeToSync    ||
-                                 ! this.mtu.FastMessageConfig )
-                            {
-                                form.RemoveParameter ( FIELD.TWO_WAY );
-
-                                continue;
-                            }
-                            
-                            // In STAR Programmer this value is used as boolean ( true=Fast, false=Slow )
-                            if ( fail = ! bool.TryParse ( value, out bool result ) )
-                                msgDescription = "Should be one of the possible values ( 'True' for Fast, 'False' for Slow )";
-                            else
-                                value = ( ( result ) ? ScriptAux.TwoWay.FAST : ScriptAux.TwoWay.SLOW ).ToString ();
-                            break;
-                            #endregion
-                            #region Auto-detect Meter
-                            case FIELD.NUMBER_OF_DIALS:
-                            case FIELD.NUMBER_OF_DIALS_2:
-                            case FIELD.DRIVE_DIAL_SIZE:
-                            case FIELD.DRIVE_DIAL_SIZE_2:
-                            if ( fail = EmptyNum ( value ) )
-                                msgDescription = "should be a valid numeric value";
-                            break;
-                            
-                            case FIELD.UNIT_MEASURE:
-                            case FIELD.UNIT_MEASURE_2:
-                            //...
-                            break;
-                            #endregion
-                            #region Force Time Sync
-                            case FIELD.FORCE_TIME_SYNC:
-                            bool.TryParse ( value, out fail );
-                            if ( fail = ! fail )
-                                msgDescription = "should be 'true' or 'false'";
-                            break;
-                            #endregion
-                        }
-                    }
-    
-                    // Concatenates error messages
-                    if ( fail )
-                    {
-                        fail = false;
-                        
-                        string typeStr = ( form.Texts as Dictionary<FIELD,string[]> )[ type ][ 2 ];
-                        
-                        msgErrorPopup.Append ( ( ( msgError.Length > 0 ) ? ", " : string.Empty ) +
-                                               typeStr + " " + msgDescription );
-
-                        msgError.Append ( ( ( msgError.Length > 0 ) ? ", " : string.Empty ) +
-                                          typeStr );
-                    }
-                    else
-                        parameter.Value = ( valueDyn == null ) ? value : valueDyn;
-
-                    valueDyn = null;
-                }
-
-                if ( msgError.Length > 0 )
-                {
-                    string msgErrorStr      = msgError     .ToString ();
-                    string msgErrorPopupStr = msgErrorPopup.ToString ();
-                    msgError     .Clear ();
-                    msgErrorPopup.Clear ();
-                    msgError      = null;
-                    msgErrorPopup = null;
-                
-                    int index;
-                    if ( ( index = msgErrorStr.LastIndexOf ( ',' ) ) > -1 )
-                    {
-                        msgErrorStr = msgErrorStr.Substring ( 0, index ) +
-                                      " and" +
-                                      msgErrorStr.Substring ( index + 1 );
-                        
-                        index = msgErrorPopupStr.LastIndexOf ( ',' );
-                        msgErrorPopupStr = msgErrorPopupStr.Substring ( 0, index ) +
-                                           " and" +
-                                           msgErrorPopupStr.Substring ( index + 1 );
-                    }
-    
-                    throw new ProcessingParamsScriptException ( msgErrorStr, 1, msgErrorPopupStr );
-                }
-    
-                #endregion
-    
-                #region Auto-detect Alarm
-    
-                // Auto-detect scripting Alarm profile
-                if ( this.mtu.RequiresAlarmProfile )
-                {
-                    Alarm alarm = configuration.Alarms.FindByMtuType_Scripting ( ( int )Data.Get.MtuBasicInfo.Type );
-
-                    if ( alarm != null )
-                        form.AddParameter ( FIELD.ALARM, alarm );
-                            
-                    // For current MTU does not exist "Scripting" profile inside Alarm.xml
-                    else throw new ScriptingAlarmForCurrentMtuException ();
-                }
-
-                #endregion
-
-                #region Auto-detect Demands
-
-                // Auto-detect scripting Alarm profile
-                if ( this.mtu.MtuDemand &&
-                     this.mtu.FastMessageConfig )
-                {
-                    Demand demand = configuration.Demands.FindByMtuType_Scripting ( ( int )Data.Get.MtuBasicInfo.Type );
-
-                    if ( demand != null )
-                        form.AddParameter ( FIELD.DEMAND, demand );
-                            
-                    // For current MTU does not exist "Scripting" profile inside DemandConf.xml
-                    else throw new ScriptingDemandForCurrentMtuException ();
-                }
-
-                #endregion
-            
-                // TODO: Use Library.Data as first step to remove AddMtuForm from the system
-                foreach ( KeyValuePair<string,Parameter> entry in form.Dictionary )
-                    Data.SetTemp ( entry.Key, entry.Value.Value );
-
-                await this.AddMtu ( form, action.User, action );
+                // With the parameters already converted, the installation logic can be started
+                await this.AddMtu ( action );
             }
             catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
@@ -3296,7 +2672,7 @@ namespace MTUComm
         /// configuring the MTU physical memory with the new values set in the application form or
         /// read from the script file.
         /// <para>
-        /// See <see cref="AddMtu(Action)"/> for the entry point of the DataRead process in scripted mode.
+        /// See <see cref="AddMtu_Scripting(Action)"/> for the entry point of the DataRead process in scripted mode.
         /// </para>
         /// </summary>
         /// <param name="dynamic">Intermediate data store used only during installations</param>
@@ -3313,20 +2689,17 @@ namespace MTUComm
         /// <exception cref="CheckSelectedEncoderMeter () exceptions..."></exception>
         /// <seealso cref="OnAddMtu"/>
         private async Task AddMtu (
-            dynamic form,
-            string user,
             Action action )
         {
-            this.mtu = form.mtu;
-
             try
             {
                 Logger logger = ( ! Data.Get.IsFromScripting ) ? new Logger () : truquitoAction.Logger;
-                addMtuLog = new AddMtuLog ( logger, form, user );
+                addMtuLog = new AddMtuLog ( logger, mtu, action.User );
 
                 bool rddIn1;
-                bool hasRDD = ( ( rddIn1 = mtu.Port1.IsSetFlow ) ||
-                                mtu.TwoPorts && mtu.Port2.IsSetFlow );
+                bool usePort2 = Data.Get.UsePort2;
+                bool hasRDD   = ( ( rddIn1 = mtu.Port1.IsSetFlow ) ||
+                                  mtu.TwoPorts && mtu.Port2.IsSetFlow );
                 bool noRddOrNotIn1 = ! hasRDD || ! rddIn1;
                 bool noRddOrNotIn2 = ! hasRDD ||   rddIn1;
 
@@ -3348,7 +2721,7 @@ namespace MTUComm
                 #region Check Meter for Encoder
 
                 if ( this.mtu.Port1.IsForEncoderOrEcoder ||
-                     form.UsePort2 &&
+                     usePort2 &&
                      this.mtu.Port2.IsForEncoderOrEcoder )
                 {
                     Utils.Print ( "------CHECK_ENCODER_START-----" );
@@ -3364,7 +2737,7 @@ namespace MTUComm
                         await this.CheckSelectedEncoderMeter ();
                     }
 
-                    if ( form.UsePort2 &&
+                    if ( usePort2 &&
                          this.mtu.Port2.IsForEncoderOrEcoder )
                     {
                         this.mtu.Port2.MeterProtocol   = ( ( Meter )Data.Get.Meter_2 ).EncoderType;
@@ -3386,7 +2759,6 @@ namespace MTUComm
                 OnProgress ( this, new Delegates.ProgressArgs ( "Preparing MemoryMap..." ) );
 
                 dynamic map = this.GetMemoryMap ( true );
-                form.map = map;
 
                 #region Account Number
 
@@ -3394,8 +2766,8 @@ namespace MTUComm
                 // Only first 12 numeric characters are recorded in MTU memory
                 // F1 electric can have 20 alphanumeric characters but in the activity log should be written all characters
                 map.P1MeterId = Utils.GetValueOrDefault<ulong> ( Data.Get.AccountNumber, 12 );
-                if ( form.UsePort2 &&
-                     form.ContainsParameter ( FIELD.ACCOUNT_NUMBER_2 ) )
+                if ( usePort2 &&
+                     Data.Contains ( APP_FIELD.AccountNumber_2.ToString () ) )
                     map.P2MeterId = Utils.GetValueOrDefault<ulong> ( Data.Get.AccountNumber_2, 12 );
 
                 #endregion
@@ -3408,8 +2780,8 @@ namespace MTUComm
                 selectedMeter = (Meter)Data.Get.Meter;
                 map.P1MeterType = selectedMeter.Id;
 
-                if ( form.UsePort2 &&
-                     form.ContainsParameter ( FIELD.METER_TYPE_2 ) )
+                if ( usePort2 &&
+                     Data.Contains ( APP_FIELD.Meter_2.ToString () ) )
                 {
                     selectedMeter2 = (Meter)Data.Get.Meter_2;
                     map.P2MeterType = selectedMeter2.Id;
@@ -3426,7 +2798,7 @@ namespace MTUComm
                 if ( noRddOrNotIn1 &&
                      ! selectedMeter.IsForEncoderOrEcoder )
                 {
-                    if ( form.ContainsParameter ( FIELD.METER_READING ) )
+                    if ( Data.Contains ( APP_FIELD.MeterReading.ToString () ) )
                     {
                         p1readingStr = Data.Get.MeterReading;
                         ulong p1reading = ( ! string.IsNullOrEmpty ( p1readingStr ) ) ? Convert.ToUInt64 ( ( p1readingStr ) ) : 0;
@@ -3435,20 +2807,21 @@ namespace MTUComm
                     }
                     else if ( this.mtu.Port1.IsForPulse )
                     {
-                        // If meter reading was not present, fill in to zeros up to length equals to selected Meter live digits
+                        // If meter reading was not present, fill in to zeros
+                        // up to length equals to selected Meter live digits
                         p1readingStr = selectedMeter.FillLeftLiveDigits ();
 
-                        form.AddParameter ( FIELD.METER_READING, p1readingStr );
+                        Data.SetTemp ( APP_FIELD.MeterReading.ToString (), p1readingStr );
                         map.P1MeterReading = p1readingStr;
                     }
                 }
 
                 // Do not use the Meter reading if the port is for Encoders/Ecoders and RDDs
-                if ( form.UsePort2 &&
+                if ( usePort2 &&
                      noRddOrNotIn2 &&
                      ! selectedMeter2.IsForEncoderOrEcoder )
                 {
-                    if ( form.ContainsParameter ( FIELD.METER_READING_2 ) )
+                    if ( Data.Contains ( APP_FIELD.MeterReading_2.ToString () ) )
                     {
                         p2readingStr = Data.Get.MeterReading_2;
                         ulong p2reading = ( ! string.IsNullOrEmpty ( p2readingStr ) ) ? Convert.ToUInt64 ( ( p2readingStr ) ) : 0;
@@ -3459,7 +2832,7 @@ namespace MTUComm
                     {
                         p2readingStr = selectedMeter2.FillLeftLiveDigits ();
 
-                        form.AddParameter ( FIELD.METER_READING_2, p2readingStr );
+                        Data.SetTemp ( APP_FIELD.MeterReading_2.ToString (), p2readingStr );
                         map.P2MeterReading = p2readingStr;
                     }
                 }
@@ -3473,7 +2846,7 @@ namespace MTUComm
                 {
                     // If not present in scripted mode, set default value to one/1 hour
                     map.ReadIntervalMinutes =
-                        ( form.ContainsParameter ( FIELD.READ_INTERVAL ) ) ?
+                        ( Data.Contains ( APP_FIELD.ReadInterval.ToString () ) ) ?
                             Data.Get.ReadInterval : "1 Hr";
                 }
 
@@ -3495,7 +2868,7 @@ namespace MTUComm
 
                 if ( global.AllowDailyReads &&
                      mtu.DailyReads &&
-                     form.ContainsParameter ( FIELD.SNAP_READS ) &&
+                     Data.Contains ( APP_FIELD.SnapReads.ToString () ) &&
                      noRddOrNotIn1 ) // &&
                      //map.ContainsMember ( "DailyGMTHourRead" ) )
                 {
@@ -3525,7 +2898,7 @@ namespace MTUComm
                     if ( selectedMeter.IsForEncoderOrEcoder )
                         map.P1DigitsToDrop = ( int )selectedMeter.EncoderDigitsToDrop;
 
-                    if ( form.UsePort2 &&
+                    if ( usePort2 &&
                          selectedMeter2.IsForEncoderOrEcoder )
                         map.P2DigitsToDrop = ( int )selectedMeter2.EncoderDigitsToDrop;
                 }
@@ -3544,25 +2917,25 @@ namespace MTUComm
                             // Set alarms [ Alarm Message Transmission ]
                             if ( mtu.InsufficientMemory     ) map.InsufficientMemoryAlarm    = alarms.InsufficientMemory;       // 34xx and 35xx36xx
                             if ( mtu.GasCutWireAlarm        ) map.GasCutWireAlarm            = alarms.CutAlarmCable;            // 31xx32xx and 342x
-                            if ( form.UsePort2 &&
+                            if ( usePort2 &&
                                  mtu.GasCutWireAlarm        ) map.P2GasCutWireAlarm          = alarms.CutAlarmCable;            // 31xx32xx
                             if ( mtu.SerialComProblem       ) map.SerialComProblemAlarm      = alarms.SerialComProblem;         // 34xx and 35xx36xx
                             if ( mtu.LastGasp               ) map.LastGaspAlarm              = alarms.LastGasp;                 // 34xx and 35xx36xx
                             if ( mtu.TiltTamper             ) map.TiltAlarm                  = alarms.Tilt;                     // 31xx32xx, 34xx and 35xx36xx
-                            if ( form.UsePort2 &&
+                            if ( usePort2 &&
                                  mtu.GasCutWireAlarm        ) map.P2TiltAlarm                = alarms.Tilt;                     // 31xx32xx
                             if ( mtu.MagneticTamper         ) map.MagneticAlarm              = alarms.Magnetic;                 // 31xx32xx, 34xx and 35xx36xx
-                            if ( form.UsePort2 &&
+                            if ( usePort2 &&
                                  mtu.MagneticTamper         ) map.P2MagneticAlarm            = alarms.Magnetic;                 // 31xx32xx
                             if ( mtu.RegisterCoverTamper    ) map.RegisterCoverAlarm         = alarms.RegisterCover;            // 31xx32xx, 34xx and 35xx36xx
-                            if ( form.UsePort2 &&
+                            if ( usePort2 &&
                                  mtu.RegisterCoverTamper    ) map.P2RegisterCoverAlarm       = alarms.RegisterCover;            // 31xx32xx
                             if ( mtu.ReverseFlowTamper      ) map.ReverseFlowAlarm           = alarms.ReverseFlow;              // 31xx32xx, 34xx and 35xx36xx
-                            if ( form.UsePort2 &&
+                            if ( usePort2 &&
                                  mtu.ReverseFlowTamper      ) map.P2ReverseFlowAlarm         = alarms.ReverseFlow;              // 31xx32xx
                             if ( mtu.SerialCutWire          ) map.SerialCutWireAlarm         = alarms.SerialCutWire;            // 342x
                             if ( mtu.TamperPort1            ) map.P1CutWireAlarm             = alarms.TamperPort1;              // 34xx and 35xx36xx
-                            if ( form.UsePort2 &&
+                            if ( usePort2 &&
                                  mtu.TamperPort2            ) map.P2CutWireAlarm             = alarms.TamperPort2;              // 34xx and 35xx36xx
                             if ( mtu.CutWireDelaySetting    ) map.CutWireDelaySetting        = alarms.CutWireDelaySetting;      // 34xx and 35xx36xx
 
@@ -3581,7 +2954,7 @@ namespace MTUComm
                             if ( mtu.ReverseFlowTamperImm   ) map.ReverseFlowImmAlarm        = alarms.ReverseFlowTamperImm;     // 35xx36xx
                             if ( mtu.SerialCutWireImm       ) map.SerialCutWireImmAlarm      = alarms.SerialCutWireImm;         // 342x
                             if ( mtu.TamperPort1Imm         ) map.P1CutWireImmAlarm          = alarms.TamperPort1Imm;           // 34xx and 35xx36xx
-                            if ( form.UsePort2 &&
+                            if ( usePort2 &&
                                  mtu.TamperPort2Imm         ) map.P2CutWireImmAlarm          = alarms.TamperPort2Imm;           // 34xx and 35xx36xx
 
                             // Ecoder alarms
@@ -3616,7 +2989,7 @@ namespace MTUComm
                             
                             // Overlap count
                             map.MessageOverlapCount = alarms.Overlap;               // 31xx32xx, 33xx, 34xx and 35xx36xx
-                            if ( form.UsePort2 &&                     
+                            if ( usePort2 &&                     
                                  map.ContainsMember ( "P2MessageOverlapCount" ) )
                                 map.P2MessageOverlapCount = alarms.Overlap;         // 31xx32xx and 33xx
 
@@ -3750,7 +3123,10 @@ namespace MTUComm
                 Utils.Print("-------RDD_FINISH--------");
 
                 #endregion
-                await addMtuLog.LogAddMtu();
+
+                // NOTE: It must be performed after executing the ValveOperation process
+                await addMtuLog.LogAddMtu ( map );
+
                 #region Verifying data 
 
                 Utils.Print("----FINAL_READ_START-----");
@@ -3809,7 +3185,7 @@ namespace MTUComm
                         await map.InterfaceAlarm.SetValueToMtu ( alarms.InterfaceTamper );
                     
                     // 31xx32xx
-                    if ( form.UsePort2 &&
+                    if ( usePort2 &&
                          mtu.InterfaceTamper &&
                          map.ContainsMember ( "P2InterfaceAlarm" ) )
                         await map.P2InterfaceAlarm.SetValueToMtu ( alarms.InterfaceTamper );
@@ -3830,9 +3206,9 @@ namespace MTUComm
                      mtu.TimeToSync    && // Indicates that is a two-way MTU and enables TimeSync request
                      mtu.OnTimeSync    && // MTU can be force during installation to perform a TimeSync/IC
                      // If script contains ForceTimeSync, use it but if not use value from Global
-                     ( ! form.ContainsParameter ( FIELD.FORCE_TIME_SYNC ) &&
+                     ( ! Data.Contains ( APP_FIELD.ForceTimeSync.ToString () ) &&
                        global.ForceTimeSync ||
-                       form.ContainsParameter ( FIELD.FORCE_TIME_SYNC ) &&
+                       Data.Contains ( APP_FIELD.ForceTimeSync.ToString () ) &&
                        Data.Get.ForceTimeSync ) )
                 {
                     Utils.Print ( "--------IC_START---------" );
@@ -3858,7 +3234,7 @@ namespace MTUComm
                 OnProgress ( this, new Delegates.ProgressArgs ( "Reading MTU..." ) );
 
                 // Generate log to show on device screen
-                await this.OnAddMtu ( new Delegates.ActionArgs ( this.mtu, map, form, addMtuLog ) );
+                await this.OnAddMtu ( new Delegates.ActionArgs ( this.mtu, map, addMtuLog ) );
             }
             catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {

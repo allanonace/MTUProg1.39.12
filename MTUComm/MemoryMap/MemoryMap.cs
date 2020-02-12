@@ -118,8 +118,8 @@ namespace MTUComm.MemoryMap
 
         public  const string METHOD              = "method";
         public  const string METHOD_KEY          = METHOD + ":";
-        public  const string METHOD_SUFIX_SET    = "_Set";
-        public  const string METHOD_SUFIX_GET    = "_Get";
+        public  const string METHOD_SUFFIX_SET   = "_Set";
+        public  const string METHOD_SUFFIX_GET   = "_Get";
         
         private const string REGISTER_OP         = "_val_";
         private const string OVERLOAD_OP_SIGN    = "#";

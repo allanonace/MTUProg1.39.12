@@ -60,7 +60,7 @@ namespace MTUComm.MemoryMap
         /// <item>
         ///     <term>CUSTOM_TYPE.METHOD</term>
         ///     <description>Set to use a custom method, using "method", and the associated
-        /// method should have the sufix _Get or _Set, or an specific name ( >method:...</ )</description>
+        /// method should have the suffix _Get or _Set, or an specific name ( >method:...</ )</description>
         /// </item>
         /// <item>
         ///     <term>CUSTOM_TYPE.OPERATION</term>
@@ -183,7 +183,7 @@ namespace MTUComm.MemoryMap
             {
                 if ( this._HasCustomMethodId )
                      this.methodId = this.custom_Get.Substring ( MemoryMap.METHOD_KEY.Length );
-                else this.methodId = this.id + MemoryMap.METHOD_SUFIX_GET;
+                else this.methodId = this.id + MemoryMap.METHOD_SUFFIX_GET;
             }
         }
 
