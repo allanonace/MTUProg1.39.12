@@ -389,13 +389,13 @@ namespace MTUComm
         private Error[] _GetErrorsToLog (
             bool clearList = true )
         {
-            Error[] errors = new Error[ this.errorsToLog.Count ];
-            Array.Copy ( this.errorsToLog.ToArray (), errors, this.errorsToLog.Count );
+            Error[] errs = new Error[ this.errorsToLog.Count ];
+            Array.Copy ( this.errorsToLog.ToArray (), errs, this.errorsToLog.Count );
             
             if ( clearList )
                 this.errorsToLog.Clear ();
             
-            return errors;
+            return errs;
         }
         
         private bool IsLastExceptionUsed (

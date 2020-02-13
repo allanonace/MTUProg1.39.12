@@ -89,12 +89,12 @@ namespace ble_library
 
         public void OnCompleted()
         {
-
+            // not used
         }
 
         public void OnError(Exception error)
         {
-
+            // not used
         }
 
         public void OnNext(EnabledDisabledState value)
@@ -441,13 +441,13 @@ namespace ble_library
             {
                 Utils.PrintDeep ( "BlePort.WriteCharacteristic -> ERROR: " + e.Message + " ( GattException )" );
                 
-                throw e;
+                throw;
             }
             catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 Utils.PrintDeep ( "BlePort.WriteCharacteristic -> ERROR: " + e.Message );
                 
-                throw e;
+                throw;
             }
         }
 
@@ -502,7 +502,7 @@ namespace ble_library
             {
                 Utils.PrintDeep ( "BlePort.UpdateBuffer -> ERROR: " + e.Message );
                 
-                throw e;
+                throw;
             }
         }
 

@@ -510,7 +510,7 @@ namespace MTUComm
 
                     this.OnError ();
                 }
-                else throw e; // For the basic reading, that has no OnFinish nor OnError events
+                else throw; // For the basic reading, that has no OnFinish nor OnError events
             }
         }
 
@@ -695,7 +695,7 @@ namespace MTUComm
                 // Is not own exception
                 if ( ! Errors.IsOwnException ( e ) )
                      throw new PuckCantCommWithMtuException ();
-                else throw e;
+                else throw;
             }
         }
 
@@ -1181,7 +1181,7 @@ namespace MTUComm
                 // Is not own exception
                 if ( ! Errors.IsOwnException ( e ) )
                      throw new PuckCantCommWithMtuException ( "", portIndex );
-                else throw e;
+                else throw;
             }
         }
 
@@ -1239,7 +1239,7 @@ namespace MTUComm
                 // Is not own exception
                 if ( ! Errors.IsOwnException ( e ) )
                      throw new PuckCantCommWithMtuException ();
-                else throw e;
+                else throw;
             }
         }
 
@@ -1329,7 +1329,7 @@ namespace MTUComm
                 {
                     if ( e is LexiWritingAckException )
                          throw new MtuQueryEventLogsException ();
-                    else throw e;
+                    else throw;
                 }
 
                 await Task.Delay ( WAIT_BEFORE_LOGS );
@@ -1471,7 +1471,7 @@ namespace MTUComm
                 // Is not own exception
                 if ( ! Errors.IsOwnException ( e ) )
                      throw new PuckCantCommWithMtuException ();
-                else throw e;
+                else throw;
             }
         }
 
@@ -2144,7 +2144,7 @@ namespace MTUComm
                 // Is not own exception
                 if ( ! Errors.IsOwnException ( e ) )
                      throw new PuckCantCommWithMtuException ();
-                else throw e;
+                else throw;
             }
         }
 
@@ -2376,7 +2376,7 @@ namespace MTUComm
                     // Is not own exception
                     if ( ! Errors.IsOwnException ( e ) )
                          throw new PuckCantCommWithMtuException ();
-                    else throw e;
+                    else throw;
                 }
             }
             finally
@@ -2562,7 +2562,7 @@ namespace MTUComm
                 // Is not own exception
                 if ( ! Errors.IsOwnException ( e ) )
                      throw new PuckCantCommWithMtuException ();
-                else throw e;
+                else throw;
             }
         }
 
@@ -2663,7 +2663,7 @@ namespace MTUComm
                 // Is not own exception
                 if ( ! Errors.IsOwnException ( e ) )
                      throw new PuckCantCommWithMtuException ();
-                else throw e;
+                else throw;
             }
         }
 
@@ -3241,7 +3241,7 @@ namespace MTUComm
                 // Is not own exception
                 if ( ! Errors.IsOwnException ( e ) )
                      throw new PuckCantCommWithMtuException ();
-                else throw e;
+                else throw;
             }
         }
 

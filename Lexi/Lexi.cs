@@ -509,7 +509,7 @@ namespace Lexi
                         await Task.Delay ( WAIT_BTW_LEXI_ATTEMPTS * 1000 );
                     }
                     else
-                        throw e;                  
+                        throw;                  
                 }
             }
             while ( attempts <= maxAttempts );
@@ -779,7 +779,7 @@ namespace Lexi
                         await Task.Delay ( WAIT_BTW_LEXI_ATTEMPTS * 1000 );
                     }
                     else
-                        throw e;                  
+                        throw;                  
                 }
             }
             while ( attempts <= maxAttempts );
@@ -933,7 +933,7 @@ namespace Lexi
                         Array.Resize ( ref rawBuffer, bytesRead );
                     }
                     // Time out and is not a special case avoiding the ACK
-                    else throw e;
+                    else throw;
                 }
                 
                 Utils.PrintDeep ( "Lexi.Read.. BytesRead: " + bytesRead + " / " + rawBuffer.Length );
@@ -971,7 +971,7 @@ namespace Lexi
             {
                 if ( e is LexiWritingEncryptionException<LexiWriteResult> ||
                      e is LexiWritingAckException )
-                     throw e;
+                     throw;
                 else throw new LexiWritingException ();
             }
         }

@@ -94,7 +94,7 @@ namespace MTUComm
             catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 if ( Errors.IsOwnException ( e ) )
-                     throw e;
+                     throw;
                 else throw new ConfigFilesCorruptedException ();
             }
         }

@@ -93,7 +93,7 @@ namespace ble_library
             {
                 Utils.PrintDeep ( "BleSerial.Read -> ERROR: " + e.Message );
             
-                throw e;
+                throw;
             }
             finally
             {
@@ -151,7 +151,7 @@ namespace ble_library
             {
                 Utils.PrintDeep ( "BleSerial.Write -> ERROR: " + e.Message );
             
-                throw e;
+                throw;
             }
             finally
             {
@@ -228,7 +228,10 @@ namespace ble_library
             }
         }
 
-        public void Open() { }
+        public void Open() 
+        {
+            // not used
+        }
 
         /// <summary>
         /// Returns the number of bytes of data received stored in the buffer.
