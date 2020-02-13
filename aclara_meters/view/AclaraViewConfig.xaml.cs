@@ -92,7 +92,7 @@ namespace aclara_meters.view
                                 GenericUtilsClass.BackUpConfigFiles ();
 
                                 // Update config files with the "new" version detected
-                                if ( this.UpdateConfigFiles () )
+                                if ( !this.UpdateConfigFiles () )
                                 {
                                     GenericUtilsClass.RestoreConfigFiles ();
 

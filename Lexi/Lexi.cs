@@ -300,8 +300,8 @@ namespace Lexi
         #region Attributes
 
         private static dynamic map;
-        public static int LexiMaxAttempts = Global.MAX_LEXI_ATTEMPTS;
-        public static int LexiMaxTimeout  = Global.MAX_LEXI_TIMEOUT;
+        public static int LexiMaxAttempts;
+        public static int LexiMaxTimeout;
         private readonly ISerial m_serial; // Serial port interface used to communicate through Lexi
         private static int numErrors   = 0;
         private static int numAttempts = 0;

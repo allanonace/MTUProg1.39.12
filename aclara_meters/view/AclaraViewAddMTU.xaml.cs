@@ -509,13 +509,13 @@ namespace aclara_meters.view
             dynamic map = Data.Get.MemoryMap;
 
             string rddPosition = await map.RDDValvePosition.GetValue();
-            ulong rddSerial = await map.RDDSerialNumber.GetValue();
+            string rddSerial = await map.RDDSerialNumberAscii.GetValue();
             string rddBattery = await map.RDDBatteryStatus.GetValue();
 
             Device.BeginInvokeOnMainThread(() =>
             {
                 this.tbx_RDDPosition       .Text = rddPosition;
-                this.tbx_RDDSerialNumber   .Text = rddSerial.ToString();
+                this.tbx_RDDSerialNumber   .Text = rddSerial;
                 this.tbx_Battery           .Text = rddBattery;
                 this.tbx_RDDFirmwareVersion.Text = this.global.RDDFirmwareVersion;
             });
