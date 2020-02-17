@@ -247,7 +247,6 @@ namespace aclara_meters.view
                 Mobile.ConfData.HasFTP = false;
 
                 // Check if all configuration files are available in public folder
-                // FIXME: PARECE QUE SOLO EN MANUAL SE ESTA COMPROBANDO SI ESTAN DISPONIBLES TODOS LOS FICHEROS DE CONFIGURACION
                 if (GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPublicPath))
                 {
                     newConfigVersion = GenericUtilsClass.CheckPubConfigVersion ();

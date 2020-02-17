@@ -122,21 +122,25 @@ namespace MTUComm.MemoryMap
             Global global = Singleton.Get.Configuration.Global;
             Mtu    mtu    = Singleton.Get.Action.CurrentMtu;
         
-            if ( ! global.AllowDailyReads ||
-                 ! mtu.DailyReads )
+            // In the MTU the value is written in UTC but when
+            // reading the value must be converted to local time
+            int snapReads = await MemoryRegisters.DailyGMTHourRead.GetValue ();
+            
+            if ( snapReads >= Global.MAX_DAILY_OFF )
                 return DISABLED;
-        
-            int timeDiff = TimeZoneInfo.Local.GetUtcOffset ( DateTime.Now ).Hours;
-            int curTime = await MemoryRegisters.DailyGMTHourRead.GetValue () + timeDiff;
 
-            if ( curTime < 0 )
-                curTime = 24 + curTime;
+            snapReads -= Utils.GetUtcOffset (); // UTC to Local
 
-            if      ( curTime ==  0 ) return MIDNIGHT;
-            else if ( curTime <= 11 ) return curTime + AM;
-            else if ( curTime == 12 ) return NOON;
-            else if ( curTime >  12 &&
-                      curTime <  24 ) return ( curTime - 12 ) + PM;
+            // Maintain value within range [0,23]
+            if      ( snapReads <  0 ) snapReads += 24;
+            else if ( snapReads > 23 ) snapReads -= 24;
+
+            // Convert to string
+            if      ( snapReads ==  0 ) return MIDNIGHT;
+            else if ( snapReads <= 11 ) return snapReads + AM;
+            else if ( snapReads == 12 ) return NOON;
+            else if ( snapReads >  12 &&
+                      snapReads <  24 ) return ( snapReads - 12 ) + PM;
             else return DISABLED;
         }
 

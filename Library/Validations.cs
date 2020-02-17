@@ -21,9 +21,11 @@ namespace Library
 
         #region Tests
 
-        public static bool IsNumeric ( dynamic value )
+        public static bool IsNumeric (
+            dynamic value )
         {
-            if ( string.IsNullOrEmpty ( value.ToString () ) )
+            if ( value is null ||
+                 string.IsNullOrEmpty ( value.ToString () ) )
                 return false;
             
             else if ( value is sbyte  ||

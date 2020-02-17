@@ -658,9 +658,7 @@ namespace MTUComm
         {
             try
             {
-                // Check if any required parameter is not present, but does nothing else
-                // because in the validation region of method ScriptAux.ValidateParams
-                // all unnecessary parameters will be removed
+                // Look for mandatory parameters and, in some cases, set a default value if they are not present
                 // NOTE: This sentece must be at the beginning of the process because some required
                 // NOTE: parameters have a default value in case they are not present, and perform this
                 // NOTE: step after the validation of the parameters ends with the "new" parameters added to
@@ -680,7 +678,7 @@ namespace MTUComm
                 // There are present in the script some param for port 2 and the port is enabled
                 Data.SetTemp ( "UsePort2", mtuPort2Enabled && translatedParams.UsePort2InScript );
 
-                // Validate script parameters ( removing the unnecessary ones )
+                // Validate the current/final value of all parameters and remove unnecessary ones
                 Dictionary<APP_FIELD,dynamic> psSelected = ScriptAux.ValidateParams (
                     this.mtu, action, translatedParams, mtuPort2Enabled );
 
@@ -707,9 +705,10 @@ namespace MTUComm
             StringBuilder strb = new StringBuilder ();
             ActionType actionType = action.Type;
 
-            bool rddIn1 = this.mtu.Port1.IsSetFlow;
-            bool rddIn2 = this.mtu.TwoPorts && this.mtu.Port2.IsSetFlow;
-            bool hasRDD = ( rddIn1 || rddIn2 );
+            bool rddIn1  = this.mtu.Port1.IsSetFlow;
+            bool rddIn2  = this.mtu.TwoPorts && this.mtu.Port2.IsSetFlow;
+            bool hasRDD  = ( rddIn1 || rddIn2 );
+            int  rddPort = ( rddIn1 ) ? 0 : 1;
             bool isReplaceMeter = ( actionType == ActionType.ReplaceMeter           ||
                                     actionType == ActionType.ReplaceMtuReplaceMeter ||
                                     actionType == ActionType.AddMtuReplaceMeter );
@@ -786,6 +785,8 @@ namespace MTUComm
 
             switch ( actionType )
             {
+                #region No installation
+
                 case ActionType.BasicRead:
                 case ActionType.ReadFabric:
                 case ActionType.ReadMtu:
@@ -794,18 +795,30 @@ namespace MTUComm
                 case ActionType.TurnOffMtu:
                 case ActionType.TurnOnMtu:
                     break;
-                
+
+                #endregion
+                #region Historical Read
+
                 case ActionType.DataRead:
                     CheckIfNotPresentWithDef (
                         ParameterType.DaysOfRead,
                         global.NumOfDays.ToString () );
                     break;
-                
+
+                #endregion
+                #region Valve Operation
+
                 case ActionType.ValveOperation:
-                    CheckIfNotPresent ( ParameterType.RDDFirmwareVersion );
-                    CheckIfNotPresent ( ParameterType.RDDPosition );
+                    CheckIfNotPresentInPortWithDef (
+                        ParameterType.RDDFirmwareVersion, rddPort,
+                        global.RDDFirmwareVersion );
+                    CheckIfNotPresentInPort (
+                        ParameterType.RDDPosition, rddPort );
                     break;
                 
+                #endregion
+                #region Installations
+
                 case ActionType.AddMtu:
                 case ActionType.AddMtuAddMeter:
                 case ActionType.ReplaceMTU:
@@ -821,7 +834,17 @@ namespace MTUComm
                     if ( this.global.TimeToSync &&
                          this.mtu.TimeToSync    &&
                          this.mtu.FastMessageConfig )
-                        CheckIfNotPresentWithDef ( ParameterType.Fast2Way, global.Fast2Way );
+                        CheckIfNotPresentWithDef (
+                            ParameterType.Fast2Way,
+                            global.Fast2Way.ToString () );
+                    
+                    // The MTU can perform an Install Confirmation during the installations
+                    if ( this.global.TimeToSync &&
+                         this.mtu.TimeToSync    &&
+                         this.mtu.OnTimeSync )
+                        CheckIfNotPresentWithDef (
+                            ParameterType.ForceTimeSync,
+                            global.ForceTimeSync.ToString () );
                     
                     #endregion
                     #region Port 1
@@ -845,20 +868,8 @@ namespace MTUComm
                         // NOTE: Is general data/not for the first port, but not present if the RDD is on port 1
                         if ( actionType == ActionType.ReplaceMTU ||
                              actionType == ActionType.ReplaceMtuReplaceMeter )
-                            CheckIfNotPresentInPort ( ParameterType.OldMtuId, 0 );
-
-                        // ( New ) Meter Serial Number
-                        if ( this.global.UseMeterSerialNumber )
-                            CheckIfAnyPresentInPort (
-                              new ParameterType[] {
-                                ParameterType.MeterSerialNumber,
-                                ParameterType.NewMeterSerialNumber }, 0 );
-
-                        // ( New ) Meter Reading / Initial Reading
-                        CheckIfAnyPresentInPort (
-                            new ParameterType[] {
-                                ParameterType.MeterReading,
-                                ParameterType.NewMeterReading }, 0 );
+                            CheckIfNotPresentInPort (
+                                ParameterType.OldMtuId, 0 );
 
                         // Read Interval
                         // NOTE: Is general data/not for the first port, but not present if the RDD is on port 1
@@ -871,12 +882,30 @@ namespace MTUComm
 
                         // Span Reads / Daily Reads
                         // NOTE: Is general data/not for the first port, but not present if the RDD is on port 1
-                        if ( this.global.AllowDailyReads &&
-                             this.mtu.DailyReads &&
-                             ! this.mtu.IsFamily33xx )
+                        if ( ! this.mtu.IsFamily33xx && 
+                             this.global.AllowDailyReads &&
+                             this.mtu.DailyReads )
+                        {
+                            string valueDailyReads = Global.DEF_DAILY_READS.ToString ();
+                            ScriptAux.PrepareDailyReadValue ( mtu, ref valueDailyReads );
                             CheckIfNotPresentWithDef (
                                 ParameterType.SnapRead,
-                                global.DailyReadsDefault.ToString () );
+                                valueDailyReads );
+                        }
+
+                        // ( New ) Meter Serial Number
+                        if ( this.global.UseMeterSerialNumber )
+                            CheckIfAnyPresentInPort (
+                                new ParameterType[] {
+                                    ParameterType.MeterSerialNumber,
+                                    ParameterType.NewMeterSerialNumber }, 0 );
+
+                        // ( New ) Meter Reading / Initial Reading
+                        if ( this.mtu.Port1.IsForPulse )
+                            CheckIfAnyPresentInPort (
+                                new ParameterType[] {
+                                    ParameterType.MeterReading,
+                                    ParameterType.NewMeterReading }, 0 );
 
                         // Action is about Replace Meter
                         if ( isReplaceMeter )
@@ -934,10 +963,11 @@ namespace MTUComm
                                         ParameterType.NewMeterSerialNumber }, 1 );
 
                             // ( New ) Meter Reading / Initial Reading
-                            CheckIfAnyPresentInPort (
-                                new ParameterType[] {
-                                    ParameterType.MeterReading,
-                                    ParameterType.NewMeterReading }, 1 );
+                            if ( this.mtu.Port2.IsForPulse )
+                                CheckIfAnyPresentInPort (
+                                    new ParameterType[] {
+                                        ParameterType.MeterReading,
+                                        ParameterType.NewMeterReading }, 1 );
 
                             // Action is about Replace Meter
                             if ( isReplaceMeter )
@@ -968,19 +998,21 @@ namespace MTUComm
                     }
 
                     #endregion
-                    #region RDD
+                    #region Valve Operation
 
                     if ( hasRDD )
                     {
-                        // FIXME: COMPROBAR PORQUE NO ESTOY MUY SEGURO DE QUE NO HAYA QUE INDICAR EL PUERTO 2
-                        CheckIfNotPresentWithDef (
-                            ParameterType.RDDFirmwareVersion,
+                        CheckIfNotPresentInPortWithDef (
+                            ParameterType.RDDFirmwareVersion, rddPort,
                             global.RDDFirmwareVersion );
-                        CheckIfNotPresent ( ParameterType.RDDPosition );
+                        CheckIfNotPresentInPort (
+                            ParameterType.RDDPosition, rddPort );
                     }
 
                     #endregion
                     break;
+
+                #endregion
             }
 
             paramsFail = strb.ToString ();
@@ -1302,7 +1334,7 @@ namespace MTUComm
                 // NOTE: When performing unit tests, the date must be a fixed value
                 DateTime end   = ( ! Data.Get.UNIT_TEST ) ? DateTime.Now : new DateTime ( 2019, 10, 15 );
                 end = new DateTime ( end.Year, end.Month, end.Day, 23, 59, 59 );
-                DateTime start = end.Subtract ( new TimeSpan ( int.Parse ( Data.Get.NumOfDays ), 0, 0, 0 ) );
+                DateTime start = end.Subtract ( new TimeSpan ( int.Parse ( Data.Get[ APP_FIELD.NumOfDays.ToString () ] ), 0, 0, 0 ) );
                 start = new DateTime ( start.Year, start.Month, start.Day, 0, 0, 0 );
 
                 Utils.Print ( "DataRead: From " + start + " to " + end );
@@ -1598,7 +1630,7 @@ namespace MTUComm
                         mtu.MtuDemand );
 
                     // Simulated
-                    if ( Data.Get.ArtificialInstallConfirmation )
+                    if ( Data.Get[ "ArtificialInstallConfirmation" ] )
                     {
                         OnProgress ( this, new Delegates.ProgressArgs ( "RF-Check: Artificial..." ) );
 
@@ -2202,12 +2234,15 @@ namespace MTUComm
                     dynamic map = this.GetMemoryMap ();
                     MemoryRegister<int> rddStatus = map.RDDStatusInt;
 
-                    Data.Get.RDDPosition = Data.Get.RDDPosition.ToUpper ();
+                    string rddPosition = APP_FIELD.RDDPosition.ToString ();
+
+                    // Use the id specified in the Set method ( TrySetMember )
+                    Data.Get[ rddPosition ] = Data.Get[ rddPosition ].ToUpper ();
 
                     // Convert from RDD command to RDD desired status
                     RDDValveStatus rddValveStatus = RDDValveStatus.UNKNOWN;
                     switch ( ( RDDCmd )Enum.Parse ( typeof ( RDDCmd ),
-                             Data.Get.RDDPosition.Replace ( " ", "_" ) ) )
+                             Data.Get[ rddPosition ].Replace ( " ", "_" ) ) )
                     {
                         case RDDCmd.CLOSE       : rddValveStatus = RDDValveStatus.CLOSED;       break;
                         case RDDCmd.OPEN        : rddValveStatus = RDDValveStatus.OPEN;         break;
@@ -2231,7 +2266,8 @@ namespace MTUComm
                             RDDStatus status = RDDStatus.DISABLED;
                             for ( int i = 0; i < RDD_MAX_ATTEMPTS; i++ )
                             {
-                                switch ( status = Utils.ParseIntToEnum<RDDStatus> ( await rddStatus.GetValueFromMtu (), RDDStatus.DISABLED ) )
+                                switch ( status = Utils.ParseIntToEnum<RDDStatus> (
+                                    await rddStatus.GetValueFromMtu (), RDDStatus.DISABLED ) )
                                 {
                                     case RDDStatus.BUSY:
                                         if ( okBusy )
@@ -2357,8 +2393,9 @@ namespace MTUComm
                     }
 
                     // Updates firmware version of the RDD in both global file and global instance
-                    if ( ! ( ( string )Data.Get.RDDFirmware ).Equals ( this.global.RDDFirmwareVersion ) )
-                        Utils.WriteToGlobal ( "RDDFirmwareVersion", Data.Get.RDDFirmware );
+                    string rddfw = ( string )Data.Get[ APP_FIELD.RDDFirmware.ToString () ];
+                    if ( ! rddfw.Equals ( this.global.RDDFirmwareVersion ) )
+                        Utils.WriteToGlobal ( "RDDFirmwareVersion", rddfw );
 
                     // Save the seria number used during the process
                     Data.SetTemp ( "RDDSerialNumber", response.SerialNumber );
@@ -2720,6 +2757,9 @@ namespace MTUComm
 
                 #region Check Meter for Encoder
 
+                Meter selectedMeter  = null;
+                Meter selectedMeter2 = null;
+
                 if ( this.mtu.Port1.IsForEncoderOrEcoder ||
                      usePort2 &&
                      this.mtu.Port2.IsForEncoderOrEcoder )
@@ -2731,17 +2771,21 @@ namespace MTUComm
                     // Check if selected Meter is supported for current MTU
                     if ( this.mtu.Port1.IsForEncoderOrEcoder )
                     {
+                        selectedMeter = ( Meter )Data.Get[ APP_FIELD.Meter.ToString () ];
+
                         // Updates the port information without fear, since it was only used to fill the meter list
-                        this.mtu.Port1.MeterProtocol   = ( ( Meter )Data.Get.Meter ).EncoderType;
-                        this.mtu.Port1.MeterLiveDigits = ( ( Meter )Data.Get.Meter ).LiveDigits;
+                        this.mtu.Port1.MeterProtocol   = selectedMeter.EncoderType;
+                        this.mtu.Port1.MeterLiveDigits = selectedMeter.LiveDigits;
                         await this.CheckSelectedEncoderMeter ();
                     }
 
                     if ( usePort2 &&
                          this.mtu.Port2.IsForEncoderOrEcoder )
                     {
-                        this.mtu.Port2.MeterProtocol   = ( ( Meter )Data.Get.Meter_2 ).EncoderType;
-                        this.mtu.Port2.MeterLiveDigits = ( ( Meter )Data.Get.Meter_2 ).LiveDigits;
+                        selectedMeter2 = ( Meter )Data.Get[ APP_FIELD.Meter_2.ToString () ];
+
+                        this.mtu.Port2.MeterProtocol   = selectedMeter2.EncoderType;
+                        this.mtu.Port2.MeterLiveDigits = selectedMeter2.LiveDigits;
                         await this.CheckSelectedEncoderMeter ( 2 );
                     }
 
@@ -2765,27 +2809,17 @@ namespace MTUComm
                 // Uses default value fill to zeros if parameter is missing in scripting
                 // Only first 12 numeric characters are recorded in MTU memory
                 // F1 electric can have 20 alphanumeric characters but in the activity log should be written all characters
-                map.P1MeterId = Utils.GetValueOrDefault<ulong> ( Data.Get.AccountNumber, 12 );
-                if ( usePort2 &&
-                     Data.Contains ( APP_FIELD.AccountNumber_2.ToString () ) )
-                    map.P2MeterId = Utils.GetValueOrDefault<ulong> ( Data.Get.AccountNumber_2, 12 );
+                map.P1MeterId = Utils.GetValueOrDefault<ulong> ( Data.Get[ APP_FIELD.AccountNumber.ToString () ], 12 );
+                if ( usePort2 )
+                    map.P2MeterId = Utils.GetValueOrDefault<ulong> ( Data.Get[ APP_FIELD.AccountNumber_2.ToString () ], 12 );
 
                 #endregion
 
                 #region Meter Type
 
-                Meter selectedMeter  = null;
-                Meter selectedMeter2 = null;
-                
-                selectedMeter = (Meter)Data.Get.Meter;
                 map.P1MeterType = selectedMeter.Id;
-
-                if ( usePort2 &&
-                     Data.Contains ( APP_FIELD.Meter_2.ToString () ) )
-                {
-                    selectedMeter2 = (Meter)Data.Get.Meter_2;
+                if ( usePort2 )
                     map.P2MeterType = selectedMeter2.Id;
-                }
 
                 #endregion
 
@@ -2795,84 +2829,77 @@ namespace MTUComm
                 string p2readingStr = "0";
 
                 // Do not use the Meter reading if the port is for Encoders/Ecoders and RDDs
-                if ( noRddOrNotIn1 &&
-                     ! selectedMeter.IsForEncoderOrEcoder )
+                if ( this.mtu.Port1.IsForPulse )
                 {
-                    if ( Data.Contains ( APP_FIELD.MeterReading.ToString () ) )
-                    {
-                        p1readingStr = Data.Get.MeterReading;
-                        ulong p1reading = ( ! string.IsNullOrEmpty ( p1readingStr ) ) ? Convert.ToUInt64 ( ( p1readingStr ) ) : 0;
-        
-                        map.P1MeterReading = p1reading / ( ( selectedMeter.HiResScaling <= 0 ) ? 1 : selectedMeter.HiResScaling );
-                    }
-                    else if ( this.mtu.Port1.IsForPulse )
-                    {
-                        // If meter reading was not present, fill in to zeros
-                        // up to length equals to selected Meter live digits
-                        p1readingStr = selectedMeter.FillLeftLiveDigits ();
-
-                        Data.SetTemp ( APP_FIELD.MeterReading.ToString (), p1readingStr );
-                        map.P1MeterReading = p1readingStr;
-                    }
+                    p1readingStr = Data.Get[ APP_FIELD.MeterReading.ToString () ];
+                    ulong p1reading = ( ! string.IsNullOrEmpty ( p1readingStr ) ) ? Convert.ToUInt64 ( ( p1readingStr ) ) : 0;
+    
+                    map.P1MeterReading = p1reading / ( ( selectedMeter.HiResScaling <= 0 ) ? 1 : selectedMeter.HiResScaling );
                 }
 
-                // Do not use the Meter reading if the port is for Encoders/Ecoders and RDDs
                 if ( usePort2 &&
-                     noRddOrNotIn2 &&
-                     ! selectedMeter2.IsForEncoderOrEcoder )
+                     this.mtu.Port2.IsForPulse )
                 {
-                    if ( Data.Contains ( APP_FIELD.MeterReading_2.ToString () ) )
-                    {
-                        p2readingStr = Data.Get.MeterReading_2;
-                        ulong p2reading = ( ! string.IsNullOrEmpty ( p2readingStr ) ) ? Convert.ToUInt64 ( ( p2readingStr ) ) : 0;
-        
-                        map.P2MeterReading = p2reading / ( ( selectedMeter2.HiResScaling <= 0 ) ? 1 : selectedMeter2.HiResScaling );
-                    }
-                    else if ( this.mtu.Port2.IsForPulse )
-                    {
-                        p2readingStr = selectedMeter2.FillLeftLiveDigits ();
-
-                        Data.SetTemp ( APP_FIELD.MeterReading_2.ToString (), p2readingStr );
-                        map.P2MeterReading = p2readingStr;
-                    }
+                    p2readingStr = Data.Get[ APP_FIELD.MeterReading_2.ToString () ];
+                    ulong p2reading = ( ! string.IsNullOrEmpty ( p2readingStr ) ) ? Convert.ToUInt64 ( ( p2readingStr ) ) : 0;
+    
+                    map.P2MeterReading = p2reading / ( ( selectedMeter2.HiResScaling <= 0 ) ? 1 : selectedMeter2.HiResScaling );
                 }
 
                 #endregion
 
                 #region Reading Interval
 
-                if ( global.IndividualReadInterval &&
-                     noRddOrNotIn1 )
-                {
-                    // If not present in scripted mode, set default value to one/1 hour
-                    map.ReadIntervalMinutes =
-                        ( Data.Contains ( APP_FIELD.ReadInterval.ToString () ) ) ?
-                            Data.Get.ReadInterval : "1 Hr";
-                }
+                if ( noRddOrNotIn1 )
+                    map.ReadIntervalMinutes = Data.Get[ APP_FIELD.ReadInterval.ToString () ];
 
                 #endregion
 
-                #region Two-Way ( Fast Messaging )
+                #region Two-Way ( a.k.a. Fast Messaging )
 
-                if ( global.TimeToSync &&
-                     this.mtu.TimeToSync &&
+                if ( this.global.TimeToSync &&
+                     this.mtu.TimeToSync    &&
                      this.mtu.FastMessageConfig )
                 {
                     // NOTE: Konstantin "Bit 0 - Mode 1 is Fast and 0 is Slow. That is ON/OFF"
-                    map.FastMessagingConfigMode = Data.Get.TwoWay.ToUpper ().Equals ( "FAST" );
+                    map.FastMessagingConfigMode = Data.Get[ APP_FIELD.TwoWay.ToString () ].ToUpper ().Equals ( "FAST" );
                 }
 
                 #endregion
 
-                #region Snap Reads
+                #region Snap Reads ( prev. Daily Reads )
 
-                if ( global.AllowDailyReads &&
-                     mtu.DailyReads &&
-                     Data.Contains ( APP_FIELD.SnapReads.ToString () ) &&
-                     noRddOrNotIn1 ) // &&
-                     //map.ContainsMember ( "DailyGMTHourRead" ) )
+                if ( noRddOrNotIn1 &&
+                     ! this.mtu.IsFamily33xx )
                 {
-                    map.DailyGMTHourRead = Data.Get.SnapReads;
+                    // Configure or disable
+                    bool used      = this.global.AllowDailyReads && this.mtu.DailyReads;
+                    int  snapReads = ( used ) ? int.Parse ( Data.Get[ APP_FIELD.SnapReads.ToString () ] ) : Global.MAX_DAILY_OFF;
+
+                    // DailyReads is not disabled
+                    if ( snapReads != Global.MAX_DAILY_OFF )
+                    {
+                        // In the MTU the value is written in UTC but when
+                        // reading the value must be converted to local time
+                        // e.g. Cleveland UTC offset -5
+                        //      Value 6 -> To UTC  : 6 + -5 = 6 - 5 = 1
+                        //                 To Local: 1 - -5 = 1 + 5 = 6
+                        // e.g. Spain UTC offset +1
+                        //      Value 6 -> To UTC  : 6 + 1 = 7
+                        //                 To Local: 7 - 1 = 6
+                        snapReads += Utils.GetUtcOffset (); // Local to UTC
+
+                        // Maintain value within range [0,23]
+                        // Down: -2 -> -2 + 24 = 22
+                        // Up  : 25 -> 25 - 24 =  1
+                        if      ( snapReads <  0 ) snapReads += 24;
+                        else if ( snapReads > 23 ) snapReads -= 24;
+                    }
+                    // DailyReads is disabled
+                    else Data.Set ( APP_FIELD.SnapReads.ToString (), snapReads ); // Off = 255
+
+                    // When disabled, both local ( Data ) and UTC ( MTU ) have the same value ( 255 )
+                    map.DailyGMTHourRead = snapReads;
                 }
 
                 #endregion
@@ -2909,7 +2936,7 @@ namespace MTUComm
 
                 if ( mtu.RequiresAlarmProfile )
                 {
-                    Alarm alarms = (Alarm)Data.Get.Alarm;
+                    Alarm alarms = ( Alarm )Data.Get[ APP_FIELD.Alarm.ToString () ];
                     if ( alarms != null )
                     {
                         try
@@ -3013,7 +3040,7 @@ namespace MTUComm
                      this.mtu.FastMessageConfig )
                 {
                     // MTU 170+ = Families 342x and 35xx36xx
-                    Demand demand = ( Demand )Data.Get.Demand;
+                    Demand demand = ( Demand )Data.Get[ APP_FIELD.Demand.ToString () ];
                     if ( demand != null )
                     {
                         map.MtuPrimaryWindowInterval  = demand.MtuPrimaryWindowInterval;
@@ -3023,7 +3050,7 @@ namespace MTUComm
                         map.MtuPrimaryWindowOffset    = demand.MtuPrimaryWindowOffset;
                         map.MtuNumLowPriorityMsg      = demand.MtuNumLowPriorityMsg;
 
-                        // NOTE: Konstantin: "It is out of this project. This is will be part of Windows project"
+                        // NOTE: Konstantin: "It is out of this project. This will be part of Windows project"
                         /*
                         map.ConfigReportItems.SetValue ( demand.ConfigReportItems ); // [320,389] = 70 / 2 bytes each element = 35 values max
                         map.ConfigReportInterval      = demand.ConfigReportInterval;
@@ -3110,9 +3137,9 @@ namespace MTUComm
 
                 Utils.Print("--------RDD_START--------");
 
-                if ( ! Data.Get.UNIT_TEST && // Avoid this subprocess during the unit test because the RemoteDisconnect has its own test
-                     ( this.mtu.Port1.IsSetFlow ||
-                       this.mtu.TwoPorts && this.mtu.Port2.IsSetFlow ) )
+                // Avoid this subprocess during the unit test because the RemoteDisconnect has its own test
+                if ( ! Data.Get.UNIT_TEST &&
+                     hasRDD )
                 {
                     // If the Remote Disconnect fails, it cancels the installation
                     await this.RemoteDisconnect_Logic ( true );
@@ -3176,7 +3203,7 @@ namespace MTUComm
 
                 if ( mtu.RequiresAlarmProfile )
                 {
-                    Alarm alarms = ( Alarm )Data.Get.Alarm;
+                    Alarm alarms = ( Alarm )Data.Get[ APP_FIELD.Alarm.ToString () ];
                     
                     // PCI Alarm needs to be set after MTU is turned on, just before the read MTU
                     // The Status will show enabled during install and actual status (triggered) during the read
@@ -3199,17 +3226,17 @@ namespace MTUComm
                 
                 #region RFCheck ( prev. Install Confirmation )
 
+                // If the script does not contain ForceTimeSync, the parameter is set using global
+                bool forceRfcheck = Data.Contains ( APP_FIELD.ForceTimeSync.ToString () ) &&
+                                    bool.Parse ( Data.Get[ APP_FIELD.ForceTimeSync.ToString () ] );
+
                 // After TurnOn has to be performed an InstallConfirmation
                 // if certain tags/registers are validated/true
                 if ( ! Data.Get.UNIT_TEST && // Avoid this subprocess during the unit test because the RFCheck has its own test
                      global.TimeToSync && // Indicates that is a two-way MTU and enables TimeSync request
                      mtu.TimeToSync    && // Indicates that is a two-way MTU and enables TimeSync request
                      mtu.OnTimeSync    && // MTU can be force during installation to perform a TimeSync/IC
-                     // If script contains ForceTimeSync, use it but if not use value from Global
-                     ( ! Data.Contains ( APP_FIELD.ForceTimeSync.ToString () ) &&
-                       global.ForceTimeSync ||
-                       Data.Contains ( APP_FIELD.ForceTimeSync.ToString () ) &&
-                       Data.Get.ForceTimeSync ) )
+                     forceRfcheck )
                 {
                     Utils.Print ( "--------IC_START---------" );
 
@@ -3758,8 +3785,8 @@ namespace MTUComm
         
             try
             {
-                byte[] firstRead  = await lexi.Read ( BASIC_READ_1_ADDRESS, BASIC_READ_1_DATA );
-                byte[] secondRead = await lexi.Read ( BASIC_READ_2_ADDRESS, BASIC_READ_2_DATA );
+                byte[] firstRead  = await lexi.Read ( BASIC_READ_1_ADDRESS, BASIC_READ_1_DATA ); // MTU Bytes [0,31]
+                byte[] secondRead = await lexi.Read ( BASIC_READ_2_ADDRESS, BASIC_READ_2_DATA ); // MTU Byte 244, MTU Software Version
                 finalRead.AddRange ( firstRead  );
                 finalRead.AddRange ( secondRead );
             }

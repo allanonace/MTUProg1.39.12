@@ -203,24 +203,11 @@ namespace MTUComm
                 string type    = meter.Type.ToLower ();
                 string utility = meter.Utility.ToLower ();
 
-                // Numerical Meter Type
-                if ( int.TryParse (type, out int ok ) )
-                {
-                    if ( ! utilities.ContainsKey ( type ) )
-                        utilities.Add ( type, new List<string> () );
+                if ( ! utilities.ContainsKey ( type ) )
+                    utilities.Add ( type, new List<string> () );
 
-                    if ( ! utilities[ type ].Contains ( utility ) )
-                        utilities[ type ].Add ( utility );
-                }
-                // Characters
-                else
-                {
-                    if ( ! utilities.ContainsKey ( type ) )
-                        utilities.Add ( type, new List<string> () );
-
-                    if ( ! utilities[ type ].Contains ( utility ) )
-                        utilities[ type ].Add ( utility );
-                }
+                if ( ! utilities[ type ].Contains ( utility ) )
+                    utilities[ type ].Add ( utility );
             }
 
             #endregion

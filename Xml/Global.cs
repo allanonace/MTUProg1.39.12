@@ -481,15 +481,16 @@ namespace Xml
         private const int DEF_LEXI_TIMEOUT  = 10;
         private const int MIN_LEXI_TIMEOUT  = 5;  // Seconds
         public  const int MAX_LEXI_TIMEOUT  = 30; // Seconds
+        public  const int DEF_DAILY_READS   = 13;
+        public  const int MIN_DAILY_READS   = 0;
+        public  const int MAX_DAILY_READS   = 23;
+        public  const int MAX_DAILY_OFF     = 255;
 
         #endregion
 
         public Global ()
         {
             // Default values and comments are extracted from Y20318-TUM_Rev_E.PDF and STAR Programmer source code
-            
-            // NOTE: Is this tag used?
-            this.FastMessageConfig            = false;                // To make migratable switch for migratable MTUs => Bit 0: Fast Messaging Mode - 0=Off, 1=On Location 163 Migratable
             
             // Display or hide
             this.ShowAddMTU                   = false;                // Show the Add MTU button on the main menu or not
@@ -569,12 +570,15 @@ namespace Xml
             this.ftpRemotePath                = string.Empty;         // Path to FTP remote host
             this.ftpUserName                  = string.Empty;         // FTP login user name
 
+            // Two-way / Fast Messaging
+            this.FastMessageConfig            = false;                // To make migratable switch for migratable MTUs => Bit 0: Fast Messaging Mode - 0=Off, 1=On Location 163 Migratable
+
             // Read Internal
             this.LatestVersion                = 16;                   // [Byte] F1 MTU Good firmware version. Specifies the minimum version that can have a 20-minute read interval
             this.NormXmitInterval             = "1 Hr";               // Default transmit interval
 
             // Snap Reads
-            this.DailyReadsDefault            = 13;                   // [0-23] Hour (in military time) for daily reads/snap
+            this.DailyReadsDefault            = DEF_DAILY_READS;      // [0-23] Hour (in military time) for daily reads/snap
 
             // Frequencies
             this.AFC                          = true;                 // Advance Frequency Change on 3000 MTUs after firmware 19
@@ -743,9 +747,9 @@ namespace Xml
                     int v;
                     if (int.TryParse(value, out v))
                         this.DailyReadsDefault = v;
-                    else this.DailyReadsDefault = -1;
+                    else this.DailyReadsDefault = Global.MAX_DAILY_OFF;
                 }
-                else this.DailyReadsDefault = -1;
+                else this.DailyReadsDefault = Global.MAX_DAILY_OFF;
             }
         }
 
