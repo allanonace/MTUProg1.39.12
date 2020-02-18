@@ -428,16 +428,6 @@ namespace MTUComm
                     }
                 },
                 #endregion
-                #region Force TimeSync -> Install Confirmation
-                {
-                    APP_FIELD.ForceTimeSync,
-                    new string[]
-                    {
-                        "ForceTimeSync",
-                        "Force TimeSync"
-                    }
-                },
-                #endregion
             };
         }
 
@@ -501,9 +491,8 @@ namespace MTUComm
                 Logger.AddParameter(this.addMtuAction, new Parameter("User", "User", this.user ) );
 
             // Not used with single port MTUs with RDD
-            if ( isReplaceMtu &&
-                 this.DataContains ( APP_FIELD.OldMtuId ) &&
-                 noRddOrNotIn1 )
+            if ( noRddOrNotIn1 && 
+                 isReplaceMtu )
                 Logger.AddParameter ( this.addMtuAction, this.PrepareParameter ( APP_FIELD.OldMtuId ) );
 
             Logger.AddParameter ( this.addMtuAction, new Parameter ( "MtuId",   "MTU ID",   this.mtuBasicInfo.Id   ) );
@@ -513,20 +502,21 @@ namespace MTUComm
             if ( noRddOrNotIn1 )
                 Logger.AddParameter ( this.addMtuAction, this.PrepareParameter ( APP_FIELD.ReadInterval ) );
 
-            // Not used with single port MTUs with RDD
-            if ( this.DataContains ( APP_FIELD.SnapReads ) &&
-                 noRddOrNotIn1 )
+            // Not used with single port MTUs with RDD or family 33xx
+            if ( noRddOrNotIn1 &&
+                 ! this.mtu.IsFamily33xx )
             {
-                bool   useDailyReads    = ( global.AllowDailyReads && 
-                                            mtu.DailyReads &&
-                                            this.DataContains ( APP_FIELD.SnapReads ) );
+                string dailyReadsLocal = this.GetDataValue ( APP_FIELD.SnapReads ); // Local or disabled ( 255 )
+                int    dailyReadsUTC   = await map.DailyGMTHourRead.GetValue ();    // UTC or disabled
 
-                string dailyReads       = ( useDailyReads ) ? this.GetDataValue ( APP_FIELD.SnapReads ) : DISABLED;
-                string dailyGmtHourRead = ( useDailyReads ) ? this.GetDataValue ( APP_FIELD.SnapReads ) : DISABLED;
-                Logger.AddParameter(this.addMtuAction, new Parameter("DailyGMTHourRead", "GMT Daily Reads", dailyGmtHourRead));
+                // Value written in the MTU, in UTC time
+                Logger.AddParameter ( this.addMtuAction,
+                    new Parameter ( "DailyGMTHourRead", "GMT Daily Reads", dailyReadsUTC ) );
                 
-                if ( ! dailyGmtHourRead.Equals ( DISABLED ) )
-                    Logger.AddParameter(this.addMtuAction, new Parameter("DailyReads", "Daily Reads", dailyReads));
+                // Value selected by the user, in local time
+                if ( dailyReadsUTC != Global.MAX_DAILY_OFF )
+                    Logger.AddParameter ( this.addMtuAction,
+                        new Parameter ( "DailyReads", "Daily Reads", dailyReadsLocal ) );
             }
 
             if ( global.TimeToSync &&

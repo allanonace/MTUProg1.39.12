@@ -1550,8 +1550,6 @@ namespace MTUComm
                                      meter_reading_error.Length < 1 )
                                 {
                                     ulong meter_reading  = await map[ PORT_PREFIX + indexPort + IFACE_MREADING ].GetValue ();
-                                    //MRA
-                                    
                                     ulong tempReadingVal = (meter.HiResScaling > 0 && mtu.PulseCountOnly) ? meter_reading * (ulong)meter.HiResScaling : meter_reading;
                                     
                                     String tempReading    = tempReadingVal.ToString ();

@@ -129,15 +129,16 @@ namespace Xml
         }
 
         [XmlIgnore]
-        public bool IsForEncoderOrEcoder
+        public bool IsForPulse
         {
-            get { return this.TypeString.Equals ( "E" ); }
+            get { return ! this.IsForEncoderOrEcoder &&
+                         ! this.IsSetFlow; }
         }
 
         [XmlIgnore]
-        public bool IsForPulse
+        public bool IsForEncoderOrEcoder
         {
-            get { return ! this.TypeString.Equals ( "E" ); }
+            get { return this.TypeString.Equals ( "E" ); }
         }
 
         [XmlIgnore]

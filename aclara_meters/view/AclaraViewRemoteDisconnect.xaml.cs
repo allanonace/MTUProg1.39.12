@@ -154,13 +154,12 @@ namespace aclara_meters.view
             Mtu     mtu = Singleton.Get.Action.CurrentMtu;
 
             int    mtuIdLength = Singleton.Get.Configuration.Global.MtuIdLength;
-
             ulong  AccountNum  = ( mtu.Port1.IsSetFlow ) ? await map.P1MeterId.GetValue () : await map.P2MeterId.GetValue ();
-            int    MtuId       = await map.MtuSerialNumber .GetValue ();
-            string MtuStatus   = await map.MtuStatus       .GetValue ();
-            string rddPosition = await map.RDDValvePosition.GetValue ();
-            string  rddSerial   = await map.RDDSerialNumberAscii.GetValue ();
-            string rddBattery  = await map.RDDBatteryStatus.GetValue ();
+            int    MtuId       = await map.MtuSerialNumber     .GetValue ();
+            string MtuStatus   = await map.MtuStatus           .GetValue ();
+            string rddPosition = await map.RDDValvePosition    .GetValue ();
+            string rddSerial   = await map.RDDSerialNumberAscii.GetValue ();
+            string rddBattery  = await map.RDDBatteryStatus    .GetValue ();
 
             Device.BeginInvokeOnMainThread ( () =>
             {

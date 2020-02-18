@@ -783,5 +783,14 @@ namespace Library
         }
 
         #endregion
+
+        #region Time
+
+        public static int GetUtcOffset ()
+        {
+            return TimeZoneInfo.Local.GetUtcOffset ( DateTime.Now ).Hours;
+        }
+
+        #endregion
     }
 }

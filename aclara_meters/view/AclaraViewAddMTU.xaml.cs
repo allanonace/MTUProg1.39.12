@@ -508,9 +508,9 @@ namespace aclara_meters.view
 
             dynamic map = Data.Get.MemoryMap;
 
-            string rddPosition = await map.RDDValvePosition.GetValue();
-            string rddSerial = await map.RDDSerialNumberAscii.GetValue();
-            string rddBattery = await map.RDDBatteryStatus.GetValue();
+            string rddPosition = await map.RDDValvePosition    .GetValue ();
+            string rddSerial   = await map.RDDSerialNumberAscii.GetValue ();
+            string rddBattery  = await map.RDDBatteryStatus    .GetValue ();
 
             Device.BeginInvokeOnMainThread(() =>
             {
@@ -690,8 +690,8 @@ namespace aclara_meters.view
 
                 ///////////////////////////////////
                 // ( New ) Meter Reading
-                this.p1NoNewMeterReadings = !this.currentMtu.Port1.IsForEncoderOrEcoder;
-                this.p2NoNewMeterReadings = this.hasMeterPortTwo && !this.currentMtu.Port2.IsForEncoderOrEcoder;
+                this.p1NoNewMeterReadings = this.currentMtu.Port1.IsForPulse;
+                this.p2NoNewMeterReadings = this.hasMeterPortTwo && this.currentMtu.Port2.IsForPulse;
 
                 // Port 1
                 this.div_MeterReadings.IsVisible = this.p1NoNewMeterReadings;
@@ -3454,8 +3454,7 @@ namespace aclara_meters.view
                                 ! Validations.Text ( value, maxLength, 1, true, true, false ) );
             
             dynamic NoValNOrEmpty = new Func<string,bool> ( ( value ) =>
-                                      ! string.IsNullOrEmpty ( value ) &&
-                                      ! Validations.IsNumeric ( value ) );
+                                        ! Validations.IsNumeric ( value ) );
 
             #endregion
 
@@ -4054,6 +4053,7 @@ namespace aclara_meters.view
                     //MRA like Star Programmer  ( en el artificial sync se ponia a false )
                     global.FastMessageConfig = value_two.Equals("Fast") ? true : false;
                 }
+                
                 // Alarms dropdownlist is hidden when only has one option
                 if (this.pck_Alarms.ItemsSource != null)
                 {
@@ -4124,19 +4124,19 @@ namespace aclara_meters.view
 
             #region Set parameters Port 1
 
+            // Account Number / Service Port ID
+            Data.SetTemp ( APP_FIELD.AccountNumber.ToString (), value_acn );
+
+            // Work Order / Field Order
+            if ( global.WorkOrderRecording )
+                Data.SetTemp ( APP_FIELD.WorkOrder.ToString (), value_wor );
+
             // No RDD
             if ( ! mtu.Port1.IsSetFlow )
             {
-                // Account Number / Service Port ID
-                Data.SetTemp ( APP_FIELD.AccountNumber.ToString (), value_acn );
-
-                // Work Order / Field Order
-                if ( global.WorkOrderRecording )
-                    Data.SetTemp ( APP_FIELD.WorkOrder.ToString (), value_wor );
-
                 // Old MTU ID
                 if ( this.actionType == ActionType.ReplaceMTU ||
-                    this.actionType == ActionType.ReplaceMtuReplaceMeter )
+                     this.actionType == ActionType.ReplaceMtuReplaceMeter )
                     Data.SetTemp ( APP_FIELD.OldMtuId.ToString (), value_omt );
 
                 // ( New ) Meter Serial Number
@@ -4144,7 +4144,8 @@ namespace aclara_meters.view
                     Data.SetTemp ( APP_FIELD.MeterNumber.ToString (), value_msn );
 
                 // ( New ) Meter Reading / Initial Reading
-                Data.SetTemp ( APP_FIELD.MeterReading.ToString (), value_mre );
+                if ( mtu.Port1.IsForPulse )
+                    Data.SetTemp ( APP_FIELD.MeterReading.ToString (), value_mre );
 
                 // Meter Type
                 Data.SetTemp ( APP_FIELD.Meter.ToString (), value_mty );
@@ -4180,14 +4181,7 @@ namespace aclara_meters.view
             }
             // RDD
             else
-            {
-                // Account Number / Service Port ID
-                Data.SetTemp ( APP_FIELD.AccountNumber.ToString (), value_acn );
-
-                // Work Order / Field Order
-                if ( global.WorkOrderRecording )
-                    Data.SetTemp ( APP_FIELD.WorkOrder.ToString (), value_wor );
-                
+            {               
                 // Meter Type
                 Data.SetTemp ( APP_FIELD.Meter.ToString (), value_rdd );
             }
@@ -4216,22 +4210,23 @@ namespace aclara_meters.view
 
             if ( Data.Get.UsePort2 )
             {
+                // Account Number / Service Port ID
+                Data.SetTemp ( APP_FIELD.AccountNumber_2.ToString (), value_acn_2 );
+
+                // Work Order / Field Order
+                if ( global.WorkOrderRecording )
+                    Data.SetTemp ( APP_FIELD.WorkOrder_2.ToString (), value_wor_2 );
+
                 // No RDD
                 if ( ! mtu.Port2.IsSetFlow )
                 {
-                    // Account Number / Service Port ID
-                    Data.SetTemp ( APP_FIELD.AccountNumber_2.ToString (), value_acn_2 );
-
-                    // Work Order / Field Order
-                    if ( global.WorkOrderRecording )
-                        Data.SetTemp ( APP_FIELD.WorkOrder_2.ToString (), value_wor_2 );
-
                     // ( New ) Meter Serial Number
                     if ( global.UseMeterSerialNumber )
                         Data.SetTemp ( APP_FIELD.MeterNumber_2.ToString (), value_msn_2 );
 
                     // ( New ) Meter Reading / Initial Reading
-                    Data.SetTemp ( APP_FIELD.MeterReading_2.ToString (), value_mre_2 );
+                    if ( mtu.Port2.IsForPulse )
+                        Data.SetTemp ( APP_FIELD.MeterReading_2.ToString (), value_mre_2 );
 
                     // Meter Type
                     Data.SetTemp ( APP_FIELD.Meter_2.ToString (), value_mty_2 );
@@ -4259,13 +4254,6 @@ namespace aclara_meters.view
                 // RDD
                 else
                 {
-                    // Account Number / Service Port ID
-                    Data.SetTemp ( APP_FIELD.AccountNumber_2.ToString (), value_acn_2 );
-
-                    // Work Order / Field Order
-                    if ( global.WorkOrderRecording )
-                        Data.SetTemp ( APP_FIELD.WorkOrder_2.ToString (), value_wor_2 );
-                    
                     // Meter Type
                     Data.SetTemp ( APP_FIELD.Meter_2.ToString (), value_rdd );
                 }
@@ -4277,8 +4265,8 @@ namespace aclara_meters.view
 
             if ( hasRDD )
             {
-                Data.SetTemp ( "RDDFirmware", value_fir );
-                Data.SetTemp ( "RDDPosition", value_pos );
+                Data.SetTemp ( APP_FIELD.RDDFirmware.ToString (), value_fir );
+                Data.SetTemp ( APP_FIELD.RDDPosition.ToString (), value_pos );
             }
 
             #endregion
