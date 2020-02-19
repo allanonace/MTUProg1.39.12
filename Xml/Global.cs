@@ -936,6 +936,7 @@ namespace Xml
         [XmlElement("ShowValvePosition")]
         public bool ShowValvePosition { get; set; }
 
+        // TODO: No se utiliza?
         [XmlElement("SpecialSet")]
         public string SpecialSet { get; set; }
 

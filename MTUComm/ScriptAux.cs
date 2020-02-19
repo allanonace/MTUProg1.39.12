@@ -751,6 +751,7 @@ namespace MTUComm
                         */
                         #endregion
 
+                        // RF-Check
                         #region Force Time Sync [ Only Writing ]
                         case APP_FIELD.ForceTimeSync:
                         // Do not use
@@ -760,6 +761,7 @@ namespace MTUComm
                              ! mtu.OnTimeSync )
                             continue;
 
+                        // Verify the content -> True or False
                         else if ( fail = ! bool.TryParse ( valueStr, out bool _ ) )
                             msgDescription = MSG_BOOL;
                         break;

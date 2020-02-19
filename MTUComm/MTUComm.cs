@@ -836,7 +836,7 @@ namespace MTUComm
                          this.mtu.FastMessageConfig )
                         CheckIfNotPresentWithDef (
                             ParameterType.Fast2Way,
-                            global.Fast2Way.ToString () );
+                            global.FastMessageConfig.ToString () );
                     
                     // The MTU can perform an Install Confirmation during the installations
                     if ( this.global.TimeToSync &&
@@ -2237,7 +2237,7 @@ namespace MTUComm
                     string rddPosition = APP_FIELD.RDDPosition.ToString ();
 
                     // Use the id specified in the Set method ( TrySetMember )
-                    Data.Get[ rddPosition ] = Data.Get[ rddPosition ].ToUpper ();
+                    Data.Get.RDDPosition = Data.Get[ rddPosition ].ToUpper ();
 
                     // Convert from RDD command to RDD desired status
                     RDDValveStatus rddValveStatus = RDDValveStatus.UNKNOWN;
@@ -2757,8 +2757,8 @@ namespace MTUComm
 
                 #region Check Meter for Encoder
 
-                Meter selectedMeter  = null;
-                Meter selectedMeter2 = null;
+                Meter selectedMeter  = ( Meter )Data.Get[ APP_FIELD.Meter  .ToString () ];
+                Meter selectedMeter2 = ( Meter )Data.Get[ APP_FIELD.Meter_2.ToString () ];
 
                 if ( this.mtu.Port1.IsForEncoderOrEcoder ||
                      usePort2 &&
@@ -2771,8 +2771,6 @@ namespace MTUComm
                     // Check if selected Meter is supported for current MTU
                     if ( this.mtu.Port1.IsForEncoderOrEcoder )
                     {
-                        selectedMeter = ( Meter )Data.Get[ APP_FIELD.Meter.ToString () ];
-
                         // Updates the port information without fear, since it was only used to fill the meter list
                         this.mtu.Port1.MeterProtocol   = selectedMeter.EncoderType;
                         this.mtu.Port1.MeterLiveDigits = selectedMeter.LiveDigits;
@@ -2782,8 +2780,6 @@ namespace MTUComm
                     if ( usePort2 &&
                          this.mtu.Port2.IsForEncoderOrEcoder )
                     {
-                        selectedMeter2 = ( Meter )Data.Get[ APP_FIELD.Meter_2.ToString () ];
-
                         this.mtu.Port2.MeterProtocol   = selectedMeter2.EncoderType;
                         this.mtu.Port2.MeterLiveDigits = selectedMeter2.LiveDigits;
                         await this.CheckSelectedEncoderMeter ( 2 );
