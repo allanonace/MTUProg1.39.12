@@ -354,22 +354,23 @@ namespace aclara_meters.view
             cbx_SnapReads.GestureRecognizers.Add(new TapGestureRecognizer
             {
                 Command = new Command(() =>
-              {
-                  bool ok = !snapReadsStatus;
+                {
+                    bool ok = !snapReadsStatus;
 
-                  cbx_SnapReads.Source = "checkbox_" + ((ok) ? "on" : "off");
-                  sld_SnapReads.IsEnabled = ok;
-                  divSub_SnapReads.Opacity = (ok) ? 1 : OPACITY_DISABLE;
-                  snapReadsStatus = ok;
+                    cbx_SnapReads.Source = "checkbox_" + ((ok) ? "on" : "off");
+                    sld_SnapReads.IsEnabled = ok;
+                    divSub_SnapReads.Opacity = (ok) ? 1 : OPACITY_DISABLE;
+                    snapReadsStatus = ok;
 
-#pragma warning disable S2589 // Boolean expressions should not be gratuitous
-                  if (MANDATORY_SNAPREADS &&
-#pragma warning restore S2589 // Boolean expressions should not be gratuitous
-                       global.IndividualDailyReads &&
-                       snapReadsStatus)
-                      this.lb_SnapReads.TextColor = COL_MANDATORY;
-                  else this.lb_SnapReads.TextColor = Color.Black;
-              }),
+                    // Boolean expressions should not be gratuitous
+                    #pragma warning disable S2589
+                    if ( MANDATORY_SNAPREADS &&
+                    #pragma warning restore S2589
+                         global.IndividualDailyReads &&
+                         snapReadsStatus )
+                         this.lb_SnapReads.TextColor = COL_MANDATORY;
+                    else this.lb_SnapReads.TextColor = Color.Black;
+                }),
             });
         }
 
@@ -531,7 +532,12 @@ namespace aclara_meters.view
                  this.currentMtu.TimeToSync &&
                  this.currentMtu.FastMessageConfig )
             {
-                int twoway = ( await map.FastMessagingConfigMode.GetValue () ) ? 1 : 0; // Fast or Slow
+                // Default value
+                int twoway = ( this.global.FastMessageConfig ) ? 1 : 0; // Fast or Slow
+                
+                // Allow user to modify the default value
+                if ( this.global.IndividualFastMessageConfig )
+                    twoway = ( await map.FastMessagingConfigMode.GetValue () ) ? 1 : 0;
 
                 Device.BeginInvokeOnMainThread ( () =>
                 {
@@ -823,11 +829,11 @@ namespace aclara_meters.view
 
                 #region Read Interval
 
-                this.InitializePicker_ReadInterval(this.mtuBasicInfo, this.currentMtu);
+                this.InitializePicker_ReadInterval ( this.mtuBasicInfo, this.currentMtu );
 
-                // Use IndividualReadInterval tag to enable o disable read interval picker
                 this.pck_ReadInterval.IsEnabled = global.IndividualReadInterval;
-                if ( !this.pck_ReadInterval.IsEnabled )
+
+                if ( ! global.IndividualReadInterval )
                 {
                     this.div_ReadInterval.BackgroundColor = Color.LightGray;
                     this.pck_ReadInterval.BackgroundColor = Color.LightGray;
@@ -838,45 +844,50 @@ namespace aclara_meters.view
 
                 #region Snap Reads / Daily Reads
 
-                bool useDailyReads = global.AllowDailyReads && this.currentMtu.DailyReads && !this.currentMtu.IsFamily33xx;
-                bool changeableDailyReads = global.IndividualDailyReads;
-
-                int dailyReadsDefault = global.DailyReadsDefault;
+                bool useDailyReads = ! this.currentMtu.IsFamily33xx &&
+                                     this.global.AllowDailyReads &&
+                                     this.currentMtu.DailyReads;
 
                 this.div_SnapReads.IsEnabled = useDailyReads;
                 this.div_SnapReads.IsVisible = useDailyReads;
-                this.divSub_SnapReads.IsEnabled = changeableDailyReads && useDailyReads;
-                this.divSub_SnapReads.Opacity = (changeableDailyReads && useDailyReads) ? 1 : 0.8d;
 
-                this.snapReadsStep = 1.0;
+                if ( useDailyReads )
+                {
+                    this.divSub_SnapReads.IsEnabled = this.global.IndividualDailyReads;
+                    this.divSub_SnapReads.Opacity = ( this.global.IndividualDailyReads ) ? 1 : 0.8d;
 
-                if (useDailyReads)
+                    this.snapReadsStep = 1.0;
+
                     this.sld_SnapReads.ValueChanged += OnSnapReadsSlider_ValueChanged;
 
-                this.sld_SnapReads.Value = (dailyReadsDefault > -1) ? dailyReadsDefault : 13;
-
+                    if ( this.global.DailyReadsDefault >= Global.MIN_DAILY_READS &&
+                         this.global.DailyReadsDefault <= Global.MAX_DAILY_READS )
+                         this.sld_SnapReads.Value = this.global.DailyReadsDefault;
+                    else this.sld_SnapReads.Value = Global.DEF_DAILY_READS;
+                }
 
                 #endregion
 
                 #region 2-Way
 
                 // Only for 34xx MTUs and above
-                bool useTwoWay = global.TimeToSync &&
-                                this.currentMtu.TimeToSync &&
-                                this.currentMtu.FastMessageConfig;
+                bool useTwoWay = this.global.TimeToSync &&
+                                 this.currentMtu.TimeToSync &&
+                                 this.currentMtu.FastMessageConfig;
 
-                if (!div_RDDGeneral.IsVisible)
+                if ( ! div_RDDGeneral.IsVisible )
                 {
-                    this.Initialize_TwoWay(pck_TwoWay);
+                    this.Initialize_TwoWay ( pck_TwoWay );
                     div_TwoWay.IsVisible = useTwoWay;
-                    div_TwoWay.IsEnabled = useTwoWay;
+                    div_TwoWay.IsEnabled = useTwoWay && global.IndividualFastMessageConfig;
                 }
                 else
                 {
-                    this.Initialize_TwoWay(pck_TwoWay_V);
+                    this.Initialize_TwoWay ( pck_TwoWay_V );
                     div_TwoWay_V.IsVisible = useTwoWay;
-                    div_TwoWay_V.IsEnabled = useTwoWay;
+                    div_TwoWay_V.IsEnabled = useTwoWay && global.IndividualFastMessageConfig;
                 }
+                
                 #endregion
 
                 #region Alarms
@@ -1208,18 +1219,19 @@ namespace aclara_meters.view
                     }
 
                     // Read Interval
-                    if (MANDATORY_READINTERVAL &&
-                        global.IndividualReadInterval)
+                    if ( MANDATORY_READINTERVAL &&
+                         global.IndividualReadInterval )
                         this.lb_ReadInterval.TextColor = COL_MANDATORY;
 
                     // Snap Reads
-                    if (MANDATORY_SNAPREADS &&
-                        global.IndividualDailyReads &&
-                        snapReadsStatus)
+                    if ( MANDATORY_SNAPREADS &&
+                         global.IndividualDailyReads &&
+                         snapReadsStatus )
                         this.lb_SnapReads.TextColor = COL_MANDATORY;
 
                     // Two-Way
-                    if (MANDATORY_TWOWAY)
+                    if ( MANDATORY_TWOWAY &&
+                         global.IndividualFastMessageConfig )
                         this.lb_TwoWay.TextColor = COL_MANDATORY;
 
                     // Alarms
@@ -3470,17 +3482,22 @@ namespace aclara_meters.view
                 bool noOMt = EmptyNoReq ( this.tbx_OldMtuId            .Text, MANDATORY_OLDMTUID        );
                 bool noOMs = EmptyNoReq ( this.tbx_OldMeterSerialNumber.Text, MANDATORY_OLDMETERSERIAL  );
                 bool noMsn = EmptyNoReq ( this.tbx_MeterSerialNumber   .Text, MANDATORY_METERSERIAL     );
-                bool noSnr = EmptyNoReq ( this.lb_SnapReads_Num        .Text, MANDATORY_SNAPREADS       );
                 bool noOMr = EmptyNoReq ( this.tbx_OldMeterReading     .Text, MANDATORY_OLDMETERREADING );
                 bool noMre = EmptyNoReq ( this.tbx_MeterReading        .Text, MANDATORY_METERREADING    );
                 
                 bool noOMw = NoSelNoReq ( this.pck_OldMeterWorking     .SelectedIndex, global.MeterWorkRecording   );
                 bool noRpc = NoSelNoReq ( this.pck_ReplaceMeterRegister.SelectedIndex, global.RegisterRecordingReq );
-                bool noMty = NoSelNoReq ( this.pck_MeterType_Names     .SelectedIndex, MANDATORY_METERTYPE       );
-                bool noRin = NoSelNoReq ( this.pck_ReadInterval        .SelectedIndex, MANDATORY_READINTERVAL    );
-                bool noTwo = NoSelNoReq ( this.pck_TwoWay              .SelectedIndex, MANDATORY_TWOWAY          );
+                bool noMty = NoSelNoReq ( this.pck_MeterType_Names     .SelectedIndex, MANDATORY_METERTYPE       );                
                 bool noAlr = NoSelNoReq ( this.pck_Alarms              .SelectedIndex, MANDATORY_ALARMS          );
                 bool noDmd = NoSelNoReq ( this.pck_Demands             .SelectedIndex, MANDATORY_DEMANDS         );
+
+                // They are special cases because they are disabled and filled with the
+                // default value if the associated Global.Interval_ tag is false, but here
+                // it is not necessary to use their respective Global.Invertal_ because all
+                // fields must be filled in both cases, manually or automatically filled
+                bool noSnr = EmptyNoReq ( this.lb_SnapReads_Num        .Text, MANDATORY_SNAPREADS       );
+                bool noRin = NoSelNoReq ( this.pck_ReadInterval        .SelectedIndex, MANDATORY_READINTERVAL    );
+                bool noTwo = NoSelNoReq ( this.pck_TwoWay              .SelectedIndex, MANDATORY_TWOWAY          );
 
                 bool noDAc = EmptyNoReq ( this.tbx_AccountNumber_Dual       .Text, MANDATORY_ACCOUNTNUMBER   );
                 bool noDWr = EmptyNoReq ( this.tbx_WorkOrder_Dual           .Text, MANDATORY_WORKORDER       );
@@ -4049,9 +4066,9 @@ namespace aclara_meters.view
                         mtu.TimeToSync &&
                         mtu.FastMessageConfig)
                 {
-                    value_two = this.pck_TwoWay.SelectedItem.ToString();
+                    value_two = this.pck_TwoWay.SelectedItem.ToString(); // Fast or Slow
                     //MRA like Star Programmer  ( en el artificial sync se ponia a false )
-                    global.FastMessageConfig = value_two.Equals("Fast") ? true : false;
+                    global.FastMessageConfig = value_two.ToLower ().Equals("fast") ? true : false;
                 }
                 
                 // Alarms dropdownlist is hidden when only has one option

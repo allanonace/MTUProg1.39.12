@@ -217,11 +217,11 @@ namespace Xml
     /// </item>
     /// <item>
     ///   <term>IndividualDailyReads</term>
-    ///   <description>Allow selection of daily Reads interval value</description>
+    ///   <description>Allow selection of daily reads interval value or use the default value automatically</description>
     /// </item>
     /// <item>
     ///   <term>IndividualReadInterval</term>
-    ///   <description>Controls whether the read interval can be specified on a per MTU basis or default only</description>
+    ///   <description>Allow selection of read interval value or use the default value automatically</description>
     /// </item>
     /// <item>
     ///   <term>MeterWorkRecording</term>
@@ -543,8 +543,9 @@ namespace Xml
 
             // Enable or Disable form fields
             this.AllowDailyReads              = true;                 // Enable SnapReads/DailyReads
-            this.IndividualDailyReads         = true;                 // Allow selection of daily Reads interval value
-            this.IndividualReadInterval       = false;                // Controls whether the read interval can be specified on a per MTU basis or default only
+            this.IndividualDailyReads         = true;                 // Allow selection of daily reads interval value or use the default value automatically
+            this.IndividualReadInterval       = false;                // Allow selection of read interval value or use the default value automatically
+            this.IndividualFastMessageConfig  = true;                 // Allow selection of two-way value or use the default value automatically
             this.MeterWorkRecording           = true;                 // Enables or disables the "Old Meter Working" dialog box during MTU programming
             this.OldReadingRecording          = true;                 // Enables or disables entry of the old meter reading during programming
             this.RegisterRecording            = true;                 // Enables or disables display of the Register/Meter change question during programming
@@ -751,6 +752,7 @@ namespace Xml
                 }
                 else this.DailyReadsDefault = Global.MAX_DAILY_OFF;
             }
+            get { return this.DailyReadsDefault.ToString (); }
         }
 
         [XmlElement("EnableFEC")]
@@ -797,6 +799,9 @@ namespace Xml
 
         [XmlElement("IndividualReadInterval")]
         public bool IndividualReadInterval { get; set; }
+
+        [XmlElement("IndividualFastMessageConfig")]
+        public bool IndividualFastMessageConfig { get; set; }
 
         [XmlElement("LatestVersion")]
         public int LatestVersion { get; set; }
@@ -1096,26 +1101,6 @@ namespace Xml
             }
             get { return this.LexiAttempts.ToString (); }
         }
-
-        /*
-        private int value_lexiTimeout;
-        [XmlElement("LexiTimeout")]
-        public dynamic LexiTimeout
-        {
-            set { this.value_lexiTimeout = XmlAux.Set ( value,
-                    DEF_LEXI_TIMEOUT, MIN_LEXI_TIMEOUT, MAX_LEXI_TIMEOUT ); }
-            get { return this.value_lexiTimeout; }
-        }
-
-        private int value_lexiAttempts;
-        [XmlElement("LexiAttempts")]
-        public dynamic LexiAttempts
-        {
-            set { this.value_lexiAttempts = XmlAux.Set ( value,
-                    DEF_LEXI_ATTEMPTS, MIN_LEXI_ATTEMPTS, MAX_LEXI_ATTEMPTS ); }
-            get { return this.value_lexiAttempts; }
-        }
-        */
 
         #endregion
 

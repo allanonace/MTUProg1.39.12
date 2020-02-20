@@ -783,6 +783,9 @@ namespace MTUComm
             
             #endregion
 
+            // The Check___WithDef methods, if the parameter is present set the specified value,
+            // but if the value is an empty string or the parameter is not present, use the default value
+
             switch ( actionType )
             {
                 #region No installation
@@ -872,25 +875,26 @@ namespace MTUComm
                                 ParameterType.OldMtuId, 0 );
 
                         // Read Interval
+                        // The default value is calculated conditioned by the MTU and Global configuration
                         // NOTE: Is general data/not for the first port, but not present if the RDD is on port 1
-                        // Calculates the default value to use in case the parameter is not present in the script
-                        string valueReadInterval = "1 Hour";
-                        ScriptAux.PrepareReadIntervalList ( mtu, ref valueReadInterval );
+                        string defReadInterval = "1 Hour";
+                        ScriptAux.PrepareReadIntervalList ( mtu, ref defReadInterval ); // Always returns "1 Hour"
                         CheckIfNotPresentWithDef (
                             ParameterType.ReadInterval,
-                            valueReadInterval );
+                            defReadInterval );
 
                         // Span Reads / Daily Reads
+                        // The default value is calculated by verifying that the value used in global is correct
                         // NOTE: Is general data/not for the first port, but not present if the RDD is on port 1
                         if ( ! this.mtu.IsFamily33xx && 
                              this.global.AllowDailyReads &&
                              this.mtu.DailyReads )
                         {
-                            string valueDailyReads = Global.DEF_DAILY_READS.ToString ();
-                            ScriptAux.PrepareDailyReadValue ( mtu, ref valueDailyReads );
+                            string defDailyReads = Global.DEF_DAILY_READS.ToString ();
+                            ScriptAux.PrepareDailyReadValue ( mtu, ref defDailyReads );
                             CheckIfNotPresentWithDef (
                                 ParameterType.SnapRead,
-                                valueDailyReads );
+                                defDailyReads );
                         }
 
                         // ( New ) Meter Serial Number
@@ -2140,7 +2144,7 @@ namespace MTUComm
 
             await Task.Delay ( WAIT_BTW_ARTIFICIAL );
 
-            await map.FastMessagingConfigMode.SetValueToMtu ( global.FastMessageConfig );
+            await map.FastMessagingConfigMode.SetValueToMtu ( this.global.FastMessageConfig );
         }
 
         #endregion

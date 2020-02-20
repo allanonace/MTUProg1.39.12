@@ -50,10 +50,11 @@ namespace MTUComm
             BOTH
         }
 
+        // They are the indices in the dropdownlist
         public enum TwoWay
         {
-            FAST,
-            SLOW
+            SLOW,
+            FAST
         }
 
         public enum APP_FIELD
@@ -493,13 +494,14 @@ namespace MTUComm
                              ! mtu.TimeToSync    ||
                              ! mtu.FastMessageConfig )
                             continue;
-                        
-                        // Verify the content -> True or False
-                        // NOTE: Method bool.TryParse is not case-sensitive
-                        if ( ! ( fail = ! bool.TryParse ( valueStr, out bool twResult ) ) )
+
+                        // Verify the content -> True or False or default value if ! Global.IndividualFastMessageConfig
+                        if ( ! ( fail = ! PrepareTwoWay ( mtu, ref valueStr ) ) )
                         {
-                            // In interactive the value is retrieved from a dropdownlist, using the selection index ( 0=Fast, 1=Slow )
-                            valueStr = ( ( twResult ) ? ScriptAux.TwoWay.FAST : ScriptAux.TwoWay.SLOW ).ToString ();
+                            // In interactive the value is retrieved from a dropdownlist
+                            // control, using the selection index ( 0=Fast, 1=Slow )
+                            valueStr = ( ( valueStr.ToUpper ().Equals ( "TRUE" ) ) ?
+                                ScriptAux.TwoWay.FAST : ScriptAux.TwoWay.SLOW ).ToString ();
                         }
                         else
                             msgDescription = MSG_TWO;
@@ -546,7 +548,7 @@ namespace MTUComm
                              isNotWrite )
                             continue;
 
-                        // Verify the content -> Value is in the generated list
+                        // Verify the content -> Value in the generated list or default value if ! Global.IndividualReadInterval
                         else if ( fail = ! PrepareReadIntervalList ( mtu, ref valueStr ) )
                             msgDescription = MSG_HSMINS;
                         break;
@@ -561,10 +563,8 @@ namespace MTUComm
                              ! mtu.DailyReads )
                             continue;
 
-                        // Verify the content -> Value [0,23] or 255/Disabled
-                        // The last parameter indicates that the current value will be verified,
-                        // to also verify the default value in the case that was set in MTUComm.ValidateRequiredParams
-                        else if ( fail = ! PrepareDailyReadValue ( mtu, ref valueStr, true ) )
+                        // Verify the content -> Value [0,23] or 255/OFF or default value if ! Global.IndividualDailyReads
+                        else if ( fail = ! PrepareDailyReadValue ( mtu, ref valueStr ) )
                             msgDescription = MSG_DAILY;
                         break;
                         #endregion
@@ -892,6 +892,27 @@ namespace MTUComm
             return entriesSelected;
         }
 
+        private static bool PrepareTwoWay (
+            Mtu mtu,
+            ref string value )
+        {
+            Global global = Singleton.Get.Configuration.Global;
+
+            // Use default value
+            // This case never fails, always setting a "correct" value
+            if ( ! global.IndividualFastMessageConfig )
+                value = global.FastMessageConfig.ToString ();
+            
+            // Use the value specified
+            // This case can fail
+            // NOTE: Method bool.TryParse is not case-sensitive
+            else if ( ! bool.TryParse ( value, out bool _ ) )
+                return false;
+
+            // Not a valid value
+            return false;
+        }
+
         public static bool PrepareReadIntervalList (
             Mtu mtu,
             ref string value )
@@ -964,6 +985,7 @@ namespace MTUComm
                     .Replace ( "h" , "H" )
                     .Replace ( "m" , "M" );
                 
+                // Not a valid value
                 if ( string.IsNullOrEmpty ( value ) ||
                      ! list.Contains ( value ) )
                     return false;
@@ -974,16 +996,14 @@ namespace MTUComm
     
         public static bool PrepareDailyReadValue (
             Mtu mtu,
-            ref string value,
-            bool forceVerifyValue = false )
+            ref string value )
         {
             Global global = Singleton.Get.Configuration.Global;
 
             // Use default value
             // This case never fails, always setting a "correct" value
             // A custom default value could be incorrect and for that reason is the forceVerifyValue parameter
-            if ( ! forceVerifyValue &&
-                 ! global.IndividualDailyReads )
+            if ( ! global.IndividualDailyReads )
             {
                 int defDailyReads = global.DailyReadsDefault;
                 value = ( ( defDailyReads >= Global.MIN_DAILY_READS &&
@@ -992,6 +1012,7 @@ namespace MTUComm
                 
                 return true;
             }
+
             // Use the value specified
             // This case can fail
             else if ( int.TryParse ( value, out int dailyReads ) &&

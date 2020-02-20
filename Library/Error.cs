@@ -131,7 +131,10 @@ namespace Library
             get { return ! string.IsNullOrEmpty ( this.messagePopup ); }
         }
 
+        [XmlIgnore]
         public int Port { get; set; }
+
+        [XmlIgnore]
         public Exception Exception { get; set; }
 
         public object Clone ()
