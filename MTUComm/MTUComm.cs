@@ -601,11 +601,15 @@ namespace MTUComm
         private bool Validate_TurnOff (
             out string textError )
         {
+            // NOTE: Konstantin "Turn Off Action recording is missing. If the user Turn Off MTU in ship mode the MTU Programmer
+            // NOTE: reports that MTU is already turned off. It also needs to record the action and indicate that MTU is turned off"
+            /*
             if ( Data.Get.MtuBasicInfo.Shipbit )
             {
                 textError = "The MTU is already turned Off";
                 return false;
             }
+            */
 
             textError = string.Empty;
             return true;
@@ -875,7 +879,8 @@ namespace MTUComm
                                 ParameterType.OldMtuId, 0 );
 
                         // Read Interval
-                        // The default value is calculated conditioned by the MTU and Global configuration
+                        // The default value is only used if the parameter is not present in
+                        // the script file or if the associated Individual_ parameter is false
                         // NOTE: Is general data/not for the first port, but not present if the RDD is on port 1
                         string defReadInterval = "1 Hour";
                         ScriptAux.PrepareReadIntervalList ( mtu, ref defReadInterval ); // Always returns "1 Hour"
@@ -884,7 +889,8 @@ namespace MTUComm
                             defReadInterval );
 
                         // Span Reads / Daily Reads
-                        // The default value is calculated by verifying that the value used in global is correct
+                        // The default value is only used if the parameter is not present in
+                        // the script file or if the associated Individual_ parameter is false
                         // NOTE: Is general data/not for the first port, but not present if the RDD is on port 1
                         if ( ! this.mtu.IsFamily33xx && 
                              this.global.AllowDailyReads &&
@@ -1651,9 +1657,6 @@ namespace MTUComm
                     // Not necessary to perform an artificial process when the IC has worked
                     Data.SetTemp ( "ArtificialInstallConfirmation", false );
                 }
-
-                int DcuId = await map.DcuId.GetValueFromMtu ( false, true );
-                Data.SetTemp ( "DcuId", DcuId );
             }
             catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
@@ -2807,7 +2810,7 @@ namespace MTUComm
                 #region Account Number
 
                 // Uses default value fill to zeros if parameter is missing in scripting
-                // Only first 12 numeric characters are recorded in MTU memory
+                // Only first 12 characters are recorded in MTU memory
                 // F1 electric can have 20 alphanumeric characters but in the activity log should be written all characters
                 map.P1MeterId = Utils.GetValueOrDefault<ulong> ( Data.Get[ APP_FIELD.AccountNumber.ToString () ], 12 );
                 if ( usePort2 )
@@ -2870,35 +2873,28 @@ namespace MTUComm
                 #region Snap Reads ( prev. Daily Reads )
 
                 if ( noRddOrNotIn1 &&
-                     ! this.mtu.IsFamily33xx )
+                     ! this.mtu.IsFamily33xx &&
+                     this.global.AllowDailyReads &&
+                     this.mtu.DailyReads )
                 {
-                    // Configure or disable
-                    bool used      = this.global.AllowDailyReads && this.mtu.DailyReads;
-                    int  snapReads = ( used ) ? int.Parse ( Data.Get[ APP_FIELD.SnapReads.ToString () ] ) : Global.MAX_DAILY_OFF;
+                    int snapReads = int.Parse ( Data.Get[ APP_FIELD.SnapReads.ToString () ] );
 
-                    // DailyReads is not disabled
-                    if ( snapReads != Global.MAX_DAILY_OFF )
-                    {
-                        // In the MTU the value is written in UTC but when
-                        // reading the value must be converted to local time
-                        // e.g. Cleveland UTC offset -5
-                        //      Value 6 -> To UTC  : 6 + -5 = 6 - 5 = 1
-                        //                 To Local: 1 - -5 = 1 + 5 = 6
-                        // e.g. Spain UTC offset +1
-                        //      Value 6 -> To UTC  : 6 + 1 = 7
-                        //                 To Local: 7 - 1 = 6
-                        snapReads += Utils.GetUtcOffset (); // Local to UTC
+                    // In the MTU the value is written in UTC but when
+                    // reading the value must be converted to local time
+                    // e.g. Cleveland UTC offset -5
+                    //      Value 6 -> To UTC  : 6 + -5 = 6 - 5 = 1
+                    //                 To Local: 1 - -5 = 1 + 5 = 6
+                    // e.g. Spain UTC offset +1
+                    //      Value 6 -> To UTC  : 6 + 1 = 7
+                    //                 To Local: 7 - 1 = 6
+                    snapReads += Utils.GetUtcOffset (); // Local to UTC
 
-                        // Maintain value within range [0,23]
-                        // Down: -2 -> -2 + 24 = 22
-                        // Up  : 25 -> 25 - 24 =  1
-                        if      ( snapReads <  0 ) snapReads += 24;
-                        else if ( snapReads > 23 ) snapReads -= 24;
-                    }
-                    // DailyReads is disabled
-                    else Data.Set ( APP_FIELD.SnapReads.ToString (), snapReads ); // Off = 255
+                    // Maintain value within range [0,23]
+                    // Down: -2 -> -2 + 24 = 22
+                    // Up  : 25 -> 25 - 24 =  1
+                    if      ( snapReads <  0 ) snapReads += 24;
+                    else if ( snapReads > 23 ) snapReads -= 24;
 
-                    // When disabled, both local ( Data ) and UTC ( MTU ) have the same value ( 255 )
                     map.DailyGMTHourRead = snapReads;
                 }
 

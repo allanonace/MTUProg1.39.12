@@ -24,14 +24,15 @@ namespace MTUComm
         private const string MIN        = " Min";
         private const string MSG_EMPTY  = "cannot be empty";
         private const string MSG_NUMBER = "should be a valid numeric value";
-        private const string MSG_DAILY  = "should be a valid numeric value within the range [0,23] or 255 to disable";
         private const string MSG_ELTHAN = "should be equal to or less than {0} ( {1} )";
         private const string MSG_ELONLY = "should be equal to or less than {0}";
         private const string MSG_EQUAL  = "should be equal to {0} ( {1} )";
+        private const string MSG_DAILY  = "should be a valid numeric value within the range [0,23]";
         private const string MSG_HSMINS = "should be one of the possible values and using Hr/s or Min";
         private const string MSG_BOOL   = "should be 'True' or 'False'";
         private const string MSG_DAYS   = "should be one of the possible values ( 1, 8, 32, 64 or 96 )";
         private const string MSG_RDD    = "Should be one of the possible values ( 'CLOSE', 'OPEN', 'PARTIAL OPEN' )";
+        private const string MSG_ELRDD  = "should be equal to or less than {0} or there is no default value in Global";
         private const string MSG_OMW    = "Should be one of the possible values ( 'Yes', 'No', 'Broken' )";
         private const string MSG_MRR    = "Should be one of the possible values ( 'Meter', 'Register', 'Both' )";
         private const string MSG_TWO    = "Should be one of the possible values ( 'True' for Fast, 'False' for Slow )";
@@ -563,7 +564,7 @@ namespace MTUComm
                              ! mtu.DailyReads )
                             continue;
 
-                        // Verify the content -> Value [0,23] or 255/OFF or default value if ! Global.IndividualDailyReads
+                        // Verify the content -> Value [0,23] or default value if ! Global.IndividualDailyReads
                         else if ( fail = ! PrepareDailyReadValue ( mtu, ref valueStr ) )
                             msgDescription = MSG_DAILY;
                         break;
@@ -626,8 +627,8 @@ namespace MTUComm
                         // In the mask the 'X' character is replaced by the value
                         // e.g. NumberOfDials 4 Value 1234 Mask X00 -> 1234 + Mask = 123400
                         // e.g. NumberOfDials 4 Value 12 Mask X00 -> Fill left to 0's = 0012 + Mask = 001200
-                        else if ( ! ( fail = meter.NumberOfDials <= -1 ||
-                                             NoELNum ( valueStr, meter.NumberOfDials ) ) )
+                        else if ( meter.NumberOfDials > -1 &&
+                                  NoELNum ( valueStr, meter.NumberOfDials ) )
                         {
                             valueStr = meter.FillLeftNumberOfDials ( valueStr );
 
@@ -771,7 +772,9 @@ namespace MTUComm
                         #region Number of Days [ Only DataRead ]
                         case APP_FIELD.NumOfDays:
                         // Do not use
-                        if ( actionType != ActionType.DataRead )
+                        if ( actionType != ActionType.DataRead ||
+                             ! mtu.MtuDemand ||
+                             ! mtu.DataRead )
                             continue;
 
                         // Verify the content -> Value { 1, 8, 32, 64, 96 }
@@ -808,7 +811,7 @@ namespace MTUComm
                         
                         // Verify the content -> Length [1,12]
                         else if ( fail = NoELTxt ( valueStr, MAX_RDD_FW ) )
-                            msgDescription = String.Format ( MSG_ELONLY, MAX_RDD_FW );
+                            msgDescription = String.Format ( MSG_ELRDD, MAX_RDD_FW );
                         break;
                         #endregion
                     }
@@ -1016,9 +1019,8 @@ namespace MTUComm
             // Use the value specified
             // This case can fail
             else if ( int.TryParse ( value, out int dailyReads ) &&
-                      ( dailyReads >= Global.MIN_DAILY_READS &&
-                        dailyReads <= Global.MAX_DAILY_READS ||
-                        dailyReads == Global.MAX_DAILY_OFF ) )
+                      dailyReads >= Global.MIN_DAILY_READS &&
+                      dailyReads <= Global.MAX_DAILY_READS )
                 return true;
 
             // Not a valid value

@@ -26,7 +26,7 @@
 			<Parameter 	name="DailySnap" 					display="Daily Snap" 					log="true" 	interface="true"/>
 			<Parameter 	name="DailyGMTHourRead" 			display="Daily GMT Hour Read" 			log="true" 	interface="false" 														conditional="MemoryMap.DailyGMTHourRead gt -1 + MemoryMap.DailyGMTHourRead lt 24"/>
 			<Parameter 	name="InstallationConfirmationStatus" display="Installation" 				log="true" 	interface="true" 	source="MemoryMap.InstallConfirmationStatus"		conditional="MemoryMap.Shipbit=false"/>
-			<Parameter 	name="DcuId" 						display="DCU ID" 						log="true" 	interface="true" 	source="Data.DcuId" 								conditional="MemoryMap.Shipbit=false + MemoryMap.InstallConfirmationNotSynced=false + Data.DcuId gt 0"/>
+			<Parameter 	name="DcuId" 						display="DCU ID" 						log="true" 	interface="true" 						 								conditional="MemoryMap.Shipbit=false + MemoryMap.InstallConfirmationNotSynced=false + MemoryMap.DcuId gt 0"/>
 			<Parameter 	name="RSSI" 						display="RSSI" 							log="true" 	interface="true" 	source="MemoryMap.RSSIStatus" 						conditional="MemoryMap.Shipbit=false + MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter 	name="Deviation" 					display="Deviation" 					log="true" 	interface="false" 														conditional="MemoryMap.Shipbit=false + MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter 	name="MTU_DateTime" 				display="MtuGmtDateTime" 				log="true" 	interface="false" 	source="MemoryMap.MtuDatetime" 						conditional="MemoryMap.Shipbit=false + MemoryMap.InstallConfirmationNotSynced=false"/>
@@ -90,7 +90,7 @@
 			<Parameter 	name="Frequency" 					display="2 Way Tx Freq" 				log="true" 	interface="true"	source="MemoryMap.Frequency2WayTx" 					conditional="Global.ShowFreq=true"/>
 			<Parameter 	name="Frequency" 					display="2 Way Rx Freq" 				log="true" 	interface="true"	source="MemoryMap.Frequency2WayRx"  				conditional="Global.ShowFreq=true"/>
 			<Parameter 	name="InstallationConfirmationStatus" display="Installation" 				log="true" 	interface="true" 	source="MemoryMap.InstallConfirmationStatus"		conditional="MemoryMap.Shipbit=false"/>
-			<Parameter 	name="DcuId" 						display="DCU ID" 						log="true" 	interface="true" 	source="Data.DcuId" 								conditional="MemoryMap.Shipbit=false + MemoryMap.InstallConfirmationNotSynced=false + Data.DcuId gt 0"/>
+			<Parameter 	name="DcuId" 						display="DCU ID" 						log="true" 	interface="true" 														conditional="MemoryMap.Shipbit=false + MemoryMap.InstallConfirmationNotSynced=false + MemoryMap.DcuId gt 0"/>
 			<Parameter 	name="RSSI" 						display="RSSI" 							log="true" 	interface="true" 	source="MemoryMap.RSSIStatus" 						conditional="MemoryMap.Shipbit=false + MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter 	name="Deviation" 					display="Deviation" 					log="true" 	interface="false" 														conditional="MemoryMap.Shipbit=false + MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter 	name="MTU_DateTime" 				display="MtuGmtDateTime" 				log="true" 	interface="false" 	source="MemoryMap.MtuDatetime" 						conditional="MemoryMap.Shipbit=false + MemoryMap.InstallConfirmationNotSynced=false"/>
@@ -188,7 +188,7 @@
 			<Parameter 	name="DailyGMTHourRead" 			display="Daily GMT Hour Read" 			log="true" 	interface="false" 														conditional="MemoryMap.DailyGMTHourRead gt -1 + MemoryMap.DailyGMTHourRead lt 24"/>
 			<Parameter 	name="ArtificialTimeSync" 			display="ArtificialTimeSync" 			log="true" 	interface="true" 	source="Data.ArtificialInstallConfirmation"			conditional="MemoryMap.Shipbit=false + Data.ArtificialInstallConfirmation=true"/>
 			<Parameter 	name="InstallationConfirmationStatus" display="Installation" 				log="true" 	interface="true" 	source="MemoryMap.InstallConfirmationStatus"		conditional="MemoryMap.Shipbit=false"/>
-			<Parameter 	name="DcuId" 						display="DCU ID" 						log="true" 	interface="true" 	source="Data.DcuId"  								conditional="MemoryMap.Shipbit=false + Data.ArtificialInstallConfirmation=false + MemoryMap.InstallConfirmationNotSynced=false + Data.DcuId gt 0"/>
+			<Parameter 	name="DcuId" 						display="DCU ID" 						log="true" 	interface="true" 						  								conditional="MemoryMap.Shipbit=false + Data.ArtificialInstallConfirmation=false + MemoryMap.InstallConfirmationNotSynced=false + MemoryMap.DcuId gt 0"/>
 			<Parameter 	name="RSSI" 						display="RSSI" 							log="true" 	interface="true" 	source="MemoryMap.RSSIStatus" 						conditional="MemoryMap.Shipbit=false + Data.ArtificialInstallConfirmation=false + MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter 	name="Deviation" 					display="Deviation" 					log="true" 	interface="false" 														conditional="MemoryMap.Shipbit=false + Data.ArtificialInstallConfirmation=false + MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter 	name="MTU_DateTime" 				display="MtuGmtDateTime" 				log="true" 	interface="false" 	source="MemoryMap.MtuDatetime" 						conditional="MemoryMap.Shipbit=false + MemoryMap.InstallConfirmationNotSynced=false"/>
@@ -295,7 +295,7 @@
 			<Parameter 	name="NodeDiscoveryFile" 			display="NodeDiscoveryFile" 			log="true" 	interface="true" 	source="Data.ProcessResultFileND"					conditional="MemoryMap.Shipbit=false + Data.ArtificialInstallConfirmation=false + MemoryMap.InstallConfirmationNotSynced=false + Mtu.MtuDemand=true + Mtu.NodeDiscovery=true"/>
 			<Parameter 	name="ArtificialTimeSync" 			display="ArtificialTimeSync" 			log="true" 	interface="true" 	source="Data.ArtificialInstallConfirmation"			conditional="MemoryMap.Shipbit=false + Data.ArtificialInstallConfirmation=true"/>
 			<Parameter 	name="InstallationConfirmationStatus" display="Installation" 				log="true" 	interface="true" 	source="MemoryMap.InstallConfirmationStatus"		conditional="MemoryMap.Shipbit=false"/>
-			<Parameter 	name="DcuId" 						display="DCU ID" 						log="true" 	interface="true"	source="Data.DcuId" 								conditional="MemoryMap.Shipbit=false + Data.ArtificialInstallConfirmation=false + MemoryMap.InstallConfirmationNotSynced=false + Data.DcuId gt 0"/>
+			<Parameter 	name="DcuId" 						display="DCU ID" 						log="true" 	interface="true"						 								conditional="MemoryMap.Shipbit=false + Data.ArtificialInstallConfirmation=false + MemoryMap.InstallConfirmationNotSynced=false + MemoryMap.DcuId gt 0"/>
 			<Parameter 	name="RSSI" 						display="RSSI" 							log="true" 	interface="true" 	source="MemoryMap.RSSIStatus"						conditional="MemoryMap.Shipbit=false + Data.ArtificialInstallConfirmation=false + MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter 	name="Deviation" 					display="Deviation" 					log="true" 	interface="false"														conditional="MemoryMap.Shipbit=false + Data.ArtificialInstallConfirmation=false + MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter 	name="MTU_DateTime" 				display="MtuGmtDateTime" 				log="true" 	interface="false" 	source="MemoryMap.MtuDatetime"						conditional="MemoryMap.Shipbit=false + MemoryMap.InstallConfirmationNotSynced=false"/>

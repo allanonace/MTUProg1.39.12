@@ -1891,6 +1891,10 @@ namespace MTUComm
                                 result = 1; // Ok
                         }
 
+                        // Special case for Data when the element is not registered
+                        else if ( condMembers[ 0 ].Equals ( IFACE_DATA )  )
+                            result = 1; // Ok
+
                         // Saves/cache result for the current condition/part of the sentence
                         if ( !isPort )
                              this.validatedConditions    .Add ( condition.CondFull, result );

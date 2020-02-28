@@ -743,14 +743,14 @@ namespace Xml
         {
             set
             {
-                if (!string.IsNullOrEmpty(value))
+                if ( ! string.IsNullOrEmpty ( value ) )
                 {
                     int v;
-                    if (int.TryParse(value, out v))
-                        this.DailyReadsDefault = v;
-                    else this.DailyReadsDefault = Global.MAX_DAILY_OFF;
+                    if ( int.TryParse ( value, out v ) )
+                         this.DailyReadsDefault = v;
+                    else this.DailyReadsDefault = Global.DEF_DAILY_READS;
                 }
-                else this.DailyReadsDefault = Global.MAX_DAILY_OFF;
+                else this.DailyReadsDefault = Global.DEF_DAILY_READS;
             }
             get { return this.DailyReadsDefault.ToString (); }
         }

@@ -535,7 +535,7 @@ namespace aclara_meters.view
                 // Default value
                 int twoway = ( this.global.FastMessageConfig ) ? 1 : 0; // Fast or Slow
                 
-                // Allow user to modify the default value
+                // Allow user to modify the default value and set the initial value reading the MTU
                 if ( this.global.IndividualFastMessageConfig )
                     twoway = ( await map.FastMessagingConfigMode.GetValue () ) ? 1 : 0;
 
@@ -3510,7 +3510,7 @@ namespace aclara_meters.view
                 // TRUE when the field has not correct length or is not selected yet
                 bool badAcn =                                             NoEqNum ( this.tbx_AccountNumber       .Text, global.AccountLength               );
                 bool badWor = this.div_WorkOrder            .IsVisible && NoELTxt ( this.tbx_WorkOrder           .Text, global.WorkOrderLength             );
-                bool badOMt = this.div_OldMtuId             .IsVisible && NoEqTxt ( this.tbx_OldMtuId            .Text, global.MtuIdLength                 );
+                bool badOMt = this.div_OldMtuId             .IsVisible && NoEqNum ( this.tbx_OldMtuId            .Text, global.MtuIdLength                 );
                 bool badOMs = this.div_OldMeterSerialNumber .IsVisible && NoELTxt ( this.tbx_OldMeterSerialNumber.Text, global.MeterNumberLength           );
                 bool badMsn = this.div_MeterSerialNumber    .IsVisible && NoELTxt ( this.tbx_MeterSerialNumber   .Text, global.MeterNumberLength           );
                 bool badSnr = this.div_SnapReads            .IsVisible && NoELNum ( this.lb_SnapReads_Num        .Text, (int)this.sld_SnapReads .Maximum   ) && snapReadsStatus;
