@@ -601,11 +601,15 @@ namespace MTUComm
         private bool Validate_TurnOff (
             out string textError )
         {
+            // NOTE: Konstantin "Turn Off Action recording is missing. If the user Turn Off MTU in ship mode the MTU Programmer
+            // NOTE: reports that MTU is already turned off. It also needs to record the action and indicate that MTU is turned off"
+            /*
             if ( Data.Get.MtuBasicInfo.Shipbit )
             {
                 textError = "The MTU is already turned Off";
                 return false;
             }
+            */
 
             textError = string.Empty;
             return true;
@@ -783,6 +787,9 @@ namespace MTUComm
             
             #endregion
 
+            // The Check___WithDef methods, if the parameter is present set the specified value,
+            // but if the value is an empty string or the parameter is not present, use the default value
+
             switch ( actionType )
             {
                 #region No installation
@@ -836,7 +843,7 @@ namespace MTUComm
                          this.mtu.FastMessageConfig )
                         CheckIfNotPresentWithDef (
                             ParameterType.Fast2Way,
-                            global.Fast2Way.ToString () );
+                            global.FastMessageConfig.ToString () );
                     
                     // The MTU can perform an Install Confirmation during the installations
                     if ( this.global.TimeToSync &&
@@ -872,25 +879,28 @@ namespace MTUComm
                                 ParameterType.OldMtuId, 0 );
 
                         // Read Interval
+                        // The default value is only used if the parameter is not present in
+                        // the script file or if the associated Individual_ parameter is false
                         // NOTE: Is general data/not for the first port, but not present if the RDD is on port 1
-                        // Calculates the default value to use in case the parameter is not present in the script
-                        string valueReadInterval = "1 Hour";
-                        ScriptAux.PrepareReadIntervalList ( mtu, ref valueReadInterval );
+                        string defReadInterval = "1 Hour";
+                        ScriptAux.PrepareReadIntervalList ( mtu, ref defReadInterval ); // Always returns "1 Hour"
                         CheckIfNotPresentWithDef (
                             ParameterType.ReadInterval,
-                            valueReadInterval );
+                            defReadInterval );
 
                         // Span Reads / Daily Reads
+                        // The default value is only used if the parameter is not present in
+                        // the script file or if the associated Individual_ parameter is false
                         // NOTE: Is general data/not for the first port, but not present if the RDD is on port 1
                         if ( ! this.mtu.IsFamily33xx && 
                              this.global.AllowDailyReads &&
                              this.mtu.DailyReads )
                         {
-                            string valueDailyReads = Global.DEF_DAILY_READS.ToString ();
-                            ScriptAux.PrepareDailyReadValue ( mtu, ref valueDailyReads );
+                            string defDailyReads = Global.DEF_DAILY_READS.ToString ();
+                            ScriptAux.PrepareDailyReadValue ( mtu, ref defDailyReads );
                             CheckIfNotPresentWithDef (
                                 ParameterType.SnapRead,
-                                valueDailyReads );
+                                defDailyReads );
                         }
 
                         // ( New ) Meter Serial Number
@@ -1647,9 +1657,6 @@ namespace MTUComm
                     // Not necessary to perform an artificial process when the IC has worked
                     Data.SetTemp ( "ArtificialInstallConfirmation", false );
                 }
-
-                int DcuId = await map.DcuId.GetValueFromMtu ( false, true );
-                Data.SetTemp ( "DcuId", DcuId );
             }
             catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
@@ -2140,7 +2147,7 @@ namespace MTUComm
 
             await Task.Delay ( WAIT_BTW_ARTIFICIAL );
 
-            await map.FastMessagingConfigMode.SetValueToMtu ( global.FastMessageConfig );
+            await map.FastMessagingConfigMode.SetValueToMtu ( this.global.FastMessageConfig );
         }
 
         #endregion
@@ -2237,7 +2244,7 @@ namespace MTUComm
                     string rddPosition = APP_FIELD.RDDPosition.ToString ();
 
                     // Use the id specified in the Set method ( TrySetMember )
-                    Data.Get[ rddPosition ] = Data.Get[ rddPosition ].ToUpper ();
+                    Data.Get.RDDPosition = Data.Get[ rddPosition ].ToUpper ();
 
                     // Convert from RDD command to RDD desired status
                     RDDValveStatus rddValveStatus = RDDValveStatus.UNKNOWN;
@@ -2757,8 +2764,8 @@ namespace MTUComm
 
                 #region Check Meter for Encoder
 
-                Meter selectedMeter  = null;
-                Meter selectedMeter2 = null;
+                Meter selectedMeter  = ( Meter )Data.Get[ APP_FIELD.Meter  .ToString () ];
+                Meter selectedMeter2 = ( Meter )Data.Get[ APP_FIELD.Meter_2.ToString () ];
 
                 if ( this.mtu.Port1.IsForEncoderOrEcoder ||
                      usePort2 &&
@@ -2771,8 +2778,6 @@ namespace MTUComm
                     // Check if selected Meter is supported for current MTU
                     if ( this.mtu.Port1.IsForEncoderOrEcoder )
                     {
-                        selectedMeter = ( Meter )Data.Get[ APP_FIELD.Meter.ToString () ];
-
                         // Updates the port information without fear, since it was only used to fill the meter list
                         this.mtu.Port1.MeterProtocol   = selectedMeter.EncoderType;
                         this.mtu.Port1.MeterLiveDigits = selectedMeter.LiveDigits;
@@ -2782,8 +2787,6 @@ namespace MTUComm
                     if ( usePort2 &&
                          this.mtu.Port2.IsForEncoderOrEcoder )
                     {
-                        selectedMeter2 = ( Meter )Data.Get[ APP_FIELD.Meter_2.ToString () ];
-
                         this.mtu.Port2.MeterProtocol   = selectedMeter2.EncoderType;
                         this.mtu.Port2.MeterLiveDigits = selectedMeter2.LiveDigits;
                         await this.CheckSelectedEncoderMeter ( 2 );
@@ -2807,7 +2810,7 @@ namespace MTUComm
                 #region Account Number
 
                 // Uses default value fill to zeros if parameter is missing in scripting
-                // Only first 12 numeric characters are recorded in MTU memory
+                // Only first 12 characters are recorded in MTU memory
                 // F1 electric can have 20 alphanumeric characters but in the activity log should be written all characters
                 map.P1MeterId = Utils.GetValueOrDefault<ulong> ( Data.Get[ APP_FIELD.AccountNumber.ToString () ], 12 );
                 if ( usePort2 )
@@ -2870,35 +2873,28 @@ namespace MTUComm
                 #region Snap Reads ( prev. Daily Reads )
 
                 if ( noRddOrNotIn1 &&
-                     ! this.mtu.IsFamily33xx )
+                     ! this.mtu.IsFamily33xx &&
+                     this.global.AllowDailyReads &&
+                     this.mtu.DailyReads )
                 {
-                    // Configure or disable
-                    bool used      = this.global.AllowDailyReads && this.mtu.DailyReads;
-                    int  snapReads = ( used ) ? int.Parse ( Data.Get[ APP_FIELD.SnapReads.ToString () ] ) : Global.MAX_DAILY_OFF;
+                    int snapReads = int.Parse ( Data.Get[ APP_FIELD.SnapReads.ToString () ] );
 
-                    // DailyReads is not disabled
-                    if ( snapReads != Global.MAX_DAILY_OFF )
-                    {
-                        // In the MTU the value is written in UTC but when
-                        // reading the value must be converted to local time
-                        // e.g. Cleveland UTC offset -5
-                        //      Value 6 -> To UTC  : 6 + -5 = 6 - 5 = 1
-                        //                 To Local: 1 - -5 = 1 + 5 = 6
-                        // e.g. Spain UTC offset +1
-                        //      Value 6 -> To UTC  : 6 + 1 = 7
-                        //                 To Local: 7 - 1 = 6
-                        snapReads += Utils.GetUtcOffset (); // Local to UTC
+                    // In the MTU the value is written in UTC but when
+                    // reading the value must be converted to local time
+                    // e.g. Cleveland UTC offset -5
+                    //      Value 6 -> To UTC  : 6 + -5 = 6 - 5 = 1
+                    //                 To Local: 1 - -5 = 1 + 5 = 6
+                    // e.g. Spain UTC offset +1
+                    //      Value 6 -> To UTC  : 6 + 1 = 7
+                    //                 To Local: 7 - 1 = 6
+                    snapReads += Utils.GetUtcOffset (); // Local to UTC
 
-                        // Maintain value within range [0,23]
-                        // Down: -2 -> -2 + 24 = 22
-                        // Up  : 25 -> 25 - 24 =  1
-                        if      ( snapReads <  0 ) snapReads += 24;
-                        else if ( snapReads > 23 ) snapReads -= 24;
-                    }
-                    // DailyReads is disabled
-                    else Data.Set ( APP_FIELD.SnapReads.ToString (), snapReads ); // Off = 255
+                    // Maintain value within range [0,23]
+                    // Down: -2 -> -2 + 24 = 22
+                    // Up  : 25 -> 25 - 24 =  1
+                    if      ( snapReads <  0 ) snapReads += 24;
+                    else if ( snapReads > 23 ) snapReads -= 24;
 
-                    // When disabled, both local ( Data ) and UTC ( MTU ) have the same value ( 255 )
                     map.DailyGMTHourRead = snapReads;
                 }
 

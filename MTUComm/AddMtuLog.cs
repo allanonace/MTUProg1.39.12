@@ -506,8 +506,9 @@ namespace MTUComm
             if ( noRddOrNotIn1 &&
                  ! this.mtu.IsFamily33xx )
             {
-                string dailyReadsLocal = this.GetDataValue ( APP_FIELD.SnapReads ); // Local or disabled ( 255 )
-                int    dailyReadsUTC   = await map.DailyGMTHourRead.GetValue ();    // UTC or disabled
+                // FIXME: EN INTERACTIVO APP_FIELD.SNAPREADS PARECE SER UN ENTERO PERO EN SCRIPTING?
+                string dailyReadsLocal = this.GetDataValue ( APP_FIELD.SnapReads ).ToString (); // Local
+                int    dailyReadsUTC   = await map.DailyGMTHourRead.GetValue ();    // UTC
 
                 // Value written in the MTU, in UTC time
                 Logger.AddParameter ( this.addMtuAction,
