@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Xml
 {
-    public class MtuAux
+    public static class MtuAux
     {
         public static bool GetPortTypes (
             string portType, // From the mtu.xml

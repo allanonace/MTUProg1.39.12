@@ -964,7 +964,7 @@ namespace MTUComm
 
                 // Write result in the activity log
                 if ( ! Data.Get.UNIT_TEST )
-                this.lastLogCreated = logger.ReadMTU ( this, result, args.Mtu );
+                    this.lastLogCreated = logger.ReadMTU ( this, result, args.Mtu );
 
                 #if DEBUG
                 timer.Stop ();

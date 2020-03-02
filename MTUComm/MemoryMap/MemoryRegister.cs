@@ -617,7 +617,7 @@ namespace MTUComm.MemoryMap
                     // Is not own exception
                     if ( ! Errors.IsOwnException ( e ) )
                          throw new MemoryRegisterSetValueException ();
-                    else throw e;
+                    else throw;
                 }
             }
             // Register is readonly

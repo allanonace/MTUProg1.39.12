@@ -8,7 +8,7 @@ namespace Library
     public class PageLinker
     {
         private const string BTN_OK     = "Ok";
-        private const string BTN_CANCEL = "Cancel";
+      
         private const string ID_ERROR   = "\nError ID: ";
         private const string ID_INFO    = "\nID: ";
     

@@ -135,11 +135,17 @@ namespace aclara_meters
 
                                         if (file.Name.Contains("jpg"))
                                             sName = file.Name.Substring(0, file.Name.Length - 4) + "-" + sTick + ".jpg";
-                                        else if(file.Name.ToLower().Contains("mtuid"))
+                                        else if (file.Name.ToLower().Contains("mtuid"))
                                             sName = file.Name.Substring(0, file.Name.Length - 4) + "-" + sTick + ".xml";
                                         else
-                                            sName = file.Name.Substring(0, 10) + "-" + sTick + "Log.xml";
-                                       
+                                        {
+                                            string dayfix = file.Name.ToLower().Substring(0, 10);
+                                            bool LogDateOk = DateTime.TryParseExact(dayfix, "MMddyyyyHH", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime date);
+                                            if (LogDateOk)  // normal activitu log
+                                                sName = file.Name.Substring(0, 10) + "-" + sTick + "Log.xml";
+                                            else   // script log
+                                                sName = file.Name.Substring(0, file.Name.Length - 4) + "-" + sTick + ".xml";
+                                        }
                                         remotePath = Path.Combine(remotePath, sName);
                                         sftp.UploadFile ( fileStream, remotePath, null );
                                     }

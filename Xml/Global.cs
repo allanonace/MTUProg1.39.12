@@ -634,7 +634,7 @@ namespace Xml
 
             // LExI communication attempts
             this.LexiAttempts                 = DEF_LEXI_ATTEMPTS;
-            this.LexiTimeout                  = DEF_LEXI_TIMEOUT;
+            this.LexiTimeout                  = DEF_LEXI_TIMEOUT * 1000;  // to milliseconds
         
             #region Collections
         

@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace MTUComm
 {
-    public class InterfaceAux
+    public static class InterfaceAux
     {
         private static Interface iInfo;
 

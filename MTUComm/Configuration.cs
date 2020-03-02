@@ -59,12 +59,15 @@ namespace MTUComm
         }
 
         public static Configuration GetInstance (
+            bool Force= false,
             string path = "" )
         {
-            if ( ! Singleton.Has<Configuration> () )
+            if ( ! Singleton.Has<Configuration> () || Force )
             {
-                Singleton.Set = new Configuration ( path );
-                ( ( Configuration )Singleton.Get.Configuration ).Initialize ();
+                Configuration config = new Configuration ( path );
+                config.Initialize ();
+
+                Singleton.Set = config;
 
                 // NOTE: It is not possible to use Mobile static property through an instance
                 //Singleton.Set = new Mobile ();
@@ -91,12 +94,12 @@ namespace MTUComm
             catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
             {
                 if ( Errors.IsOwnException ( e ) )
-                     throw e;
+                     throw;
                 else throw new ConfigFilesCorruptedException ();
             }
         }
 
-        private static void LoadAndVerifyXMLs ()
+        private void LoadAndVerifyXMLs ()
         {
             string configPath = Mobile.ConfigPath;
             MtuTypes        tempMtuTypes;
@@ -145,21 +148,20 @@ namespace MTUComm
                     DateTime.Today ) < 0 )
                 throw new DeviceMinDateAllowedException ();
 
-            Configuration config = Singleton.Get.Configuration;
-
+                     
             // All configuration files are OK
-            config.MtuTypes   = tempMtuTypes;
-            config.MeterTypes = tempMeterTypes;
-            config.Global     = tempGlobal;
-            config.Alarms     = tempAlarms;
-            config.Demands    = tempDemands;
-            config.Users      = tempUsers;
-            config.Interfaces = tempInterface;
-            config.Debug      = tempDebug;
+            this.MtuTypes   = tempMtuTypes;
+            this.MeterTypes = tempMeterTypes;
+            this.Global     = tempGlobal;
+            this.Alarms     = tempAlarms;
+            this.Demands    = tempDemands;
+            this.Users      = tempUsers;
+            this.Interfaces = tempInterface;
+            this.Debug      = tempDebug;
 
             // Set ammounts ( attempts and timeout ) to configure the LExI communication
-            Lexi.Lexi.LexiMaxAttempts = config.Global.LexiAttempts;
-            Lexi.Lexi.LexiMaxTimeout  = config.Global.LexiTimeout;
+            Lexi.Lexi.LexiMaxAttempts = this.Global.LexiAttempts;
+            Lexi.Lexi.LexiMaxTimeout  = this.Global.LexiTimeout;
         }
 
         private static void PreloadHardwareInfo (

@@ -19,6 +19,8 @@ namespace Library
 
         #endregion
 
+        protected Validations() { }
+
         #region Tests
 
         public static bool IsNumeric (

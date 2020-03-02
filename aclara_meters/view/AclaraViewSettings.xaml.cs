@@ -621,8 +621,44 @@ namespace aclara_meters.view
             {
                 Waiting ( true );
 
-                await DownloadConfigFiles ();
+                if (await DownloadConfigFiles())
+                {
+                    try
+                    {
+                        // Verify the configuration files and preload important information for the hardware
+                        // [ Configuration.cs ] ConfigurationFilesNotFoundException
+                        // [ Configuration.cs ] ConfigurationFilesCorruptedException
+                        // [ Configuration.cs ] DeviceMinDateAllowedException
+                        Configuration config = Configuration.GetInstance(true);
+#if DEBUG
 
+                        // Force some error cases in debug mode
+                        DebugOptions debug = config.Debug;
+                        if (debug != null)
+                        {
+                            if (debug.ForceErrorConfig_Settings_Date)
+                                throw new DeviceMinDateAllowedException();
+                            else if (debug.ForceErrorConfig_Settings_Files)
+                                throw new Exception();
+                        }
+
+#endif
+
+                        await SecureStorage.SetAsync(VAR_VERSION, NewConfigVersion);
+                        await SecureStorage.SetAsync(VAR_DATECHECK, DateTime.Today.ToShortDateString());
+
+                        await DisplayAlert("Attention", "The app will close to apply the new configuration", "OK");
+                        System.Diagnostics.Process.GetCurrentProcess().Kill();
+                    }
+                    catch (Exception ex) when (Data.SaveIfDotNetAndContinue(ex))
+                    {
+                        GenericUtilsClass.RestoreConfigFiles();
+
+                        if (ex is DeviceMinDateAllowedException)
+                            base.ShowAlert(new DeviceMinDateAllowedSettingsException());
+                        else base.ShowAlert(new ConfigFilesCorruptedSettingsException());
+                    }
+                }
                 Waiting ( false );
             }
         }
@@ -1018,7 +1054,7 @@ namespace aclara_meters.view
         public async Task<bool> DownloadConfigFiles ()
         {
             GenericUtilsClass.BackUpConfigFiles ();
-
+            
             if (Mobile.ConfData.HasIntune)
             {
                 if (Mobile.IsNetAvailable())
@@ -1041,6 +1077,8 @@ namespace aclara_meters.view
                 if (Mobile.IsNetAvailable())
                 {
                     string result = string.Empty;
+                    string currentVersion = await SecureStorage.GetAsync(VAR_VERSION);
+
                     TaskCompletionSource<string> taskSemaphoreDownload = new TaskCompletionSource<string>();
 
                     await Task.Run(async () =>
@@ -1061,8 +1099,9 @@ namespace aclara_meters.view
                                     // [ Configuration.cs ] ConfigurationFilesNotFoundException
                                     // [ Configuration.cs ] ConfigurationFilesCorruptedException
                                     // [ Configuration.cs ] DeviceMinDateAllowedException
-                                    Configuration config = Singleton.Get.Configuration;
+                                    Configuration config = Configuration.GetInstance(true);
 
+                                    
                                     #if DEBUG
 
                                     // Force some error cases in debug mode
@@ -1076,8 +1115,7 @@ namespace aclara_meters.view
                                     }
 
                                     #endif
-
-                                    await SecureStorage.SetAsync ( VAR_VERSION, GenericUtilsClass.CheckFTPConfigVersion () );
+                                                                       
                                     await SecureStorage.SetAsync ( VAR_DATECHECK, DateTime.Today.ToShortDateString () );
 
                                     await DisplayAlert ( "Attention", "The app will close to apply the new configuration", "OK" );
@@ -1086,7 +1124,7 @@ namespace aclara_meters.view
                                 catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
                                 {
                                     GenericUtilsClass.RestoreConfigFiles ();
-                                    
+                                    await SecureStorage.SetAsync(VAR_VERSION,currentVersion);
                                     if ( e is DeviceMinDateAllowedException )
                                          base.ShowAlert ( new DeviceMinDateAllowedSettingsException () );
                                     else base.ShowAlert ( new ConfigFilesCorruptedSettingsException () );
