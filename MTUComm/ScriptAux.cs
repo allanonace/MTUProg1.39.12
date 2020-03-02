@@ -131,6 +131,7 @@ namespace MTUComm
                 { ParameterType.SnapRead,             APP_FIELD.SnapReads       },
                 { ParameterType.ReadInterval,         APP_FIELD.ReadInterval    },
                 { ParameterType.Fast2Way,             APP_FIELD.TwoWay          },
+                { ParameterType.TwoWay,               APP_FIELD.TwoWay          },
                 { ParameterType.Alarm,                APP_FIELD.Alarm           },
                 { ParameterType.ForceTimeSync,        APP_FIELD.ForceTimeSync   },
                 { ParameterType.Custom,               APP_FIELD.Optional        },

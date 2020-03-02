@@ -504,9 +504,9 @@ namespace MTUComm
 
             // Not used with single port MTUs with RDD or family 33xx
             if ( noRddOrNotIn1 &&
-                 ! this.mtu.IsFamily33xx )
+                 ! this.mtu.IsFamily33xx &&
+                 DataContains ( APP_FIELD.SnapReads ) )
             {
-                // FIXME: EN INTERACTIVO APP_FIELD.SNAPREADS PARECE SER UN ENTERO PERO EN SCRIPTING?
                 string dailyReadsLocal = this.GetDataValue ( APP_FIELD.SnapReads ).ToString (); // Local
                 int    dailyReadsUTC   = await map.DailyGMTHourRead.GetValue ();    // UTC
 

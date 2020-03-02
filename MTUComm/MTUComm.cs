@@ -766,7 +766,7 @@ namespace MTUComm
 
                     return contains;
                 });
-
+            
             dynamic CheckIfNotPresentWithDef = new Func<ParameterType,string,bool> (
                 ( paramType, defValue ) =>
                 {
@@ -865,8 +865,18 @@ namespace MTUComm
 
                     // Work Order / Field Order
                     if ( this.global.WorkOrderRecording )
-                        CheckIfNotPresentInPort (
-                            ParameterType.WorkOrder, 0 );
+                    {
+                        // Share the value of the second port parameter
+                        Parameter paramP2 = action.GetParameterByTag ( ParameterType.WorkOrder.ToString (), 1 );
+
+                        if ( paramP2 != null )
+                            CheckIfNotPresentInPortWithDef (
+                                ParameterType.WorkOrder, 0,
+                                paramP2.Value.ToString () );
+                        else
+                            CheckIfNotPresentInPort (
+                                ParameterType.WorkOrder, 0 );
+                    }
 
                     // No RDD in Port 1
                     if ( ! rddIn1 )
@@ -959,8 +969,18 @@ namespace MTUComm
 
                         // Work Order / Field Order
                         if ( this.global.WorkOrderRecording )
-                            CheckIfNotPresentInPort (
-                                ParameterType.WorkOrder, 1 );
+                        {
+                            // Share the value of the first port parameter
+                            Parameter paramP1 = action.GetParameterByTag ( ParameterType.WorkOrder.ToString (), 0 );
+
+                            if ( paramP1 != null )
+                                CheckIfNotPresentInPortWithDef (
+                                    ParameterType.WorkOrder, 1,
+                                    paramP1.Value.ToString () );
+                            else
+                                CheckIfNotPresentInPort (
+                                    ParameterType.WorkOrder, 1 );
+                        }
 
                         // No RDD in Port 2
                         if ( ! rddIn2 )
