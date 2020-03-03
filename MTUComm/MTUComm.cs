@@ -867,7 +867,7 @@ namespace MTUComm
                     if ( this.global.WorkOrderRecording )
                     {
                         // Share the value of the second port parameter
-                        Parameter paramP2 = action.GetParameterByTag ( ParameterType.WorkOrder.ToString (), 1 );
+                        Parameter paramP2 = action.GetParameterByType ( ParameterType.WorkOrder, 1 );
 
                         if ( paramP2 != null )
                             CheckIfNotPresentInPortWithDef (
@@ -971,7 +971,7 @@ namespace MTUComm
                         if ( this.global.WorkOrderRecording )
                         {
                             // Share the value of the first port parameter
-                            Parameter paramP1 = action.GetParameterByTag ( ParameterType.WorkOrder.ToString (), 0 );
+                            Parameter paramP1 = action.GetParameterByType ( ParameterType.WorkOrder, 0 );
 
                             if ( paramP1 != null )
                                 CheckIfNotPresentInPortWithDef (
@@ -3243,8 +3243,9 @@ namespace MTUComm
                 #region RFCheck ( prev. Install Confirmation )
 
                 // If the script does not contain ForceTimeSync, the parameter is set using global
-                bool forceRfcheck = Data.Contains ( APP_FIELD.ForceTimeSync.ToString () ) &&
-                                    bool.Parse ( Data.Get[ APP_FIELD.ForceTimeSync.ToString () ] );
+                bool forceRfcheck = ( Data.Contains ( APP_FIELD.ForceTimeSync.ToString () ) ) ?
+                                        bool.Parse ( Data.Get[ APP_FIELD.ForceTimeSync.ToString () ] ) :
+                                        this.global.ForceTimeSync;
 
                 // After TurnOn has to be performed an InstallConfirmation
                 // if certain tags/registers are validated/true

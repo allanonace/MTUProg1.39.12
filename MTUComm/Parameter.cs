@@ -134,43 +134,45 @@ namespace MTUComm
             public String action_tag;
             public String action_display;
 
-            public ParameterDefine(Boolean present, Boolean generates_log, String tag, String display)
+            public ParameterDefine (
+                Boolean present,
+                Boolean generates_log,
+                String tag,
+                String display )
             {
                 memory_present = present;
                 log_generation = generates_log;
-                action_tag = tag;
+                action_tag     = tag;
                 action_display = display;
             }
         };
 
-        private Dictionary<ParameterType, ParameterDefine> paremeter_defines = new Dictionary<ParameterType, ParameterDefine>()
+        private Dictionary<ParameterType,ParameterDefine> paremeter_defines =
+            new Dictionary<ParameterType,ParameterDefine> ()
         {
-            {ParameterType.ActivityLogId, new ParameterDefine(true, true, "ActivityLogId", "") },
-            {ParameterType.MeterType, new ParameterDefine(true, true, "Port{0}MeterType", "Meter Type")},
-            {ParameterType.UnitOfMeasure, new ParameterDefine(true, true, "UnitOfMeasure", "")},
-            //{ParameterType.Port2Disabled, new ParameterDefine(true, true, "Port2Disabled", "")},
-            {ParameterType.AccountNumber, new ParameterDefine(true, true, "Port{0}AccountNumber", "Service Pt. ID")},
-            //{ParameterType.ProvidingHandFactor, new ParameterDefine(true, true, "ProvidingHandFactor", "")},
-            {ParameterType.ReadInterval, new ParameterDefine(true, true, "ReadInterval", "Read Interval")},
-            {ParameterType.ForceTimeSync, new ParameterDefine(true, true, "ForceTimeSync", "")},
-            {ParameterType.WorkOrder, new ParameterDefine(true, true, "WorkOrder", "Field Order")},
-            //{ParameterType.LiveDigits, new ParameterDefine(true, true, "LiveDigits", "")},
-            //{ParameterType.TempReadInterval, new ParameterDefine(true, true, "TempReadInterval", "")},
-            {ParameterType.Alarm, new ParameterDefine(true, true, "Alarm", "")},
-            {ParameterType.MeterSerialNumber, new ParameterDefine(true, true, "MeterSerialNumber", "Meter Number")},
-            {ParameterType.NumberOfDials, new ParameterDefine(true, true, "NumberOfDials", "")},
-            //{ParameterType.TempReadDays, new ParameterDefine(true, true, "TempReadDays", "")},
-            {ParameterType.MeterReading, new ParameterDefine(true, true, "MeterReading", "Meter Reading")},
-            {ParameterType.DriveDialSize, new ParameterDefine(true, true, "DriveDialSize", "")},
-            {ParameterType.SnapRead, new ParameterDefine(true, true, "SnapRead", "")},
-            {ParameterType.OldMtuId, new ParameterDefine(true, true, "OldMtuId", "Old MTU ID")},
-            {ParameterType.OldMeterSerialNumber, new ParameterDefine(true, true, "Port{0}OldMeterSerialNumber", "Old Meter Serial Number")},
-            {ParameterType.NewMeterSerialNumber, new ParameterDefine(true, true, "Port{0}NewMeterSerialNumber", "New Meter Serial Number")},
-            {ParameterType.OldMeterReading, new ParameterDefine(true, true, "Port{0}OldMeterReading", "Old Meter Reading")},
-            {ParameterType.NewMeterReading, new ParameterDefine(true, true, "Port{0}NewMeterReading", "")},
-            //{ParameterType.DaysOfRead, new ParameterDefine(true, true, "DaysOfRead", "DaysOfRead")},
-            {ParameterType.Custom, new ParameterDefine(true, true, "{1}", "{1}")},
-            {ParameterType.TwoWay, new ParameterDefine(true, true, "TwoWay", "Two Way")}
+            // Memory present, log generation, action tag, action display
+            { ParameterType.ActivityLogId,           new ParameterDefine ( true, true, "ActivityLogId",                 "" )},
+            { ParameterType.ReadInterval,            new ParameterDefine ( true, true, "ReadInterval",                  "Read Interval" )},
+            { ParameterType.ForceTimeSync,           new ParameterDefine ( true, true, "ForceTimeSync",                 "" )},
+            { ParameterType.Alarm,                   new ParameterDefine ( true, true, "Alarm",                         "" )},
+            { ParameterType.SnapRead,                new ParameterDefine ( true, true, "SnapRead",                      "" )},
+            { ParameterType.OldMtuId,                new ParameterDefine ( true, true, "OldMtuId",                      "Old MTU ID" )},
+            { ParameterType.DaysOfRead,              new ParameterDefine ( true, true, "DaysOfRead",                    "DaysOfRead" )},
+            { ParameterType.TwoWay,                  new ParameterDefine ( true, true, "TwoWay",                        "Two Way" )},
+            //{ ParameterType.TwoWay,                  new ParameterDefine ( true, true, "Fast2Way",                      "Two Way" )},
+            { ParameterType.MeterType,               new ParameterDefine ( true, true, "Port{0}MeterType",              "Meter Type" )},
+            { ParameterType.NumberOfDials,           new ParameterDefine ( true, true, "Port{0}NumberOfDials",          "" )},
+            { ParameterType.DriveDialSize,           new ParameterDefine ( true, true, "Port{0}DriveDialSize",          "" )},
+            { ParameterType.UnitOfMeasure,           new ParameterDefine ( true, true, "Port{0}UnitOfMeasure",          "" )},
+            { ParameterType.AccountNumber,           new ParameterDefine ( true, true, "Port{0}AccountNumber",          "Service Pt. ID" )},
+            { ParameterType.WorkOrder,               new ParameterDefine ( true, true, "Port{0}WorkOrder",              "Field Order" )},
+            { ParameterType.MeterSerialNumber,       new ParameterDefine ( true, true, "Port{0}MeterSerialNumber",      "Meter Number" )},
+            { ParameterType.NewMeterSerialNumber,    new ParameterDefine ( true, true, "Port{0}NewMeterSerialNumber",   "New Meter Serial Number" )},
+            { ParameterType.OldMeterSerialNumber,    new ParameterDefine ( true, true, "Port{0}OldMeterSerialNumber",   "Old Meter Serial Number" )},
+            { ParameterType.MeterReading,            new ParameterDefine ( true, true, "Port{0}MeterReading",           "Meter Reading" )},
+            { ParameterType.NewMeterReading,         new ParameterDefine ( true, true, "Port{0}NewMeterReading",        "" )},
+            { ParameterType.OldMeterReading,         new ParameterDefine ( true, true, "Port{0}OldMeterReading",        "Old Meter Reading" )},
+            { ParameterType.Custom,                  new ParameterDefine ( true, true, "{1}",                           "{1}" )}
         };
 
         private Boolean has_port = false;
@@ -249,11 +251,6 @@ namespace MTUComm
             }
         }
 
-        public Boolean isInMemoryMap()
-        {
-            return paremeter_defines[mParameterType].memory_present;
-        }
-
         /// <summary>
         /// Modifies the port associated to the parameter.
         /// </summary>
@@ -293,11 +290,6 @@ namespace MTUComm
             }
 
             return null;
-        }
-
-        public Boolean doesGenerateLog()
-        {
-            return paremeter_defines[mParameterType].log_generation;
         }
 
         /// <summary>

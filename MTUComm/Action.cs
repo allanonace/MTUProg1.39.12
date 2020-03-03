@@ -717,6 +717,14 @@ namespace MTUComm
             return scriptParameters.Find(x => x.getLogTag().Equals(tag) && ( port == -1 || x.Port == port ) );
         }
 
+        public Parameter GetParameterByType (
+            ParameterType type,
+            int portIndex = -1 )
+        {
+            return scriptParameters.Find ( p => p.Type == type &&
+                                           ( portIndex == -1 || p.Port == portIndex ) );
+        }
+
         #endregion
 
         #region Actions

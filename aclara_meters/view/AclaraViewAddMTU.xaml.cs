@@ -3560,7 +3560,8 @@ namespace aclara_meters.view
                 if ( badAcn || badWor || badOMs || badOMw || badOMr ||
                      badRpc || badMsn || badMre || badSnr || badRin ||
                      badMty || badTwo || badAlr || badDmd || badDAc ||
-                     badDWr || badDOs || badDOr || badDMs || badDMr )
+                     badDWr || badDOs || badDOr || badDMs || badDMr ||
+                     badOMt )
                 {
                     msgError = FILL_ERROR.Replace ( "_", msgError );
                     return false;
@@ -3681,8 +3682,8 @@ namespace aclara_meters.view
                 else if ( ( badDMr &= ! noDMr ) ) msgError = this.lb_MeterReading_2.Text + DUAL_ERROR_V;
                 
                 if ( badAcn || badWor || badOMs || badOMw || badOMr ||
-                        badRpc || badMsn || badMre || badMty || badDAc ||
-                        badDWr || badDOs || badDOr || badDMs || badDMr )
+                     badRpc || badMsn || badMre || badMty || badDAc ||
+                     badDWr || badDOs || badDOr || badDMs || badDMr )
                 {
                     msgError = FILL_ERROR.Replace ( "_", msgError );
                     return false;
