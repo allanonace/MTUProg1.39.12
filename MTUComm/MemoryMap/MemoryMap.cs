@@ -798,7 +798,7 @@ namespace MTUComm.MemoryMap
                 dynamic register = modifiedRegisters[ i ];
                 string  name     = register.id;
                 
-                Utils.Print ( "Check MTU write: " + name +
+                Utils.PrintDeep ( "Check MTU write: " + name +
                     " [ Size: " + register.size +
                     ", SizeGet: " + register.sizeGet +
                     ", Other contains: " + otherMap.ContainsMember ( name ) + " ]" );

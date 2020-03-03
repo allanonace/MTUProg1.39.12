@@ -284,8 +284,10 @@ namespace MTUComm
                     autoMeterPort1 = true;
 
                     int nod, dds;
-                    bool ok = int.TryParse ( data[ APP_FIELD.NumberOfDials ].Value, out nod );
-                    ok     &= int.TryParse ( data[ APP_FIELD.DriveDialSize ].Value, out dds );
+                    string nodStr = data[ APP_FIELD.NumberOfDials ].Value;
+                    string ddsStr = data[ APP_FIELD.DriveDialSize ].Value;
+                    bool ok = int.TryParse ( nodStr, out nod );
+                    ok     &= int.TryParse ( ddsStr, out dds );
                 
                     if ( ok )
                     {
@@ -310,8 +312,11 @@ namespace MTUComm
             // Get the MTU with the selected MTU ID
             else
             {
-                int id;
-                bool ok = int.TryParse ( data[ APP_FIELD.Meter ].Value, out id );
+                // NOTE: Compiling in Windows it is possible to use "int.TryParse ( data[ APP_FIELD.Meter ].Value, out int id )",
+                // NOTE: but it seems that the CLang compiler used in Unix does not support any dynamic value as first argument,
+                // NOTE: because it is also not allowed to use "var idStr = data[ APP_FIELD.Meter ].Value; int.TryParse ( idStr, out int id )"
+                string idStr = data[ APP_FIELD.Meter ].Value;
+                bool ok = int.TryParse ( idStr, out int id );
 
                 if ( ok )
                 {
@@ -362,8 +367,10 @@ namespace MTUComm
                         autoMeterPort2 = true;
 
                         int nod, dds;
-                        bool ok = int.TryParse ( data[ APP_FIELD.NumberOfDials_2 ].Value, out nod );
-                        ok     &= int.TryParse ( data[ APP_FIELD.DriveDialSize_2 ].Value, out dds );
+                        string nodStr = data[ APP_FIELD.NumberOfDials_2 ].Value;
+                        string ddsStr = data[ APP_FIELD.DriveDialSize_2 ].Value;
+                        bool ok = int.TryParse ( nodStr, out nod );
+                        ok     &= int.TryParse ( ddsStr, out dds );
                     
                         if ( ok )
                         {
@@ -388,8 +395,8 @@ namespace MTUComm
                 // Get the MTU with the selected MTU ID
                 else
                 {
-                    int id;
-                    bool ok = int.TryParse ( data[ APP_FIELD.Meter_2 ].Value, out id );
+                    string idStr = data[ APP_FIELD.Meter_2 ].Value;
+                    bool ok = int.TryParse ( idStr, out int id );
 
                     if ( ok )
                     {
@@ -451,7 +458,7 @@ namespace MTUComm
             bool          rddIn1         = mtu.Port1.IsSetFlow;
             bool          rddIn2         = mtu.TwoPorts && mtu.Port2.IsSetFlow;
             string        valueStr       = string.Empty;
-            string        valueDyn       = null;
+            dynamic       valueDyn       = null;
             string        msgDescription = string.Empty;
             StringBuilder msgError       = new StringBuilder ();
             StringBuilder msgErrorPopup  = new StringBuilder ();
@@ -469,7 +476,9 @@ namespace MTUComm
                 bool rddInThisPort =   paramPort1 && rddIn1 ||
                                      ! paramPort1 && rddIn2;
                 
-                if ( fail = Empty ( value ) )
+                // Verify if instances are null and use Empty for the strings
+                if ( fail = value is null ||
+                            value is string && Empty ( value ) )
                     msgDescription = MSG_EMPTY;
                 else
                 {
@@ -831,6 +840,8 @@ namespace MTUComm
                 // Parameter validated and selected
                 else
                     entriesSelected.Add ( type, ( valueDyn == null ) ? valueStr : valueDyn );
+                
+                valueDyn = null;
             }
 
             if ( msgError.Length > 0 )
@@ -871,7 +882,7 @@ namespace MTUComm
             {
                 Alarm alarm = config.Alarms.FindByMtuType_Scripting ( ( int )Data.Get.MtuBasicInfo.Type );
                 if ( alarm != null )
-                    data.Add ( APP_FIELD.Alarm, ( alarm, 0 ) );
+                    entriesSelected.Add ( APP_FIELD.Alarm, alarm );
                 
                 // For current MTU does not exist "Scripting" profile inside Alarm.xml
                 else throw new ScriptingAlarmForCurrentMtuException ();
@@ -883,7 +894,7 @@ namespace MTUComm
             {
                 Demand demand = config.Demands.FindByMtuType_Scripting ( ( int )Data.Get.MtuBasicInfo.Type );
                 if ( demand != null )
-                    data.Add ( APP_FIELD.Demand, ( demand, 0 ) );
+                    entriesSelected.Add ( APP_FIELD.Demand, demand );
                 
                 // For current MTU does not exist "Scripting" profile inside DemandConf.xml
                 else throw new ScriptingDemandForCurrentMtuException ();
@@ -913,8 +924,8 @@ namespace MTUComm
             else if ( ! bool.TryParse ( value, out bool _ ) )
                 return false;
 
-            // Not a valid value
-            return false;
+            // Valid value
+            return true;
         }
 
         public static bool PrepareReadIntervalList (

@@ -2261,15 +2261,14 @@ namespace MTUComm
                     dynamic map = this.GetMemoryMap ();
                     MemoryRegister<int> rddStatus = map.RDDStatusInt;
 
-                    string rddPosition = APP_FIELD.RDDPosition.ToString ();
-
                     // Use the id specified in the Set method ( TrySetMember )
-                    Data.Get.RDDPosition = Data.Get[ rddPosition ].ToUpper ();
+                    string rddPosition   = Data.Get[ APP_FIELD.RDDPosition.ToString () ];
+                    rddPosition          = rddPosition.ToUpper ().Replace ( " ", "_" );
+                    Data.Get.RDDPosition = rddPosition;
 
                     // Convert from RDD command to RDD desired status
                     RDDValveStatus rddValveStatus = RDDValveStatus.UNKNOWN;
-                    switch ( ( RDDCmd )Enum.Parse ( typeof ( RDDCmd ),
-                             Data.Get[ rddPosition ].Replace ( " ", "_" ) ) )
+                    switch ( ( RDDCmd )Enum.Parse ( typeof ( RDDCmd ), rddPosition ) )
                     {
                         case RDDCmd.CLOSE       : rddValveStatus = RDDValveStatus.CLOSED;       break;
                         case RDDCmd.OPEN        : rddValveStatus = RDDValveStatus.OPEN;         break;
@@ -2678,8 +2677,6 @@ namespace MTUComm
 
         #region Write MTU
 
-        private Action truquitoAction;
-
         /// <summary>
         /// In scripted mode this method overload is called before the main method,
         /// because it is necessary to translate the script parameters from Aclara into
@@ -2757,7 +2754,7 @@ namespace MTUComm
         {
             try
             {
-                Logger logger = ( ! Data.Get.IsFromScripting ) ? new Logger () : truquitoAction.Logger;
+                Logger logger = ( ! Data.Get.IsFromScripting ) ? new Logger () : action.Logger;
                 addMtuLog = new AddMtuLog ( logger, mtu, action.User );
 
                 bool rddIn1;
@@ -2885,7 +2882,8 @@ namespace MTUComm
                      this.mtu.FastMessageConfig )
                 {
                     // NOTE: Konstantin "Bit 0 - Mode 1 is Fast and 0 is Slow. That is ON/OFF"
-                    map.FastMessagingConfigMode = Data.Get[ APP_FIELD.TwoWay.ToString () ].ToUpper ().Equals ( "FAST" );
+                    string twoway = Data.Get[ APP_FIELD.TwoWay.ToString () ];
+                    map.FastMessagingConfigMode = twoway.ToUpper ().Equals ( "FAST" );
                 }
 
                 #endregion
