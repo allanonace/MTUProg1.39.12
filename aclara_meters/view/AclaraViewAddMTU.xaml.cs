@@ -4175,7 +4175,7 @@ namespace aclara_meters.view
                 if ( global.AllowDailyReads &&
                      mtu.DailyReads &&
                      ! mtu.IsFamily33xx )
-                    Data.SetTemp ( APP_FIELD.SnapReads.ToString (), value_sre );
+                    Data.SetTemp ( APP_FIELD.SnapRead.ToString (), value_sre );
 
                 // Action is about Replace Meter
                 if ( isReplaceMeter )

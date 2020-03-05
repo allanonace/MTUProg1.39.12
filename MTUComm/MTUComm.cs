@@ -721,16 +721,32 @@ namespace MTUComm
             #region Methods
 
             dynamic LogParamNotPresent = new Action<ParameterType,int> (
-                ( name, portIndex ) => strb.Append ( ", " +
-                    ( ( portIndex <= 0 ) ? string.Empty : ( ( portIndex == 0 ) ? "P1." : "P2." ) ) +
-                    name.ToString () ) );
+                ( type, portIndex ) =>
+                {
+                    string name = type.ToString ();
+
+                    if ( ! name.StartsWith ( "RDD" ) )
+                        strb.Append ( ", " +
+                            ( ( portIndex <= 0 ) ? string.Empty : ( ( portIndex == 0 ) ? "P1." : "P2." ) ) +
+                            name.ToString () );
+
+                    // Avoid indicating the port number for RDD related parameters, because the RDD is always
+                    // on the second port and it is clearer to write the parameters in the script file without port
+                    else strb.Append ( ", " + name.ToString () );
+                });
 
             dynamic CheckIfParamIsPresent = new Func<ParameterType,int,bool,bool> (
                 ( paramType, portIndex, modifyResult ) => {
                     bool contains = true;
 
-                    // PortIndex -1 is used to know when a parameter is general, not for a port
-                    contains = action.ContainsParameter ( paramType, ( portIndex < 0 ) ? 0 : portIndex );
+                    // PortIndex -1 is used to know when a parameter is general, not for a port,
+                    // or when the parameter is unique and can be in the first or second port ( e.g. RDD related )
+                    // allowing to enter the parameter in the script file without indicating the specific port
+                    if ( portIndex >= 0 )
+                        contains = action.ContainsParameter ( paramType, portIndex );
+                    else
+                        contains = action.ContainsParameter ( paramType, 0 ) ||
+                                   action.ContainsParameter ( paramType, 1 );
 
                     if ( modifyResult )
                     {
@@ -816,11 +832,11 @@ namespace MTUComm
                 #region Valve Operation
 
                 case ActionType.ValveOperation:
-                    CheckIfNotPresentInPortWithDef (
-                        ParameterType.RDDFirmwareVersion, rddPort,
+                    CheckIfNotPresentWithDef (
+                        ParameterType.RDDFirmwareVersion,
                         global.RDDFirmwareVersion );
-                    CheckIfNotPresentInPort (
-                        ParameterType.RDDPosition, rddPort );
+                    CheckIfNotPresent (
+                        ParameterType.RDDPosition );
                     break;
                 
                 #endregion
@@ -869,7 +885,8 @@ namespace MTUComm
                         // Share the value of the second port parameter
                         Parameter paramP2 = action.GetParameterByType ( ParameterType.WorkOrder, 1 );
 
-                        if ( paramP2 != null )
+                        if ( paramP2 != null &&
+                             paramP2.Value != null )
                             CheckIfNotPresentInPortWithDef (
                                 ParameterType.WorkOrder, 0,
                                 paramP2.Value.ToString () );
@@ -973,7 +990,8 @@ namespace MTUComm
                             // Share the value of the first port parameter
                             Parameter paramP1 = action.GetParameterByType ( ParameterType.WorkOrder, 0 );
 
-                            if ( paramP1 != null )
+                            if ( paramP1 != null &&
+                                 paramP1.Value != null )
                                 CheckIfNotPresentInPortWithDef (
                                     ParameterType.WorkOrder, 1,
                                     paramP1.Value.ToString () );
@@ -1032,11 +1050,11 @@ namespace MTUComm
 
                     if ( hasRDD )
                     {
-                        CheckIfNotPresentInPortWithDef (
-                            ParameterType.RDDFirmwareVersion, rddPort,
+                        CheckIfNotPresentWithDef (
+                            ParameterType.RDDFirmwareVersion,
                             global.RDDFirmwareVersion );
-                        CheckIfNotPresentInPort (
-                            ParameterType.RDDPosition, rddPort );
+                        CheckIfNotPresent (
+                            ParameterType.RDDPosition );
                     }
 
                     #endregion
@@ -1047,7 +1065,19 @@ namespace MTUComm
 
             paramsFail = strb.ToString ();
             if ( ! string.IsNullOrEmpty ( paramsFail ) )
+            {
                 paramsFail = paramsFail.Substring ( 2 ); // Remove first ", "
+
+                int index;
+                if ( ( index = paramsFail.LastIndexOf ( ',' ) ) > -1 )
+                {
+                    paramsFail = paramsFail.Substring ( 0, index ) +
+                                 " and" +
+                                 paramsFail.Substring ( index + 1 );
+                }
+
+                paramsFail = paramsFail.TrimEnd ();
+            }
 
             strb.Clear ();
             strb = null;
@@ -2221,6 +2251,10 @@ namespace MTUComm
         public async Task RemoteDisconnect (
             bool throwExceptions = false )
         {
+            // Check if the MTU is compatible with RDD devices
+            if ( ! this.mtu.IsSetFlowCompatible () )
+                throw new MtuIsNotRDDCompatibleDevice ();
+
             if ( await this.RemoteDisconnect_Logic ( throwExceptions ) == RDD_OK )
             {
                 OnProgress ( this, new Delegates.ProgressArgs ( "Reading MTU..." ) );
@@ -2895,7 +2929,7 @@ namespace MTUComm
                      this.global.AllowDailyReads &&
                      this.mtu.DailyReads )
                 {
-                    int snapReads = int.Parse ( Data.Get[ APP_FIELD.SnapReads.ToString () ] );
+                    int snapReads = int.Parse ( Data.Get[ APP_FIELD.SnapRead.ToString () ] );
 
                     // In the MTU the value is written in UTC but when
                     // reading the value must be converted to local time

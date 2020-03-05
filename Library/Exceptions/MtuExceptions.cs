@@ -112,6 +112,11 @@
     {
         public MtuDoesNotBelongToAnyFamilyException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
     }
+
+    public class MtuIsNotRDDCompatibleDevice : OwnExceptionsBase
+    {
+        public MtuIsNotRDDCompatibleDevice ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
     
     #endregion
 

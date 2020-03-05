@@ -687,6 +687,12 @@ namespace Xml
             return this;
         }
 
+        public bool IsSetFlowCompatible ()
+        {
+            return this.Port1.IsSetFlow ||
+                   this.TwoPorts && this.Port2.IsSetFlow;
+        }
+
         #endregion
     }
 }

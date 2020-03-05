@@ -19,6 +19,7 @@
     <Error id="110" message="Preparing values for the log. Check puck position and try again" footer="Preparing log" />
     <Error id="111" message="The value to write in BCD format for the Meter ID is greater ( _var_ ) than the number of available bytes" footer="Meter ID length" />
     <Error id="112" message="The MTU does not belong to any of the families currently supported" no_error="true" />
+    <Error id="113" message="The MTU is not compatible with RDD devices" footer="MTU not for RDD" no_error="true" />
 
     <!-- Meter -->
     <Error id="200" message="The Meter.xml file does not contain the Meter ID specified" footer="Meter not in Meter.xml" />
@@ -44,7 +45,7 @@
     <Error id="220" message="The status of the RDD device is different than expected after _var_ seconds" footer="RDD wrong status" />
     
     <!-- Scripting parameters -->
-    <Error id="300" message="Translating or validating parameters _var_ from script file" footer="Translating script params" />
+    <Error id="300" message="Translating or validating parameters from the script file: _var_" footer="Translating script params" />
     <Error id="301" message="The script file is for one port only but the MTU has two port and both activated" footer="Script for one port" />
     <Error id="302" message="The script file is for two ports but the MTU has one port only or second port is disabled" footer="Script for two ports" />
     <Error id="303" message="The script file does not contain logfile parameter or it has some invalid character" footer="Missing logfile" />
@@ -54,7 +55,7 @@
     <Error id="307" message="The script file does not contain the ( Old|New ) Meter serial number parameter that is mandatory in writing actions" footer="Missing Meter serial number" />
     <Error id="308" message="The script file contains the same parameter more than once" footer="Repeated params" />
     <Error id="309" message="The script file does not contain userName parameter or it has some invalid character" footer="Missing Username" />
-    <Error id="310" message="The script does not contain the required parameters _var_" footer="Missing Tag" />
+    <Error id="310" message="The script file does not contain the required parameters: _var_" footer="Missing Tag" />
     
     <!-- Alarm -->
     <Error id="400" message="The alarm profile Scripting for current MTU is not defined in the Alarm.xml file" /> <!-- footer not necessary -->

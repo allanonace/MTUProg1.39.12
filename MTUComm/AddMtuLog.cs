@@ -334,7 +334,7 @@ namespace MTUComm
                 #endregion
                 #region Snap Reads
                 {
-                    APP_FIELD.SnapReads,
+                    APP_FIELD.SnapRead,
                     new string[]
                     {
                         "SnapReads",
@@ -505,9 +505,9 @@ namespace MTUComm
             // Not used with single port MTUs with RDD or family 33xx
             if ( noRddOrNotIn1 &&
                  ! this.mtu.IsFamily33xx &&
-                 DataContains ( APP_FIELD.SnapReads ) )
+                 DataContains ( APP_FIELD.SnapRead ) )
             {
-                string dailyReadsLocal = this.GetDataValue ( APP_FIELD.SnapReads ).ToString (); // Local
+                string dailyReadsLocal = this.GetDataValue ( APP_FIELD.SnapRead ).ToString (); // Local
                 int    dailyReadsUTC   = await map.DailyGMTHourRead.GetValue ();    // UTC
 
                 // Value written in the MTU, in UTC time

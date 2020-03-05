@@ -53,6 +53,8 @@ namespace MTUComm
             { new NumberToBcdIsLargerThanBytesRegister (),      111 },
             // The MTU does not belong to any of the families currently supported
             { new MtuDoesNotBelongToAnyFamilyException (),      112 },
+            // The MTU is not compatible with RDD devices
+            { new MtuIsNotRDDCompatibleDevice (),               113 },
         
             // Meter [ 2xx ]
             //------

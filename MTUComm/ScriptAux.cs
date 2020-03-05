@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Library;
@@ -31,11 +32,11 @@ namespace MTUComm
         private const string MSG_HSMINS = "should be one of the possible values and using Hr/s or Min";
         private const string MSG_BOOL   = "should be 'True' or 'False'";
         private const string MSG_DAYS   = "should be one of the possible values ( 1, 8, 32, 64 or 96 )";
-        private const string MSG_RDD    = "Should be one of the possible values ( 'CLOSE', 'OPEN', 'PARTIAL OPEN' )";
+        private const string MSG_RDD    = "should be one of the possible values ( 'CLOSE', 'OPEN', 'PARTIAL OPEN' )";
         private const string MSG_ELRDD  = "should be equal to or less than {0} or there is no default value in Global";
-        private const string MSG_OMW    = "Should be one of the possible values ( 'Yes', 'No', 'Broken' )";
-        private const string MSG_MRR    = "Should be one of the possible values ( 'Meter', 'Register', 'Both' )";
-        private const string MSG_TWO    = "Should be one of the possible values ( 'True' for Fast, 'False' for Slow )";
+        private const string MSG_OMW    = "should be one of the possible values ( 'Yes', 'No', 'Broken' )";
+        private const string MSG_MRR    = "should be one of the possible values ( 'Meter', 'Register', 'Both' )";
+        private const string MSG_TWO    = "should be one of the possible values ( 'True' for Fast, 'False' for Slow )";
 
         public enum OldMeterWorking
         {
@@ -98,7 +99,7 @@ namespace MTUComm
             UnitOfMeasure_2,
             
             ReadInterval,
-            SnapReads,
+            SnapRead,
             TwoWay,
             Alarm,
             Demand,
@@ -128,7 +129,7 @@ namespace MTUComm
                 { ParameterType.NumberOfDials,        APP_FIELD.NumberOfDials   },
                 { ParameterType.DriveDialSize,        APP_FIELD.DriveDialSize   },
                 { ParameterType.UnitOfMeasure,        APP_FIELD.UnitOfMeasure   },
-                { ParameterType.SnapRead,             APP_FIELD.SnapReads       },
+                { ParameterType.SnapRead,             APP_FIELD.SnapRead       },
                 { ParameterType.ReadInterval,         APP_FIELD.ReadInterval    },
                 { ParameterType.Fast2Way,             APP_FIELD.TwoWay          },
                 { ParameterType.TwoWay,               APP_FIELD.TwoWay          },
@@ -156,6 +157,25 @@ namespace MTUComm
         #endregion
 
         #region Logic
+
+        private static string GetAclaraName (
+            APP_FIELD name )
+        {
+            string result       = name.ToString ();
+            bool   namePort2    = result.EndsWith ( "_2" );
+            string nameWithout2 = result.Replace  ( "_2", string.Empty );
+
+            if ( Enum.TryParse ( nameWithout2, out APP_FIELD appField ) &&
+                 IdsAclara.ContainsValue ( appField ) )
+            {
+                result = IdsAclara.Single ( e => e.Value == appField ).Key.ToString ();
+
+                if ( namePort2 )
+                    result += "_2";
+            }
+
+            return result;
+        }
 
         public static ( bool UsePort2InScript, Dictionary<APP_FIELD,( dynamic Value, int Port )> Data ) TranslateAclaraParams (
             Parameter[] scriptParams )
@@ -475,8 +495,10 @@ namespace MTUComm
                 bool paramPort1    = ( portIndex == 0 );
                 bool rddInThisPort =   paramPort1 && rddIn1 ||
                                      ! paramPort1 && rddIn2;
-                
+
                 // Verify if instances are null and use Empty for the strings
+                // This step is important because leaving a parameter empty is strange
+                // and it is preferable to notify it, not to use the default value
                 if ( fail = value is null ||
                             value is string && Empty ( value ) )
                     msgDescription = MSG_EMPTY;
@@ -540,7 +562,7 @@ namespace MTUComm
                         case APP_FIELD.WorkOrder:
                         case APP_FIELD.WorkOrder_2:
                         // Do not use
-                        if ( ! isNotWrite ||
+                        if ( isNotWrite ||
                              ! global.WorkOrderRecording )
                             continue;
 
@@ -564,8 +586,8 @@ namespace MTUComm
                             msgDescription = MSG_HSMINS;
                         break;
                         #endregion
-                        #region Snap Reads [ Only Writing, No RDD port 1 ]
-                        case APP_FIELD.SnapReads:
+                        #region Snap Read [ Only Writing, No RDD port 1 ]
+                        case APP_FIELD.SnapRead:
                         // Do not use
                         if ( rddIn1 ||
                              mtu.IsFamily33xx ||
@@ -788,8 +810,8 @@ namespace MTUComm
                             continue;
 
                         // Verify the content -> Value { 1, 8, 32, 64, 96 }
-                        else if ( EmptyNum ( valueStr ) ||
-                                  ! Regex.IsMatch ( valueStr, REGEX_DAYS ) )
+                        else if ( fail = ( EmptyNum ( valueStr ) ||
+                                  ! Regex.IsMatch ( valueStr, REGEX_DAYS ) ) )
                             msgDescription = MSG_DAYS;
                         break;
                         #endregion
@@ -832,10 +854,16 @@ namespace MTUComm
                 {
                     fail = false;
                     
-                    msgErrorPopup.Append ( ( ( msgError.Length > 0 ) ? ", " : string.Empty ) +
-                                           type + " " + msgDescription );
+                    string typeStr = GetAclaraName ( type );
 
-                    msgError.Append ( ( ( msgError.Length > 0 ) ? ", " : string.Empty ) + type );
+                    // XXX_2 -> P2.XXX
+                    if ( typeStr.EndsWith ( "_2" ) )
+                        typeStr = "P2." + typeStr.Substring ( 0, typeStr.Length - 2 );
+
+                    msgErrorPopup.Append ( ( ( msgError.Length > 0 ) ? ", " : string.Empty ) +
+                                           typeStr + " " + msgDescription );
+
+                    msgError.Append ( ( ( msgError.Length > 0 ) ? ", " : string.Empty ) + typeStr );
                 }
                 // Parameter validated and selected
                 else
@@ -862,11 +890,11 @@ namespace MTUComm
                     
                     index = msgErrorPopupStr.LastIndexOf ( ',' );
                     msgErrorPopupStr = msgErrorPopupStr.Substring ( 0, index ) +
-                                        " and" +
-                                        msgErrorPopupStr.Substring ( index + 1 );
+                                       " and" +
+                                       msgErrorPopupStr.Substring ( index + 1 );
                 }
 
-                throw new ProcessingParamsScriptException ( msgErrorStr, 1, msgErrorPopupStr );
+                throw new ProcessingParamsScriptException ( msgErrorStr.TrimEnd (), 1, msgErrorPopupStr.TrimEnd () );
             }
 
             #endregion
