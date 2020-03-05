@@ -471,6 +471,20 @@ namespace Library
             return str[ 0 ].ToString ().ToUpper () + str.Substring ( 1 );
         }
 
+        public static string OnlyFirstCharToCapital (
+            object value )
+        {
+            Type type = value.GetType ();
+            if ( type.IsClass && ! ( value is string ) ||
+                 type.IsArray )
+            {
+                return string.Empty;
+            }
+
+            string str = value.ToString ();
+            return str[ 0 ].ToString ().ToUpper () + str.Substring ( 1 ).ToLower ();
+        }
+
         public static string StringToBase64 (
             string text )
         {

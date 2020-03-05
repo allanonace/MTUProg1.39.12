@@ -27,11 +27,11 @@ namespace MTUComm
         private const string MSG_NUMBER = "should be a valid numeric value";
         private const string MSG_ELTHAN = "should be equal to or less than {0} ( {1} )";
         private const string MSG_ELONLY = "should be equal to or less than {0}";
-        private const string MSG_EQUAL  = "should be equal to {0} ( {1} )";
+        private const string MSG_EQUAL  = "should be a numerical value with length equal to {0} ( {1} )";
         private const string MSG_DAILY  = "should be a valid numeric value within the range [0,23]";
         private const string MSG_HSMINS = "should be one of the possible values and using Hr/s or Min";
         private const string MSG_BOOL   = "should be 'True' or 'False'";
-        private const string MSG_DAYS   = "should be one of the possible values ( 1, 8, 32, 64 or 96 )";
+        private const string MSG_DAYS   = "should be one of the possible values ( 1, 8, 32, 64, 96 )";
         private const string MSG_RDD    = "should be one of the possible values ( 'CLOSE', 'OPEN', 'PARTIAL OPEN' )";
         private const string MSG_ELRDD  = "should be equal to or less than {0} or there is no default value in Global";
         private const string MSG_OMW    = "should be one of the possible values ( 'Yes', 'No', 'Broken' )";
@@ -727,6 +727,10 @@ namespace MTUComm
                         else if ( fail = ! ( Enum.TryParse<OldMeterWorking> (
                                                 valueStr.ToUpper (), out var _ ) ) )
                             msgDescription = MSG_OMW;
+
+                        // Prepare the string with only the first character as uppercase
+                        else valueStr = Utils.OnlyFirstCharToCapital ( valueStr );
+
                         break;
                         #endregion
                         #region Replace Meter|Register [ Only Writing, No RDD ]
@@ -742,6 +746,10 @@ namespace MTUComm
                         else if ( fail = ! ( Enum.TryParse<MeterRegisterRecording> (
                                                 valueStr.ToUpper (), out var _ ) ) )
                             msgDescription = MSG_MRR;
+
+                        // Prepare the string with only the first character as uppercase
+                        else valueStr = Utils.OnlyFirstCharToCapital ( valueStr );
+
                         break;
                         #endregion
                         
