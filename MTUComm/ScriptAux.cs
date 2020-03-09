@@ -168,7 +168,7 @@ namespace MTUComm
             if ( Enum.TryParse ( nameWithout2, out APP_FIELD appField ) &&
                  IdsAclara.ContainsValue ( appField ) )
             {
-                result = IdsAclara.Single ( e => e.Value == appField ).Key.ToString ();
+                result = IdsAclara.First ( e => e.Value == appField ).Key.ToString ();
 
                 if ( namePort2 )
                     result += "_2";
@@ -184,17 +184,50 @@ namespace MTUComm
             Dictionary<APP_FIELD,( dynamic Value, int Port )> translatedParams =
                 new Dictionary<APP_FIELD,( dynamic Value, int Port )> ();
 
+            bool ok = true;
             bool usePort2 = false;
+            StringBuilder stbr = new StringBuilder ();
             foreach ( Parameter param in scriptParams )
             {
                 APP_FIELD paramTranslated = TranslateAclaraParam ( param );
                 if ( paramTranslated != APP_FIELD.NOTHING )
                 {
-                    translatedParams.Add ( paramTranslated, ( param.Value, param.Port ) );
+                    if ( ! translatedParams.ContainsKey ( paramTranslated ) )
+                    {
+                        translatedParams.Add ( paramTranslated, ( param.Value, param.Port ) );
 
-                    if ( param.Port == 1 )
-                        usePort2 = true;
+                        if ( param.Port == 1 )
+                            usePort2 = true;
+                    }
+                    // Some parameter appears more than once for the same port
+                    else
+                    {
+                        ok = false;
+
+                        string typeStr = paramTranslated.ToString ();
+
+                        // XXX_2 -> P2.XXX
+                        if ( typeStr.EndsWith ( "_2" ) )
+                            typeStr = "P2." + typeStr.Substring ( 0, typeStr.Length - 2 );
+
+                        stbr.Append ( ( ( stbr.Length > 0 ) ? ", " : string.Empty ) + typeStr );
+                    }
                 }
+            }
+
+            if ( ! ok )
+            {
+                string msgError = stbr.ToString ();
+
+                int index;
+                if ( ( index = msgError.LastIndexOf ( ',' ) ) > -1 )
+                {
+                    msgError = msgError.Substring ( 0, index ) +
+                               " and" +
+                               msgError.Substring ( index + 1 );
+                }
+
+                throw new ScriptRepeatedParametersException ( msgError );
             }
 
             return ( usePort2, translatedParams );
@@ -321,7 +354,16 @@ namespace MTUComm
     
                     // At least one Meter was found
                     if ( meters.Count > 0 )
-                        data.Add ( APP_FIELD.Meter, ( ( meterPort1 = meters[ 0 ] ), 0 ) );
+                    {
+                        meterPort1 = meters[ 0 ];
+                        port       = mtu.Port1;
+                
+                        // Current MTU does not support selected Meter
+                        if ( ! port.IsThisMeterSupported ( meterPort1 ) )
+                            throw new ScriptingAutoDetectNotSupportedException ();
+
+                        data.Add ( APP_FIELD.Meter, ( meterPort1, 0 ) );
+                    }
                     
                     // No meter was found using the selected parameters
                     else throw new ScriptingAutoDetectMeterException ();
@@ -404,7 +446,16 @@ namespace MTUComm
                         
                         // At least one Meter was found
                         if ( meters.Count > 0 )
-                            data.Add ( APP_FIELD.Meter_2, ( ( meterPort2 = meters[ 0 ] ), 1 ) );
+                        {
+                            meterPort2 = meters[ 0 ];
+                            port       = mtu.Port2;
+                
+                            // Current MTU does not support selected Meter
+                            if ( ! port.IsThisMeterSupported ( meterPort2 ) )
+                                throw new ScriptingAutoDetectNotSupportedException ();
+
+                            data.Add ( APP_FIELD.Meter_2, ( meterPort2, 0 ) );
+                        }
                         
                         // No meter was found using the selected parameters
                         else throw new ScriptingAutoDetectMeterException ( string.Empty, 2 );
@@ -569,7 +620,7 @@ namespace MTUComm
                         // Verify the content -> Length [1,global.WorkOrderLength]
                         else if ( fail = NoELTxt ( valueStr, global.WorkOrderLength ) )
                             msgDescription =
-                                String.Format ( MSG_ELTHAN, "global.WorkOrderLength", global.WorkOrderLength );
+                                String.Format ( MSG_ELTHAN, "Global.WorkOrderLength", global.WorkOrderLength );
                         break;
                         #endregion
 
@@ -613,7 +664,7 @@ namespace MTUComm
                         // Verify the content -> Length = global.MtuIdLength
                         else if ( fail = NoEqNum ( valueStr, global.MtuIdLength ) )
                             msgDescription =
-                                String.Format ( MSG_EQUAL, "global.MtuIdLength", global.MtuIdLength );
+                                String.Format ( MSG_EQUAL, "Global.MtuIdLength", global.MtuIdLength );
                         break;
                         #endregion
 
@@ -630,7 +681,7 @@ namespace MTUComm
                         // Verify the content -> Length [1,global.MeterNumberLength]
                         else if ( fail = NoELTxt ( valueStr, global.MeterNumberLength ) )
                             msgDescription =
-                                String.Format ( MSG_ELTHAN, "global.MeterNumberLength", global.MeterNumberLength );
+                                String.Format ( MSG_ELTHAN, "Global.MeterNumberLength", global.MeterNumberLength );
                         break;
                         #endregion
                         #region Meter Reading [ Only Writing, Pulse ]
@@ -660,7 +711,7 @@ namespace MTUComm
                         // e.g. NumberOfDials 4 Value 1234 Mask X00 -> 1234 + Mask = 123400
                         // e.g. NumberOfDials 4 Value 12 Mask X00 -> Fill left to 0's = 0012 + Mask = 001200
                         else if ( meter.NumberOfDials > -1 &&
-                                  NoELNum ( valueStr, meter.NumberOfDials ) )
+                                  ! NoELNum ( valueStr, meter.NumberOfDials ) )
                         {
                             valueStr = meter.FillLeftNumberOfDials ( valueStr );
 
@@ -697,7 +748,7 @@ namespace MTUComm
                         // Verify the content -> Length [1,global.MeterNumberLength]
                         else if ( fail = NoELTxt ( valueStr, global.MeterNumberLength ) )
                             msgDescription =
-                                String.Format ( MSG_ELTHAN, "global.MeterNumberLength", global.MeterNumberLength );
+                                String.Format ( MSG_ELTHAN, "Global.MeterNumberLength", global.MeterNumberLength );
                         break;
                         #endregion
                         #region Old Meter Reading [ Only Writing, No RDD ]

@@ -457,6 +457,11 @@
         public ScriptingTagMissingException(string message = "", int port = 1, string messagePopup = "") : base(message, port, messagePopup) { }
     }
 
+    public class ScriptRepeatedParametersException : OwnExceptionsBase
+    {
+        public ScriptRepeatedParametersException(string message = "", int port = 1, string messagePopup = "") : base(message, port, messagePopup) { }
+    }
+
     #endregion
 
     #region Alarm [ 4xx ]

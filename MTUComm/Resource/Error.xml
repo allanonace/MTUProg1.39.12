@@ -23,20 +23,20 @@
 
     <!-- Meter -->
     <Error id="200" message="The Meter.xml file does not contain the Meter ID specified" footer="Meter not in Meter.xml" />
-    <Error id="201" message="Selected Meter is not supported for current MTU" footer="Meter not supported" />
-    <Error id="202" message="The Meter.xml file does not contain the Meter type specified with the tags NumberOfDials, DriveDialSize and UnitOfMeasure" footer="Meter detection failed" />
-    <Error id="203" message="The script does not contain the tag NumberOfDials needed to select the MTU" /> <!-- footer not necessary -->
-    <Error id="204" message="The script does not contain the tag DriveDialSize needed to select the MTU" /> <!-- footer not necessary -->
-    <Error id="205" message="The script does not contain the tag UnitOfMeasure needed to select the MTU" /> <!-- footer not necessary -->
-    <Error id="206" message="Some of the necessary parameters for Meter autodetection are missing in the script" footer="Missing Meter detection params" />
-    <Error id="207" message="The selected Meter is not compatible with the Encoder connected or there is no Meter connected" footer="Incompatible Meter or not present" />
-    <Error id="208" message="The selected Meter is not compatible with the Encoder because of 'Encoder has bad digit in reading'" footer="Incompatible Meter selected" />
-    <Error id="209" message="The selected Meter is not compatible with the Encoder because of 'Delta overflow'" footer="Incompatible Meter selected" />
-    <Error id="210" message="The selected Meter is not compatible with the Encoder because of 'Deltas purged / New install / Reset'" footer="Incompatible Meter selected" />
-    <Error id="211" message="The selected Meter is not compatible with the Encoder because of 'Encoder clock shorted'" footer="Incompatible Meter selected" />
-    <Error id="212" message="The selected Meter is not compatible with the Encoder because of an unknown error code" footer="Incompatible Meter selected" />
-    <Error id="213" message="Encoder auto-detection process for port _var_ can't be performed" footer="Encoder detect not achieved" no_error="true" />
-    <Error id="214" message="Encoder auto-detection process for port _var_ can't be performed, perhaps due to a problem with the puck or MTU" footer="Encoder detect not achieved" />
+    <Error id="201" message="The Meter selected is not compatible with the current MTU" footer="Meter not compatible" />
+    <Error id="202" message="The Meter.xml file does not contain the Meter type specified with the NumberOfDials, DriveDialSize and UnitOfMeasure tags" footer="Meter detection failed" />
+    <Error id="203" message="The script file does not contain the NumberOfDials tag needed to select the Meter" /> <!-- footer not necessary -->
+    <Error id="204" message="The script file does not contain the DriveDialSize tag needed to select the Meter" /> <!-- footer not necessary -->
+    <Error id="205" message="The script file does not contain the UnitOfMeasure tag needed to select the Meter" /> <!-- footer not necessary -->
+    <Error id="206" message="Some of the necessary parameters for Meter autodetection in the script file are missing" footer="Missing Meter detection params" />
+    <Error id="207" message="The Meter selected is not compatible with the connected Encoder or there is no Meter connected" footer="Incompatible Meter or not present" />
+    <Error id="208" message="The Meter selected is not compatible with the Encoder because of 'Encoder has bad digit in reading'" footer="Incompatible Meter selected" />
+    <Error id="209" message="The Meter selected is not compatible with the Encoder because of 'Delta overflow'" footer="Incompatible Meter selected" />
+    <Error id="210" message="The Meter selected is not compatible with the Encoder because of 'Deltas purged / New install / Reset'" footer="Incompatible Meter selected" />
+    <Error id="211" message="The Meter selected is not compatible with the Encoder because of 'Encoder clock shorted'" footer="Incompatible Meter selected" />
+    <Error id="212" message="The Meter selected is not compatible with the Encoder because of an unknown error code" footer="Incompatible Meter selected" />
+    <Error id="213" message="Encoder auto-detection process can't be performed" footer="Encoder detect not achieved" no_error="true" />
+    <Error id="214" message="Encoder auto-detection process can't be performed, perhaps due to a problem with the puck or MTU" footer="Encoder detect not achieved" />
     <Error id="215" message="The status of the RDD device is unknown" footer="RDD status unknown" />
     <Error id="216" message="The RDD device is disabled" footer="RDD is disabled" />
     <Error id="217" message="The status of the RDD device is not busy after executing the LExI command" footer="RDD is not busy" />
@@ -49,13 +49,14 @@
     <Error id="301" message="The script file is for one port only but the MTU has two port and both activated" footer="Script for one port" />
     <Error id="302" message="The script file is for two ports but the MTU has one port only or second port is disabled" footer="Script for two ports" />
     <Error id="303" message="The script file does not contain logfile parameter or it has some invalid character" footer="Missing logfile" />
-    <Error id="304" message="Action type _var_ in the script is not one of the available options" footer="Action not supported" />
+    <Error id="304" message="Action type _var_ in the script file is not one of the available options" footer="Action not supported" />
     <Error id="305" message="The script file used has not valid structure or format" footer="Invalid XML structure" />
     <Error id="306" message="The script file used is empty" footer="Empty script file" />
     <Error id="307" message="The script file does not contain the ( Old|New ) Meter serial number parameter that is mandatory in writing actions" footer="Missing Meter serial number" />
     <Error id="308" message="The script file contains the same parameter more than once" footer="Repeated params" />
     <Error id="309" message="The script file does not contain userName parameter or it has some invalid character" footer="Missing Username" />
     <Error id="310" message="The script file does not contain the required parameters: _var_" footer="Missing Tag" />
+    <Error id="311" message="The script file contains some parameters more than once for the same port: _var_" footer="Repeated parameters" />
     
     <!-- Alarm -->
     <Error id="400" message="The alarm profile Scripting for current MTU is not defined in the Alarm.xml file" /> <!-- footer not necessary -->

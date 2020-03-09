@@ -125,6 +125,8 @@ namespace MTUComm
             { new ScriptUserNameMissingException (),            309 },
             // The script does not contain the required parameters 
             { new ScriptingTagMissingException (),              310 },
+            // The script file contains some parameters more than once for the same port
+            { new ScriptRepeatedParametersException (),         311 },
             
             // Alarm [ 4xx ]
             //------
