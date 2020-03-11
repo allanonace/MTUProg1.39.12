@@ -2987,94 +2987,100 @@ namespace MTUComm
                     Alarm alarms = ( Alarm )Data.Get[ APP_FIELD.Alarm.ToString () ];
                     if ( alarms != null )
                     {
-                        try
+                        // Check if the current memory map contains the register to write, to avoid errors in
+                        // the configuration files or trying to set second port alarms when it is not necessary
+                        dynamic SetIfInTheMap = new Action<string,dynamic> (
+                            ( regName, value ) => {
+                                if ( map.ContainsMember ( regName ) )
+                                    map[ regName ].SetValue ( value );
+                            });
+
+                        // Set alarms [ Alarm Message Transmission ]
+                        if ( mtu.InsufficientMemory     ) SetIfInTheMap ( "InsufficientMemoryAlarm",     alarms.InsufficientMemory );       // 34xx and 35xx36xx
+                        if ( mtu.GasCutWireAlarm        ) SetIfInTheMap ( "GasCutWireAlarm",             alarms.CutAlarmCable );            // 31xx32xx and 342x
+                        if ( usePort2 &&
+                             mtu.GasCutWireAlarm        ) SetIfInTheMap ( "P2GasCutWireAlarm",           alarms.CutAlarmCable );            // 31xx32xx
+                        if ( mtu.SerialComProblem       ) SetIfInTheMap ( "SerialComProblemAlarm",       alarms.SerialComProblem );         // 34xx and 35xx36xx
+                        if ( mtu.LastGasp               ) SetIfInTheMap ( "LastGaspAlarm",               alarms.LastGasp );                 // 34xx and 35xx36xx
+                        if ( mtu.TiltTamper             ) SetIfInTheMap ( "TiltAlarm",                   alarms.Tilt );                     // 31xx32xx, 34xx and 35xx36xx
+                        if ( usePort2 &&
+                             mtu.TiltTamper             ) SetIfInTheMap ( "P2TiltAlarm",                 alarms.Tilt );                     // 31xx32xx
+                        if ( mtu.MagneticTamper         ) SetIfInTheMap ( "MagneticAlarm",               alarms.Magnetic );                 // 31xx32xx, 34xx and 35xx36xx
+                        if ( usePort2 &&
+                             mtu.MagneticTamper         ) SetIfInTheMap ( "P2MagneticAlarm",             alarms.Magnetic );                 // 31xx32xx
+                        if ( mtu.RegisterCoverTamper    ) SetIfInTheMap ( "RegisterCoverAlarm",          alarms.RegisterCover );            // 31xx32xx, 34xx and 35xx36xx
+                        if ( usePort2 &&
+                             mtu.RegisterCoverTamper    ) SetIfInTheMap ( "P2RegisterCoverAlarm",        alarms.RegisterCover );            // 31xx32xx
+                        if ( mtu.ReverseFlowTamper      ) SetIfInTheMap ( "ReverseFlowAlarm",            alarms.ReverseFlow );              // 31xx32xx, 34xx and 35xx36xx
+                        if ( usePort2 &&
+                             mtu.ReverseFlowTamper      ) SetIfInTheMap ( "P2ReverseFlowAlarm",          alarms.ReverseFlow );              // 31xx32xx
+                        if ( mtu.SerialCutWire          ) SetIfInTheMap ( "SerialCutWireAlarm",          alarms.SerialCutWire );            // 342x
+                        if ( mtu.TamperPort1            ) SetIfInTheMap ( "P1CutWireAlarm",              alarms.TamperPort1 );              // 34xx and 35xx36xx
+                        if ( usePort2 &&
+                             mtu.TamperPort2            ) SetIfInTheMap ( "P2CutWireAlarm",              alarms.TamperPort2 );              // 34xx and 35xx36xx
+                        if ( mtu.CutWireDelaySetting    ) SetIfInTheMap ( "CutWireDelaySetting",         alarms.CutWireDelaySetting );      // 34xx and 35xx36xx
+
+                        // Set immediate alarms [ Alarm Message Immediate ]
+                        if ( mtu.InsufficientMemoryImm  ) SetIfInTheMap ( "InsufficientMemoryImmAlarm ", alarms.InsufficientMemoryImm );    // 34xx and 35xx36xx
+                        if ( mtu.MoistureDetectImm      ) SetIfInTheMap ( "MoistureImmAlarm",            alarms.MoistureDetectImm );        // 35xx36xx
+                        if ( mtu.ProgramMemoryErrorImm  ) SetIfInTheMap ( "ProgramMemoryImmAlarm",       alarms.ProgramMemoryErrorImm );    // 35xx36xx
+                        if ( mtu.MemoryMapErrorImm      ) SetIfInTheMap ( "MemoryMapImmAlarm",           alarms.MemoryMapErrorImm );        // 35xx36xx
+                        if ( mtu.EnergizerLastGaspImm   ) SetIfInTheMap ( "EnergizerLastGaspImmAlarm",   alarms.EnergizerLastGaspImm );     // 35xx36xx
+                        if ( mtu.GasCutWireAlarmImm     ) SetIfInTheMap ( "GasCutWireImmAlarm",          alarms.CutWireAlarmImm );          // 342x
+                        if ( mtu.SerialComProblemImm    ) SetIfInTheMap ( "SerialComProblemImmAlarm",    alarms.SerialComProblemImm );      // 34xx and 35xx36xx
+                        if ( mtu.LastGaspImm            ) SetIfInTheMap ( "LastGaspImmAlarm",            alarms.LastGaspImm );              // 34xx and 35xx36xx
+                        if ( mtu.TiltTamperImm          ) SetIfInTheMap ( "TiltImmAlarm",                alarms.TiltTamperImm );            // 35xx36xx
+                        if ( mtu.MagneticTamperImm      ) SetIfInTheMap ( "MagneticImmAlarm",            alarms.MagneticTamperImm );        // 35xx36xx
+                        if ( mtu.RegisterCoverTamperImm ) SetIfInTheMap ( "RegisterCoverImmAlarm",       alarms.RegisterCoverTamperImm );   // 35xx36xx
+                        if ( mtu.ReverseFlowTamperImm   ) SetIfInTheMap ( "ReverseFlowImmAlarm",         alarms.ReverseFlowTamperImm );     // 35xx36xx
+                        if ( mtu.SerialCutWireImm       ) SetIfInTheMap ( "SerialCutWireImmAlarm",       alarms.SerialCutWireImm );         // 342x
+                        if ( mtu.TamperPort1Imm         ) SetIfInTheMap ( "P1CutWireImmAlarm",           alarms.TamperPort1Imm );           // 34xx and 35xx36xx
+                        if ( usePort2 &&
+                             mtu.TamperPort2Imm         ) SetIfInTheMap ( "P2CutWireImmAlarm",           alarms.TamperPort2Imm );           // 34xx and 35xx36xx
+
+                        // Ecoder alarms
+                        // 33xx, 34xx and 35xx36xx
+                        // NOTE: Same register is used to set both ports working with E-coder alarms
+                        if ( mtu.Ecoder )
                         {
-                            // Set alarms [ Alarm Message Transmission ]
-                            if ( mtu.InsufficientMemory     ) map.InsufficientMemoryAlarm    = alarms.InsufficientMemory;       // 34xx and 35xx36xx
-                            if ( mtu.GasCutWireAlarm        ) map.GasCutWireAlarm            = alarms.CutAlarmCable;            // 31xx32xx and 342x
-                            if ( usePort2 &&
-                                 mtu.GasCutWireAlarm        ) map.P2GasCutWireAlarm          = alarms.CutAlarmCable;            // 31xx32xx
-                            if ( mtu.SerialComProblem       ) map.SerialComProblemAlarm      = alarms.SerialComProblem;         // 34xx and 35xx36xx
-                            if ( mtu.LastGasp               ) map.LastGaspAlarm              = alarms.LastGasp;                 // 34xx and 35xx36xx
-                            if ( mtu.TiltTamper             ) map.TiltAlarm                  = alarms.Tilt;                     // 31xx32xx, 34xx and 35xx36xx
-                            if ( usePort2 &&
-                                 mtu.GasCutWireAlarm        ) map.P2TiltAlarm                = alarms.Tilt;                     // 31xx32xx
-                            if ( mtu.MagneticTamper         ) map.MagneticAlarm              = alarms.Magnetic;                 // 31xx32xx, 34xx and 35xx36xx
-                            if ( usePort2 &&
-                                 mtu.MagneticTamper         ) map.P2MagneticAlarm            = alarms.Magnetic;                 // 31xx32xx
-                            if ( mtu.RegisterCoverTamper    ) map.RegisterCoverAlarm         = alarms.RegisterCover;            // 31xx32xx, 34xx and 35xx36xx
-                            if ( usePort2 &&
-                                 mtu.RegisterCoverTamper    ) map.P2RegisterCoverAlarm       = alarms.RegisterCover;            // 31xx32xx
-                            if ( mtu.ReverseFlowTamper      ) map.ReverseFlowAlarm           = alarms.ReverseFlow;              // 31xx32xx, 34xx and 35xx36xx
-                            if ( usePort2 &&
-                                 mtu.ReverseFlowTamper      ) map.P2ReverseFlowAlarm         = alarms.ReverseFlow;              // 31xx32xx
-                            if ( mtu.SerialCutWire          ) map.SerialCutWireAlarm         = alarms.SerialCutWire;            // 342x
-                            if ( mtu.TamperPort1            ) map.P1CutWireAlarm             = alarms.TamperPort1;              // 34xx and 35xx36xx
-                            if ( usePort2 &&
-                                 mtu.TamperPort2            ) map.P2CutWireAlarm             = alarms.TamperPort2;              // 34xx and 35xx36xx
-                            if ( mtu.CutWireDelaySetting    ) map.CutWireDelaySetting        = alarms.CutWireDelaySetting;      // 34xx and 35xx36xx
-
-                            // Set immediate alarms [ Alarm Message Immediate ]
-                            if ( mtu.InsufficientMemoryImm  ) map.InsufficientMemoryImmAlarm = alarms.InsufficientMemoryImm;    // 34xx and 35xx36xx
-                            if ( mtu.MoistureDetectImm      ) map.MoistureImmAlarm           = alarms.MoistureDetectImm;        // 35xx36xx
-                            if ( mtu.ProgramMemoryErrorImm  ) map.ProgramMemoryImmAlarm      = alarms.ProgramMemoryErrorImm;    // 35xx36xx
-                            if ( mtu.MemoryMapErrorImm      ) map.MemoryMapImmAlarm          = alarms.MemoryMapErrorImm;        // 35xx36xx
-                            if ( mtu.EnergizerLastGaspImm   ) map.EnergizerLastGaspImmAlarm  = alarms.EnergizerLastGaspImm;     // 35xx36xx
-                            if ( mtu.GasCutWireAlarmImm     ) map.GasCutWireImmAlarm         = alarms.CutWireAlarmImm;          // 342x
-                            if ( mtu.SerialComProblemImm    ) map.SerialComProblemImmAlarm   = alarms.SerialComProblemImm;      // 34xx and 35xx36xx
-                            if ( mtu.LastGaspImm            ) map.LastGaspImmAlarm           = alarms.LastGaspImm;              // 34xx and 35xx36xx
-                            if ( mtu.TiltTamperImm          ) map.TiltImmAlarm               = alarms.TiltTamperImm;            // 35xx36xx
-                            if ( mtu.MagneticTamperImm      ) map.MagneticImmAlarm           = alarms.MagneticTamperImm;        // 35xx36xx
-                            if ( mtu.RegisterCoverTamperImm ) map.RegisterCoverImmAlarm      = alarms.RegisterCoverTamperImm;   // 35xx36xx
-                            if ( mtu.ReverseFlowTamperImm   ) map.ReverseFlowImmAlarm        = alarms.ReverseFlowTamperImm;     // 35xx36xx
-                            if ( mtu.SerialCutWireImm       ) map.SerialCutWireImmAlarm      = alarms.SerialCutWireImm;         // 342x
-                            if ( mtu.TamperPort1Imm         ) map.P1CutWireImmAlarm          = alarms.TamperPort1Imm;           // 34xx and 35xx36xx
-                            if ( usePort2 &&
-                                 mtu.TamperPort2Imm         ) map.P2CutWireImmAlarm          = alarms.TamperPort2Imm;           // 34xx and 35xx36xx
-
-                            // Ecoder alarms
-                            // 33xx, 34xx and 35xx36xx
-                            // NOTE: Same register is used to set both ports working with E-coder alarms
-                            if ( mtu.Ecoder )
-                            {
-                                if ( mtu.ECoderLeakDetectionCurrent ) map.ECoderLeakDetectionCurrent = alarms.ECoderLeakDetectionCurrent;
-                                if ( mtu.ECoderDaysOfLeak           ) map.ECoderDaysOfLeak           = alarms.ECoderDaysOfLeak;
-                                if ( mtu.ECoderDaysNoFlow           ) map.ECoderDaysNoFlow           = alarms.ECoderDaysNoFlow;
-                                if ( mtu.ECoderReverseFlow          ) map.ECoderReverseFlow          = alarms.ECoderReverseFlow;
-                            }
-
-                            // OnDemand 1.2 alarms
-                            // 35xx36xx
-                            if ( mtu.MtuDemand )
-                            {
-                                // NOTE: VSWR alarm is set in the factory
-                                if ( mtu.MoistureDetect     ) map.MoistureAlarm          = alarms.MoistureDetect;
-                                if ( mtu.ProgramMemoryError ) map.ProgramMemoryAlarm     = alarms.ProgramMemoryError;
-                                if ( mtu.MemoryMapError     ) map.MemoryMapAlarm         = alarms.MemoryMapError;
-                                if ( mtu.EnergizerLastGasp  ) map.EnergizerLastGaspAlarm = alarms.EnergizerLastGasp;
-                            }
-
-                            // Write directly ( without conditions )
-                            // NOTE: Only will be one entry for each alarm in Add block in the
-                            // NOTE: log, because both alarms are configured with the same value
-                            map.ImmediateAlarm = alarms.ImmediateAlarmTransmit;                                                     // 31xx32xx, 33xx, 34xx and 35xx36xx
-                            if ( map.ContainsMember ( "P2ImmediateAlarm" ) ) map.P2ImmediateAlarm = alarms.ImmediateAlarmTransmit;  // 31xx32xx, 33xx, 34xx and 35xx36xx
-                            if ( map.ContainsMember ( "UrgentAlarm"      ) ) map.UrgentAlarm      = alarms.DcuUrgentAlarm;          // 31xx32xx, 33xx and 342x
-                            if ( map.ContainsMember ( "P2UrgentAlarm"    ) ) map.P2UrgentAlarm    = alarms.DcuUrgentAlarm;          // 31xx32xx, 33xx and 342x
-                            
-                            // Overlap count
-                            map.MessageOverlapCount = alarms.Overlap;               // 31xx32xx, 33xx, 34xx and 35xx36xx
-                            if ( usePort2 &&                     
-                                 map.ContainsMember ( "P2MessageOverlapCount" ) )
-                                map.P2MessageOverlapCount = alarms.Overlap;         // 31xx32xx and 33xx
-
-                            // Type of alarm to send [ 0 Wire, 1 Tilt, 2 Magnetic, 3 Other ]
-                            // 33xx
-                            // NOTE: Both AlarmMask should be set to zero always
-                            if ( map.ContainsMember ( "AlarmMask1" ) ) map.AlarmMask1 = false; // Set '0'
-                            if ( map.ContainsMember ( "AlarmMask2" ) ) map.AlarmMask2 = false;
+                            if ( mtu.ECoderLeakDetectionCurrent ) SetIfInTheMap ( "ECoderLeakDetectionCurrent", alarms.ECoderLeakDetectionCurrent );
+                            if ( mtu.ECoderDaysOfLeak           ) SetIfInTheMap ( "ECoderDaysOfLeak",           alarms.ECoderDaysOfLeak );
+                            if ( mtu.ECoderDaysNoFlow           ) SetIfInTheMap ( "ECoderDaysNoFlow",           alarms.ECoderDaysNoFlow );
+                            if ( mtu.ECoderReverseFlow          ) SetIfInTheMap ( "ECoderReverseFlow",          alarms.ECoderReverseFlow );
                         }
-                        catch (Exception e) { Console.WriteLine($"mtucomm.cs_addmtu {e.Message}"); }
+
+                        // OnDemand 1.2 alarms
+                        // 35xx36xx
+                        if ( mtu.MtuDemand )
+                        {
+                            // NOTE: VSWR alarm is set in the factory
+                            if ( mtu.MoistureDetect     ) SetIfInTheMap ( "MoistureAlarm",          alarms.MoistureDetect );
+                            if ( mtu.ProgramMemoryError ) SetIfInTheMap ( "ProgramMemoryAlarm",     alarms.ProgramMemoryError );
+                            if ( mtu.MemoryMapError     ) SetIfInTheMap ( "MemoryMapAlarm",         alarms.MemoryMapError );
+                            if ( mtu.EnergizerLastGasp  ) SetIfInTheMap ( "EnergizerLastGaspAlarm", alarms.EnergizerLastGasp );
+                        }
+
+                        // Write directly ( without conditions )
+                        // NOTE: Only will be one entry for each alarm in Add block in the
+                        // NOTE: log, because both alarms are configured with the same value
+                        SetIfInTheMap ( "ImmediateAlarm", alarms.ImmediateAlarmTransmit );  // 31xx32xx, 33xx, 34xx and 35xx36xx
+                        SetIfInTheMap ( "UrgentAlarm",    alarms.DcuUrgentAlarm );          // 31xx32xx, 33xx and 342x
+                        if ( usePort2 )
+                        {
+                            SetIfInTheMap ( "P2ImmediateAlarm", alarms.ImmediateAlarmTransmit );  // 31xx32xx, 33xx, 34xx and 35xx36xx
+                            SetIfInTheMap ( "P2UrgentAlarm",    alarms.DcuUrgentAlarm );          // 31xx32xx, 33xx and 342x
+                        }
+                        
+                        // Overlap count
+                        SetIfInTheMap ( "MessageOverlapCount", alarms.Overlap );                   // 31xx32xx, 33xx, 34xx and 35xx36xx
+                        if ( usePort2 )
+                            SetIfInTheMap ( "P2MessageOverlapCount", alarms.Overlap ); // 31xx32xx and 33xx
+
+                        // Type of alarm to send [ 0 Wire, 1 Tilt, 2 Magnetic, 3 Other ]
+                        // 33xx
+                        // NOTE: Both AlarmMask should be set to zero always
+                        SetIfInTheMap ( "AlarmMask1", false ); // Set '0'
+                        SetIfInTheMap ( "AlarmMask2", false );
                     }
                     // No alarm profile was selected before launch the action
                     else throw new SelectedAlarmForCurrentMtuException ();
@@ -3252,22 +3258,29 @@ namespace MTUComm
                 if ( mtu.RequiresAlarmProfile )
                 {
                     Alarm alarms = ( Alarm )Data.Get[ APP_FIELD.Alarm.ToString () ];
-                    
+
+                    // Check if the current memory map contains the register to write, to avoid errors in
+                    // the configuration files or trying to set second port alarms when it is not necessary
+                    dynamic SetIfInTheMap = new Func<string,dynamic,Task> (
+                        async ( regName, value ) => {
+                            if ( map.ContainsMember ( regName ) )
+                                await map[ regName ].SetValueToMtu ( value );
+                        });
+
                     // PCI Alarm needs to be set after MTU is turned on, just before the read MTU
                     // The Status will show enabled during install and actual status (triggered) during the read
                     // 31xx32xx, 34xx and 35xx36xx
                     if ( mtu.InterfaceTamper )
-                        await map.InterfaceAlarm.SetValueToMtu ( alarms.InterfaceTamper );
+                        await SetIfInTheMap ( "InterfaceAlarm", alarms.InterfaceTamper );
                     
                     // 31xx32xx
                     if ( usePort2 &&
-                         mtu.InterfaceTamper &&
-                         map.ContainsMember ( "P2InterfaceAlarm" ) )
-                        await map.P2InterfaceAlarm.SetValueToMtu ( alarms.InterfaceTamper );
+                         mtu.InterfaceTamper )
+                        await SetIfInTheMap ( "P2InterfaceAlarm", alarms.InterfaceTamper );
 
                     // 34xx and 35xx36xx
                     if ( mtu.InterfaceTamperImm )
-                        await map.InterfaceImmAlarm.SetValueToMtu ( alarms.InterfaceTamperImm );
+                        await SetIfInTheMap ( "InterfaceImmAlarm", alarms.InterfaceTamperImm );
                 }
 
                 #endregion

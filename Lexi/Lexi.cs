@@ -351,12 +351,21 @@ namespace Lexi
 
         public static void ShowPopupAttemps ()
         {
-            return;
+            #if DEBUG
+
             if ( currrentAttemps > 0 )
                 errorsLog.AppendLine ( "Error with " + currrentAttemps + " attempt/s" );
 
-            if ( ! string.IsNullOrEmpty ( errorsLog.ToString () ) )
-                PageLinker.ShowAlert ( "Com.Errors", errorsLog.ToString () );
+            string str = errorsLog.ToString ();
+
+            if ( ! string.IsNullOrEmpty ( str ) )
+            {
+                if ( Data.Get.IsFromScripting )
+                     Utils.Print ( "Com.Errors" + "\n" + str );
+                else PageLinker.ShowAlert ( "Com.Errors", str );
+            }
+            
+            #endif
         }
 
         public static void ResetAttemptsCounter ()
@@ -496,6 +505,12 @@ namespace Lexi
                 }
                 catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
                 {
+                    #if DEBUG
+
+                    Utils.Print ( "Read Error: " + ( attempts + 1 ) + " <= " + maxAttempts + " [ Address: " + address + " ]" );
+
+                    #endif
+
                     if ( ++attempts <= maxAttempts )
                     {
                         #if DEBUG
@@ -760,6 +775,12 @@ namespace Lexi
                 }
                 catch ( Exception e ) when ( Data.SaveIfDotNetAndContinue ( e ) )
                 {
+                    #if DEBUG
+
+                    Utils.Print ( "Write Error: " + ( attempts + 1 ) + " <= " + maxAttempts + " [ Avoid ACK: " + avoidACK + " | Address or Cmd: " + addressOrLexiCmd + " ]" );
+
+                    #endif
+
                     // NOTE: Avoiding ACK is due to the special case related to the new encryption process, where
                     // NOTE: STAR Programmer does not take into account whether LExI commands work or not ( correct ACK = 0x06 )
                     if ( avoidACK &&

@@ -833,18 +833,22 @@ namespace aclara_meters.view
                         indicator.IsVisible = false;
                         ContentView_Scripting.IsEnabled = true;
                         ContentView_Scripting_label_read.Text = "Script Execution Error";
-                                            
-                        Device.OpenUri ( new Uri ( resultCallback + "?" +
-                                                   "status=error" +
-                                                   Compression.GetUriParameter () +
-                                                   "&message=" + Compression.CompressToUrlUsingGlobal ( "Error code: " + error.Id + "\n" + error.MessagePopup ) +
-                                                   "&output_filename=" + resultScriptName +
-                                                   "&output_data=" + Compression.CompressToUrlUsingGlobal ( Errors.lastErrorLogGenerated ) ) );
 
-                        FormsApp.ble_interface.Close ();
+                        Lexi.Lexi.ShowPopupAttemps ();
 
-                        // Close the app
-                        System.Diagnostics.Process.GetCurrentProcess ().Kill ();
+                        if ( ! Singleton.Get.Configuration.Global.NoKillInScripted )
+                        {
+                            Device.OpenUri ( new Uri ( resultCallback + "?" +
+                                                    "status=error" +
+                                                    Compression.GetUriParameter () +
+                                                    "&message=" + Compression.CompressToUrlUsingGlobal ( "Error code: " + error.Id + "\n" + error.MessagePopup ) +
+                                                    "&output_filename=" + resultScriptName +
+                                                    "&output_data=" + Compression.CompressToUrlUsingGlobal ( Errors.lastErrorLogGenerated ) ) );
+
+                            FormsApp.ble_interface.Close ();
+
+                            System.Diagnostics.Process.GetCurrentProcess ().Kill ();
+                        }
                     });
                 });
             });
@@ -910,16 +914,21 @@ namespace aclara_meters.view
                             indicator.IsVisible = false;
                             ContentView_Scripting.IsEnabled = true;
                             ContentView_Scripting_label_read.Text = "Successful Script Execution";
-                                                       
-                            Device.OpenUri ( new Uri ( resultCallback + "?" +
-                                                       "status=success" +
-                                                       Compression.GetUriParameter () +
-                                                       "&output_filename=" + resultScriptName +
-                                                       "&output_data=" + Compression.CompressToUrlUsingGlobal ( xmlResultTocallback ) ) );
+
+                            Lexi.Lexi.ShowPopupAttemps ();
+
+                            if ( ! Singleton.Get.Configuration.Global.NoKillInScripted )
+                            {
+                                Device.OpenUri ( new Uri ( resultCallback + "?" +
+                                                    "status=success" +
+                                                    Compression.GetUriParameter () +
+                                                    "&output_filename=" + resultScriptName +
+                                                    "&output_data=" + Compression.CompressToUrlUsingGlobal ( xmlResultTocallback ) ) );
                             
-                            FormsApp.ble_interface.Close();
+                                FormsApp.ble_interface.Close ();
                             
-                            System.Diagnostics.Process.GetCurrentProcess().Kill();
+                                System.Diagnostics.Process.GetCurrentProcess().Kill();
+                            }
                         });
     
                     }

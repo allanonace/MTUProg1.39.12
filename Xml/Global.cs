@@ -635,6 +635,8 @@ namespace Xml
             // LExI communication attempts
             this.LexiAttempts                 = DEF_LEXI_ATTEMPTS;
             this.LexiTimeout                  = DEF_LEXI_TIMEOUT * 1000;  // to milliseconds
+
+            this.NoKillInScripted             = false;
         
             #region Collections
         
@@ -1101,6 +1103,9 @@ namespace Xml
             }
             get { return this.LexiAttempts.ToString (); }
         }
+
+        [XmlElement("NoKillInScripted")]
+        public bool NoKillInScripted { get; set; }
 
         #endregion
 
