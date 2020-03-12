@@ -2991,6 +2991,7 @@ namespace MTUComm
                         // the configuration files or trying to set second port alarms when it is not necessary
                         dynamic SetIfInTheMap = new Action<string,dynamic> (
                             ( regName, value ) => {
+                                regName = regName.Trim ();
                                 if ( map.ContainsMember ( regName ) )
                                     map[ regName ].SetValue ( value );
                             });
@@ -3021,7 +3022,7 @@ namespace MTUComm
                         if ( mtu.CutWireDelaySetting    ) SetIfInTheMap ( "CutWireDelaySetting",         alarms.CutWireDelaySetting );      // 34xx and 35xx36xx
 
                         // Set immediate alarms [ Alarm Message Immediate ]
-                        if ( mtu.InsufficientMemoryImm  ) SetIfInTheMap ( "InsufficientMemoryImmAlarm ", alarms.InsufficientMemoryImm );    // 34xx and 35xx36xx
+                        if ( mtu.InsufficientMemoryImm  ) SetIfInTheMap ( "InsufficientMemoryImmAlarm",  alarms.InsufficientMemoryImm );    // 34xx and 35xx36xx
                         if ( mtu.MoistureDetectImm      ) SetIfInTheMap ( "MoistureImmAlarm",            alarms.MoistureDetectImm );        // 35xx36xx
                         if ( mtu.ProgramMemoryErrorImm  ) SetIfInTheMap ( "ProgramMemoryImmAlarm",       alarms.ProgramMemoryErrorImm );    // 35xx36xx
                         if ( mtu.MemoryMapErrorImm      ) SetIfInTheMap ( "MemoryMapImmAlarm",           alarms.MemoryMapErrorImm );        // 35xx36xx
@@ -3063,16 +3064,16 @@ namespace MTUComm
                         // Write directly ( without conditions )
                         // NOTE: Only will be one entry for each alarm in Add block in the
                         // NOTE: log, because both alarms are configured with the same value
-                        SetIfInTheMap ( "ImmediateAlarm", alarms.ImmediateAlarmTransmit );  // 31xx32xx, 33xx, 34xx and 35xx36xx
-                        SetIfInTheMap ( "UrgentAlarm",    alarms.DcuUrgentAlarm );          // 31xx32xx, 33xx and 342x
+                        SetIfInTheMap ( "ImmediateAlarm", alarms.ImmediateAlarmTransmit ); // 31xx32xx, 33xx, 34xx and 35xx36xx
+                        SetIfInTheMap ( "UrgentAlarm",    alarms.DcuUrgentAlarm );         // 31xx32xx, 33xx and 342x
                         if ( usePort2 )
                         {
-                            SetIfInTheMap ( "P2ImmediateAlarm", alarms.ImmediateAlarmTransmit );  // 31xx32xx, 33xx, 34xx and 35xx36xx
-                            SetIfInTheMap ( "P2UrgentAlarm",    alarms.DcuUrgentAlarm );          // 31xx32xx, 33xx and 342x
+                            SetIfInTheMap ( "P2ImmediateAlarm", alarms.ImmediateAlarmTransmit ); // 31xx32xx, 33xx, 34xx and 35xx36xx
+                            SetIfInTheMap ( "P2UrgentAlarm",    alarms.DcuUrgentAlarm );         // 31xx32xx, 33xx and 342x
                         }
                         
                         // Overlap count
-                        SetIfInTheMap ( "MessageOverlapCount", alarms.Overlap );                   // 31xx32xx, 33xx, 34xx and 35xx36xx
+                        SetIfInTheMap ( "MessageOverlapCount", alarms.Overlap );       // 31xx32xx, 33xx, 34xx and 35xx36xx
                         if ( usePort2 )
                             SetIfInTheMap ( "P2MessageOverlapCount", alarms.Overlap ); // 31xx32xx and 33xx
 
@@ -3263,6 +3264,7 @@ namespace MTUComm
                     // the configuration files or trying to set second port alarms when it is not necessary
                     dynamic SetIfInTheMap = new Func<string,dynamic,Task> (
                         async ( regName, value ) => {
+                            regName = regName.Trim ();
                             if ( map.ContainsMember ( regName ) )
                                 await map[ regName ].SetValueToMtu ( value );
                         });
@@ -3665,7 +3667,7 @@ namespace MTUComm
 
             // Removes the encryption key from the list of modified values to write to the MTU,
             // because it was already done during the ( old ) encryption process and it does not
-            // make sense to repeat the write, in addition that reduced the number of times an MTU can be encrypted
+            // make sense to repeat the write, in addition that it reduces the number of times an MTU can be encrypted
             // NOTE: Linq's Single and First methods return an exception if no entry matches the condition
             modifiedRegisters.Remove ( modifiedRegisters.SingleOrDefault ( reg => reg.id.ToUpper ().Equals ( "EncryptionKey".ToUpper () ) ) );
 
