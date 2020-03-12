@@ -38,7 +38,7 @@ namespace MTUComm
             // Error trying to start the event log query
             { new MtuQueryEventLogsException (),                104 },
             // Get next event log process has failed trying to recover data from the MTU
-            { new AttemptNotAchievedGetEventsLogException (),   105 },
+            { new AttemptNotAchievedGetEventsLogException (),   105 }, // NOTE: Not used because it fills the log list
             // Historical Read process can't be performed because the MTU is busy
             { new MtuIsBusyToGetEventsLogException (),          106 },
             // Historical Read process can't be performed after having tried it several times

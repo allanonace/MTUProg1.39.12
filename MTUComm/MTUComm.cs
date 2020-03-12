@@ -1471,7 +1471,8 @@ namespace MTUComm
                         Utils.Print ( "Data Read: Error trying to recover the next event [ Attempts " + countAttemptsEr + " / " + maxAttemptsEr + " ]" );
 
                         // Try one more time
-                        Errors.AddError ( new AttemptNotAchievedGetEventsLogException () );
+                        // NOTE: Not used because it fills the log list
+                        // Errors.AddError ( new AttemptNotAchievedGetEventsLogException () );
 
                         // Try again, using this time Get Repeat Last Event Log Response command
                         // NOTE: It is very strange how works the MTU if a LExI command fails and you use the
