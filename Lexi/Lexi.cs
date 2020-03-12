@@ -509,22 +509,15 @@ namespace Lexi
 
                     Utils.Print ( "Read Error: " + ( attempts + 1 ) + " <= " + maxAttempts + " [ Address: " + address + " ]" );
 
+                    if ( attempts == 0 )
+                         Lexi.AddNewError ();
+                    else Lexi.AddAttempt ();
+
                     #endif
 
                     if ( ++attempts <= maxAttempts )
-                    {
-                        #if DEBUG
-
-                        if ( attempts == 1 )
-                             Lexi.AddNewError ();
-                        else Lexi.AddAttempt ();
-
-                        #endif
-
-                        await Task.Delay ( WAIT_BTW_LEXI_ATTEMPTS * 1000 );
-                    }
-                    else
-                        throw;                  
+                         await Task.Delay ( WAIT_BTW_LEXI_ATTEMPTS * 1000 );
+                    else throw;
                 }
             }
             while ( attempts <= maxAttempts );
@@ -786,21 +779,20 @@ namespace Lexi
                     if ( avoidACK &&
                          Utils.IsSubclassOfGeneric ( typeof ( OwnSpecialExceptionsBase<> ), e.GetType () ) )
                         return ( ( OwnSpecialExceptionsBase<LexiWriteResult> ) e ).Response;
-
-                    else if ( ++attempts <= maxAttempts )
+                    else
                     {
                         #if DEBUG
 
-                        if ( attempts == 1 )
+                        if ( attempts == 0 )
                              Lexi.AddNewError ();
                         else Lexi.AddAttempt ();
 
                         #endif
 
-                        await Task.Delay ( WAIT_BTW_LEXI_ATTEMPTS * 1000 );
+                        if ( ++attempts <= maxAttempts )
+                             await Task.Delay ( WAIT_BTW_LEXI_ATTEMPTS * 1000 );
+                        else throw;
                     }
-                    else
-                        throw;                  
                 }
             }
             while ( attempts <= maxAttempts );

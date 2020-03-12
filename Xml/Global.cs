@@ -479,7 +479,7 @@ namespace Xml
         private const int MIN_LEXI_ATTEMPTS = 1;  // Original/initial attempt + 1 = 2
         public  const int MAX_LEXI_ATTEMPTS = 10; // Original/initial attempt + 10 = 11
         private const int DEF_LEXI_TIMEOUT  = 10;
-        private const int MIN_LEXI_TIMEOUT  = 5;  // Seconds
+        private const int MIN_LEXI_TIMEOUT  = 1;  // Seconds
         public  const int MAX_LEXI_TIMEOUT  = 30; // Seconds
         public  const int DEF_DAILY_READS   = 13;
         public  const int MIN_DAILY_READS   = 0;
