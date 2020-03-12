@@ -265,6 +265,7 @@ namespace Xml
             }
         }
 
+        // NOTE: For families 345x, 35xx and 36xx
         [XmlIgnore]
         public bool IsFamily35xx36xx
         {
@@ -273,7 +274,8 @@ namespace Xml
                 if ( this.HasFamilySet )
                     return this.family == Family._35xx36xx;
 
-                return this.HexNum.StartsWith ( "35" ) ||
+                return this.HexNum.StartsWith ( "345" ) ||
+                       this.HexNum.StartsWith ( "35" ) ||
                        this.HexNum.StartsWith ( "36" );
             }
         }

@@ -545,7 +545,8 @@ namespace MTUComm
 
             // Avoid try to log encryption info when not it has not been performed
             if ( map.ContainsMember( "Encrypted" ) &&
-                 await map.Encrypted.GetValueFromMtu () )
+                 await map.Encrypted.GetValueFromMtu () &&
+                 this.mtu.SpecialSet )
             {
                 //logger.Parameter ( this.addMtuAction, new Parameter ( "Encryption", "Encrypted", map.Encryption.GetValue () ) );
                 Logger.AddParameter ( this.addMtuAction,
