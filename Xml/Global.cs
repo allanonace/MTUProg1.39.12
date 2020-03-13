@@ -602,11 +602,11 @@ namespace Xml
             // Node Discovery
             this.AutoRFCheck                  = false;                // It is used within the condition that allows to perform the Node Discovery process with OnDemand 1.2 MTUs
             this.MinNumDCU                    = 1;                    // Minimum number of DCUs
-            this.GoodNumDCU                   = 3;                    // Good number of DCUs
-            this.MinF1Rely                    = 75m;                  // Minimum F1 frequency threshold
-            this.MinF2Rely                    = 50m;                  // Minimum F2 frequency threshold
-            this.GoodF1Rely                   = 98.5m;                // Good F1 frequency threshold
-            this.GoodF2Rely                   = 75m;                  // Good F2 frequency threshold
+            this.GoodNumDCU                   = 1;                    // Good number of DCUs
+            this.MinF1Rely                    = 70m;                  // Minimum F1 frequency threshold
+            this.GoodF1Rely                   = 90m;                  // Good F1 frequency threshold
+            this.MinF2Rely                    = 70m;                  // Minimum F2 frequency threshold
+            this.GoodF2Rely                   = 90m;                  // Good F2 frequency threshold
             this.MaxTimeRFCheck               = 60;                   // Max time in seconds to perform the NodeDiscovery process ( Value set to NodeDiscoveryTime in STAR Programmer )
 
             // Remote Disconnect

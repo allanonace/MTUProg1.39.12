@@ -20,83 +20,60 @@ namespace MTUComm
     {
         #region Constants
 
+        private const short MIN_RSSI = -128; // ~0% probability
+        private const short MAX_RSSI = -84;  // 100% probability
+
         /// <summary>
         /// Table with pre-calculated values to easiest know the probability
         /// of establish a good transmission channel, based on signal strength ( RSSI ).
         /// </summary>
         public readonly static (short RSSI,decimal Probability)[] RSSI_and_Probability =
         {
-            ( -115, 0.002m  ), // ~0% probability
-            ( -114, 0.0154m ),
-            ( -113, 0.0288m ),
-            ( -112, 0.0422m ),
-            ( -111, 0.0556m ),
-            ( -110, 0.069m  ),
-            ( -109, 0.1134m ),
-            ( -108, 0.1578m ),
-            ( -107, 0.2022m ),
-            ( -106, 0.2466m ),
-            ( -105, 0.291m  ),
-            ( -104, 0.3426m ),
-            ( -103, 0.3942m ),
-            ( -102, 0.4458m ),
-            ( -101, 0.4974m ),
-            ( -100, 0.549m  ),
-            (  -99, 0.5894m ),
-            (  -98, 0.6298m ),
-            (  -97, 0.6702m ),
-            (  -96, 0.7106m ),
-            (  -95, 0.751m  ),
-            (  -94, 0.7776m ),
-            (  -93, 0.8042m ),
-            (  -92, 0.8308m ),
-            (  -91, 0.8574m ),
-            (  -90, 0.884m  ),
-            (  -89, 0.8962m ),
-            (  -88, 0.9084m ),
-            (  -87, 0.9206m ),
-            (  -86, 0.9328m ),
-            (  -85, 0.945m  ),
-            (  -84, 0.9506m ),
-            (  -83, 0.9562m ),
-            (  -82, 0.9618m ),
-            (  -81, 0.9674m ),
-            (  -80, 0.973m  ),
-            (  -79, 0.9758m ),
-            (  -78, 0.9786m ),
-            (  -77, 0.9814m ),
-            (  -76, 0.9842m ),
-            (  -75, 0.987m  ),
-            (  -74, 0.9882m ),
-            (  -73, 0.9894m ),
-            (  -72, 0.9906m ),
-            (  -71, 0.9918m ),
-            (  -70, 0.993m  ),
-            (  -69, 0.9938m ),
-            (  -68, 0.9946m ),
-            (  -67, 0.9954m ),
-            (  -66, 0.9962m ),
-            (  -65, 0.997m  ),
-            (  -64, 0.9972m ),
-            (  -63, 0.9974m ),
-            (  -62, 0.9976m ),
-            (  -61, 0.9978m ),
-            (  -60, 0.998m  ),
-            (  -59, 0.9982m ),
-            (  -58, 0.9984m ),
-            (  -57, 0.9986m ),
-            (  -56, 0.9988m ),
-            (  -55, 0.999m  ),
-            (  -54, 0.999m  ),
-            (  -53, 0.999m  ),
-            (  -52, 0.999m  ),
-            (  -51, 0.999m  ),
-            (  -50, 0.999m  ),
-            (  -49, 0.9992m ),
-            (  -48, 0.9994m ),
-            (  -47, 0.9996m ),
-            (  -46, 0.9998m ),
-            (  -45, 1m      )  // 100% probability
+            ( -128,   0.00m ), // ~0% probability
+            ( -127,  20.57m ),
+            ( -126,  36.90m ),
+            ( -125,  49.88m ),
+            ( -124,  60.19m ),
+            ( -123,  68.38m ),
+            ( -122,  74.88m ),
+            ( -121,  80.05m ),
+            ( -120,  84.15m ),
+            ( -119,  87.41m ),
+            ( -118,  90.00m ),
+            ( -117,  92.06m ),
+            ( -116,  93.69m ),
+            ( -115,  94.99m ),
+            ( -114,  96.02m ),
+            ( -113,  96.84m ),
+            ( -112,  97.49m ),
+            ( -111,  98.00m ),
+            ( -110,  98.42m ),
+            ( -109,  98.74m ),
+            ( -108,  99.00m ),
+            ( -107,  99.21m ),
+            ( -106,  99.37m ),
+            ( -105,  99.50m ),
+            ( -104,  99.60m ),
+            ( -103,  99.68m ),
+            ( -102,  99.75m ),
+            ( -101,  99.80m ),
+            ( -100,  99.84m ),
+            (  -99,  99.87m ),
+            (  -98,  99.90m ),
+            (  -97,  99.92m ),
+            (  -96,  99.94m ),
+            (  -95,  99.95m ),
+            (  -94,  99.96m ),
+            (  -93,  99.97m ),
+            (  -92,  99.97m ),
+            (  -91,  99.98m ),
+            (  -90,  99.98m ),
+            (  -89,  99.98m ),
+            (  -88,  99.99m ),
+            (  -87,  99.99m ),
+            (  -86,  99.99m ),
+            (  -85,  99.99m ),
+            (  -84, 100.00m )  // 100% probability
         };
 
         /// <summary>
@@ -320,13 +297,13 @@ namespace MTUComm
         /// between the MTU and a node/DCU, based on signal strength ( RSSI ).
         /// </summary>
         /// <remarks>
-        /// The signal strength -45 is very difficult to achieve, because it
+        /// The signal strength MAX_RSSI is very difficult to achieve, because it
         /// is the perfect signal, which allows a perfectly estable transfer.
         /// <para>
-        /// By default, the minimum acceptable probability for channel F1 ( slow ) is 0.75 and for channel F2 ( fast ) is 0.5;
+        /// By default, the minimum acceptable probability for channel F1 ( slow ) and channel F2 ( fast ) is 0.70.
         /// </para>
         /// <para>
-        /// By default, the desired probability for channel F1 ( slow ) is 0.985 and for channel F2 ( fast ) is 0.75.
+        /// By default, the desired probability for channel F1 ( slow ) and channel F2 ( fast ) is 0.90.
         /// </para>
         /// </remarks>
         /// <param name="rssi">Signal strength</param>
@@ -337,14 +314,22 @@ namespace MTUComm
             ( short RSSI, decimal Probability )[] entries = RSSI_and_Probability
                 .Where ( entry => entry.RSSI == rssi )
                 .ToArray ();
+            
+            // Normalize probability [0,1]
+            for ( int i = 0; i < entries.Length; i++ )
+            {
+                var entry = entries[ i ];
+                entry.Probability /= 100m;
+                entries[ i ] = entry;
+            }
 
             if ( entries.Length > 0 )
                 return entries[ 0 ].Probability;
             else
             {
-                if ( rssi >= -45 )
+                if ( rssi >= MAX_RSSI )
                      return 1m; // 100% probability because the signal strength is very good 
-                else return 0m; // rssi <= -115, 0% probability because the signal strength is very small
+                else return 0m; // rssi <= MIN_RSSI, 0% probability because the signal strength is very small
             }
         }
     
