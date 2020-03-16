@@ -22,8 +22,8 @@ namespace MTUComm
 {
     /// <summary>
     /// Generic representation of the supported actions, with all the information
-    /// and events required to be able to execute the action and stablish a bidirectional
-    /// communicate between the view ( UI or script ) and the controller ( logic ).
+    /// and events required to be able to execute the action and establish a bidirectional
+    /// communication between the view ( UI or script ) and the controller ( logic ).
     /// <para>
     /// See <see cref="ActionType"/> for a list of available actions.
     /// </para>
@@ -196,6 +196,14 @@ namespace MTUComm
         ///     <description>Installation confirmation process a.k.a. RFCheck</description>
         /// </item>
         /// <item>
+        ///     <term>ActionType.RFCheck</term>
+        ///     <description>Installation confirmation process</description>
+        /// </item>
+        /// <item>
+        ///     <term>ActionType.ValveOperation</term>
+        ///     <description>Remote Disconnect process</description>
+        /// </item>
+        /// <item>
         ///     <term>ActionType.ReadFabric</term>
         ///     <description>Fast test method to know if the app can read from an MTU</description>
         /// </item>
@@ -295,7 +303,7 @@ namespace MTUComm
         /// <summary>
         /// Name of the user that is executing the action, that in interactive
         /// mode is who has logged-in and in scripted mode is the string set
-        /// in username tag in script file.
+        /// in username tag in the script file.
         /// </summary>
         public string User
         {
@@ -303,7 +311,7 @@ namespace MTUComm
         }
 
         /// <summary>
-        /// Represents current MTU.
+        /// Represents the current MTU.
         /// </summary>
         public Mtu CurrentMtu
         {
@@ -412,8 +420,25 @@ namespace MTUComm
         {
             get
             {
+                return this.IsReplaceMtu ||
+                       this.IsReplaceMeter;
+            }
+        }
+
+        public bool IsReplaceMtu
+        {
+            get
+            {
+                return this.type == ActionType.ReplaceMTU ||
+                       this.type == ActionType.ReplaceMtuReplaceMeter;
+            }
+        }
+
+        public bool IsReplaceMeter
+        {
+            get
+            {
                 return this.type == ActionType.AddMtuReplaceMeter ||
-                       this.type == ActionType.ReplaceMTU         ||
                        this.type == ActionType.ReplaceMeter       ||
                        this.type == ActionType.ReplaceMtuReplaceMeter;
             }
@@ -679,28 +704,21 @@ namespace MTUComm
 
         #region Parameters
 
-        public void AddParameter (Parameter parameter)
+        public void AddParameter (
+            Parameter parameter )
         {
-            scriptParameters.Add(parameter);
+            scriptParameters.Add ( parameter );
         }
 
-        public void AddAdditionalParameter ( Parameter parameter )
+        public void AddAdditionalParameter (
+            Parameter parameter )
         {
             this.additionalScriptParameters.Add ( parameter );
         }
 
-        /*
-        public void AddParameter ( MtuForm form )
+        public Parameter[] GetParameters ()
         {
-            Parameter[] addMtuParams = form.GetParameters ();
-            foreach ( Parameter parameter in addMtuParams )
-                scriptParameters.Add (parameter);
-        }
-        */
-
-        public Parameter[] GetParameters()
-        {
-            return scriptParameters.ToArray();
+            return scriptParameters.ToArray ();
         }
 
         public bool ContainsParameter (
@@ -712,9 +730,12 @@ namespace MTUComm
                 p.Port == portIndex ) != null;
         }
 
-        public Parameter GetParameterByTag(string tag, int port = -1)
+        public Parameter GetParameterByTag (
+            string tag,
+            int port = -1 )
         {
-            return scriptParameters.Find(x => x.getLogTag().Equals(tag) && ( port == -1 || x.Port == port ) );
+            return scriptParameters.Find ( x => x.getLogTag ().Equals ( tag ) &&
+                                                ( port == -1 || x.Port == port ) );
         }
 
         public Parameter GetParameterByType (
@@ -722,7 +743,7 @@ namespace MTUComm
             int portIndex = -1 )
         {
             return scriptParameters.Find ( p => p.Type == type &&
-                                           ( portIndex == -1 || p.Port == portIndex ) );
+                                                ( portIndex == -1 || p.Port == portIndex ) );
         }
 
         #endregion
@@ -912,7 +933,7 @@ namespace MTUComm
         #region OnEvents
 
         /// <summary>
-        /// Method invoked after have completing correctly a <see cref="ActionType"/>.ReadFabric
+        /// Method invoked after successfully completing a <see cref="ActionType"/>.ReadFabric
         /// action, without exceptions.
         /// <para>
         /// See <see cref="MTUComm.OnReadFabric"/> for the associated event ( XAML <- Action <- MTUComm ).
@@ -938,7 +959,7 @@ namespace MTUComm
         }
 
         /// <summary>
-        /// Method invoked after have completing correctly a <see cref="ActionType"/>.ReadMtu
+        /// Method invoked after successfully completing a <see cref="ActionType"/>.ReadMtu
         /// action, without exceptions.
         /// <para>
         /// See <see cref="MTUComm.OnReadMtu"/> for the associated event ( XAML <- Action <- MTUComm ).
@@ -994,7 +1015,7 @@ namespace MTUComm
         }
 
         /// <summary>
-        /// Method invoked after have completing correctly a writing ( <see cref="ActionType"/>.Add|Replace ) action,
+        /// Method invoked after successfully completing an installation ( <see cref="ActionType"/>.Add|Replace ),
         /// without exceptions.
         /// <para>
         /// See <see cref="MTUComm.OnAddMtu"/> for the associated event ( XAML <- Action <- MTUComm ).
@@ -1002,8 +1023,8 @@ namespace MTUComm
         /// </summary>
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.</returns>
-        /// <seealso cref="MTUComm.AddMtu_Scripting(Action)"/>
-        /// <seealso cref="MTUComm.AddMtu(dynamic, string, Action)"/>
+        /// <seealso cref="MTUComm.AddMtu_Scripting"/>
+        /// <seealso cref="MTUComm.AddMtu"/>
         private async Task OnAddMtu ( Delegates.ActionArgs args )
         {
             try
@@ -1047,7 +1068,7 @@ namespace MTUComm
         }
 
         /// <summary>
-        /// Method invoked after have completing correctly a <see cref="ActionType"/>.TurnOffMtu
+        /// Method invoked after successfully completing a <see cref="ActionType"/>.TurnOffMtu
         /// or TurnOnMtu action, without exceptions.
         /// <para>
         /// See <see cref="MTUComm.OnTurnOffMtu"/> and <see cref="MTUComm.OnTurnOnMtu"/> for the events associated ( XAML <- Action <- MTUComm ).
@@ -1078,7 +1099,7 @@ namespace MTUComm
         }
 
         /// <summary>
-        /// Method invoked after have completing correctly a <see cref="ActionType"/>.DataRead
+        /// Method invoked after successfully completing a <see cref="ActionType"/>.DataRead
         /// action, without exceptions.
         /// <para>
         /// See <see cref="MTUComm.OnDataRead"/> for the associated event ( XAML <- Action <- MTUComm ).
@@ -1086,8 +1107,8 @@ namespace MTUComm
         /// </summary>
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.</returns>
+        /// <seealso cref="MTUComm.DataRead_Scripting"/>
         /// <seealso cref="MTUComm.DataRead"/>
-        /// <seealso cref="MTUComm.DataRead_Scripting(Action)"/>
         private async Task OnDataRead ( Delegates.ActionArgs args )
         {
             try
@@ -1134,6 +1155,17 @@ namespace MTUComm
             }
         }
 
+        /// <summary>
+        /// Method invoked after successfully completing a <see cref="ActionType"/>.ValveOperation
+        /// action, without exceptions.
+        /// <para>
+        /// See <see cref="MTUComm.OnRemoteDisconnect"/> for the associated event ( XAML <- Action <- MTUComm ).
+        /// </para>
+        /// </summary>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
+        /// <seealso cref="MTUComm.RemoteDisconnect_Scripting"/>
+        /// <seealso cref="MTUComm.RemoteDisconnect"/>
         private async Task OnRemoteDisconnect ( Delegates.ActionArgs args )
         {
             try
@@ -1163,6 +1195,17 @@ namespace MTUComm
             }
         }
 
+        /// <summary>
+        /// Method invoked after successfully completing a Node Discovery process, which is part of
+        /// the <see cref="ActionType"/>.MtuInstallationConfirmation action, without exceptions.
+        /// <para>
+        /// See <see cref="MTUComm.OnRemoteDisconnect"/> for the associated event ( XAML <- Action <- MTUComm ).
+        /// </para>
+        /// </summary>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
+        /// <seealso cref="MTUComm.RemoteDisconnect_Scripting"/>
+        /// <seealso cref="MTUComm.RemoteDisconnect"/>
         private async Task OnNodeDiscovery ( Delegates.ActionArgs args )
         {
             try
@@ -1312,8 +1355,8 @@ namespace MTUComm
         #region Interface
 
         /// <summary>
-        /// Generates the list of ALL parameters, using the XML interface file
-        /// for the family of current MTU and the action performed.
+        /// Generates the list of all parameters, using the interface.xml file
+        /// for the family of the current MTU and the action performed.
         /// <para>
         /// This method does not filter depending on the output target,
         /// not taking into account the boolean tags 'log' ( file ) and 'interface' ( UI ).
@@ -1323,7 +1366,7 @@ namespace MTUComm
         /// </para>
         /// </summary>
         /// <param name="map"><see cref="MemoryMap"/> generated during the action</param>
-        /// <param name="mtu"><see cref="Mtu"/> that represents current MTU</param>
+        /// <param name="mtu"><see cref="Mtu"/> that represents the current MTU</param>
         /// <param name="actionType">Type of the action</param>
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.
@@ -1482,7 +1525,7 @@ namespace MTUComm
 
         /// <summary>
         /// Generates the list of parameters associated with the indicated port index, using
-        /// the XML interface file for the family of current MTU and the action performed.
+        /// the interface.xml file for the family of the current MTU and the action performed.
         /// </summary>
         /// <param name="indexPort">Index of the MTU <see cref="Port"/> to analize</param>
         /// <param name="parameters">List of parameters associated to the ports in the XML interface file to analize</param>
@@ -1722,15 +1765,15 @@ namespace MTUComm
         }
 
         /// <summary>
-        /// Evaluates the conditions listed in the parameters in the XML interface file, indicating
-        /// whether each parameter should be added to the generated log or not.
+        /// Evaluates the conditions listed in the parameters in the interface.xml file,
+        /// indicating whether each parameter should be added to the generated log or not.
         /// <para>
         /// See <see cref="ConditionObjet"/> for the nested class used to map parameters conditions.
         /// </para>
         /// </summary>
         /// <param name="conditionStr">Conditional sentence of the parameter, which can be an empty string</param>
         /// <param name="map"><see cref="MemoryMap"/> generated during the action</param>
-        /// <param name="mtu"><see cref="Mtu"/> that represents current MTU</param>
+        /// <param name="mtu"><see cref="Mtu"/> that represents the current MTU</param>
         /// <param name="portIndex">Index of the MTU <see cref="Port"/> to analize</param>
         /// <param name="meter"><see cref="Meter"/> used in the specified port</param>
         /// <returns>Task object required to execute the method asynchronously and

@@ -13,7 +13,7 @@ namespace MTUComm
     {    
         #region Constants
 
-        private const string ERROR_INFO  = "Information";
+        private const string ERROR_INFO = "Information";
 
         private Dictionary<Exception,int> ex2id = 
         new Dictionary<Exception,int> ()
@@ -60,7 +60,7 @@ namespace MTUComm
             //------
             // The Meter.xml file does not contain the Meter ID specified
             { new ScriptingAutoDetectMeterMissing (),           200 },
-            // Selected Meter is not supported for current MTU
+            // Selected Meter is not supported for the current MTU
             { new ScriptingAutoDetectNotSupportedException (),  201 },
             // The Meter.xml file does not contain the Meter type specified with the tags NumberOfDials, DriveDialSize and UnitOfMeasure
             { new ScriptingAutoDetectMeterException (),         202 },
@@ -130,14 +130,14 @@ namespace MTUComm
             
             // Alarm [ 4xx ]
             //------
-            // The alarm profile Scripting for current MTU is not defined in the Alarm.xml file
+            // The alarm profile Scripting for the current MTU is not defined in the Alarm.xml file
             { new ScriptingAlarmForCurrentMtuException (),      400 },
             // No alarm was selected but the MTU entry in Mtu.xml requires using an alarm
             { new SelectedAlarmForCurrentMtuException (),       401 },
 
             // Alarm [ 45x ]
             //------
-            // The demand profile Scripting for current MTU is not defined in the DemandConf.xml file
+            // The demand profile Scripting for the current MTU is not defined in the DemandConf.xml file
             { new ScriptingDemandForCurrentMtuException (),     450 },
             // No demand was selected but the MTU entry in Mtu.xml requires using one
             { new SelectedDemandForCurrentMtuException (),      451 },

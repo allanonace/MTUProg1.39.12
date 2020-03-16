@@ -509,6 +509,8 @@ namespace Lexi
 
                     Utils.Print ( "Read Error: " + ( attempts + 1 ) + " <= " + maxAttempts + " [ Address: " + address + " ]" );
 
+                    // The result will always be the original failed
+                    // attempt plus additional attempts failed too
                     if ( attempts == 0 )
                          Lexi.AddNewError ();
                     else Lexi.AddAttempt ();
@@ -783,6 +785,8 @@ namespace Lexi
                     {
                         #if DEBUG
 
+                        // The result will always be the original failed
+                        // attempt plus additional attempts failed too
                         if ( attempts == 0 )
                              Lexi.AddNewError ();
                         else Lexi.AddAttempt ();

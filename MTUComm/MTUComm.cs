@@ -46,6 +46,7 @@ namespace MTUComm
             OK        - The result of the initial validation process was affirmative for the current MTU and configuration files
             FAIL      - The result of the initial validation process was negative for the current MTU and configuration files
             EXCEPTION - The result of the initial validation process was negative for the current MTU and configuration files, due to an exception
+            FAMILY_NOT_SUPPORTED - The result of the initial validation process was negative for the current MTU, because it is not yet supported
         */
         public enum ValidationResult
         {
@@ -69,16 +70,20 @@ namespace MTUComm
             EXCEPTION
         }
 
+        /* Contants: MTU Basic Read
+            BASIC_READ_1_ADDRESS - Start address/byte of the first memory range of the current MTU to preload as part of the basic read = 0
+            BASIC_READ_1_DATA    - Length of the first memory range to preload = 32
+            BASIC_READ_2_ADDRESS - Start address/byte of the second memory range of the current MTU to preload as part of the basic read = 244
+            BASIC_READ_2_DATA    - Length of the second memory range to preload = 1
+            SAME_MTU_ADDRESS     - Start address/byte of the memory of the current MTU where the MTU type begins = 0
+            SAME_MTU_DATA        - Length of the MTU type data in the memory of the MTU = 10
+        */
         private const int BASIC_READ_1_ADDRESS     = 0;
         private const int BASIC_READ_1_DATA        = 32;
         private const int BASIC_READ_2_ADDRESS     = 244;
         private const int BASIC_READ_2_DATA        = 1;
-        private const int DEFAULT_OVERLAP          = 6;
-        private const int DEFAULT_LENGTH_AES       = 16;
         private const int SAME_MTU_ADDRESS         = 0;
         private const int SAME_MTU_DATA            = 10;
-        private const int WAIT_BTW_TURNOFF         = 500;
-        private const int TIMES_TURNOFF            = 3;
 
         /* Constants: LExI Read
             WAIT_BEFORE_PREPARE_MTU - Waiting time before preparing the MTU to perform the final reading = 1s
@@ -91,6 +96,13 @@ namespace MTUComm
             CMD_BYTE_RES - Byte index in the LExI commands response containing the result = 2
         */
         private const int CMD_BYTE_RES             = 2;
+
+        /* Constants: Turn On|Off
+            WAIT_BTW_TURNOFF - Waiting time between attempts to turn off the MTU = 0.5s
+            TIMES_TURNOFF    - Maximum number of attempts to try to turn off the MTU = 3
+        */
+        private const int WAIT_BTW_TURNOFF         = 500;
+        private const int TIMES_TURNOFF            = 3;
 
         /* Constants: Historical Read ( prev. Data Read )
             CMD_INIT_EVENT_LOGS   - Request code of the LExI command "START EVENT LOG QUERY" = 0x13 = 19
@@ -106,21 +118,21 @@ namespace MTUComm
             WAIT_BTW_LOGS         - Waiting time between after retrieving one record and requesting the next one = 0.1s
             WAIT_AFTER_EVENT_LOGS - Waiting time after having finished retrieving all logs stored in the MTU = 1s
         */
-        private const byte CMD_INIT_EVENT_LOGS     = 0x13; // 19
-        private const int  WAIT_BEFORE_LOGS        = 10000; // The host device should delay for at least 2 seconds to give the MTU time to begin the query
-        private const byte CMD_NEXT_EVENT_LOG      = 0x14; // 20
-        private const byte CMD_REPE_EVENT_LOG      = 0x15; // 21
-        private const int CMD_NEXT_EVENT_RES_1     = 25;   // Response ACK with log entry [0-24] = 25 bytes
-        private const int CMD_NEXT_EVENT_RES_2     = 5;    // Response ACK with no data [0-4] = 5 bytes
-        private const byte CMD_NEXT_EVENT_DATA     = 0x00; // ACK with log entry
-        private const byte CMD_NEXT_EVENT_EMPTY    = 0x01; // ACK without log entry ( query complete )
-        private const byte CMD_NEXT_EVENT_BUSY     = 0x02; // ACK without log entry ( MTU is busy or some error trying to recover next log entry )
+        private const byte CMD_INIT_EVENT_LOGS     = 0x13;
+        private const int  WAIT_BEFORE_LOGS        = 10000;
+        private const byte CMD_NEXT_EVENT_LOG      = 0x14;
+        private const byte CMD_REPE_EVENT_LOG      = 0x15;
+        private const int CMD_NEXT_EVENT_RES_1     = 25;
+        private const int CMD_NEXT_EVENT_RES_2     = 5;
+        private const byte CMD_NEXT_EVENT_DATA     = 0x00;
+        private const byte CMD_NEXT_EVENT_EMPTY    = 0x01;
+        private const byte CMD_NEXT_EVENT_BUSY     = 0x02;
         private const int WAIT_BTW_LOG_ERROR       = 1000;
         private const int WAIT_BTW_LOGS            = 100;
         private const int WAIT_AFTER_EVENT_LOGS    = 1000;
 
         /* Constants: RF-Check ( prev. Install Confirmation )
-            WAIT_BTW_ARTIFICIAL - Waiting time between steps within the Artificial TimeSync
+            WAIT_BTW_ARTIFICIAL - Waiting time between steps within the Artificial TimeSync = 1s
             WAIT_BTW_IC_ERROR   - Waiting time between attempts to perform the Install Confirmation process = 1s
             IC_OK               - The Install Confirmation process has been completed successfully = 0
             IC_NOT_ACHIEVED     - The Install Confirmation process has not completed successfully = 1
@@ -165,7 +177,7 @@ namespace MTUComm
             WAIT_BTW_NODE_NEXT_STEP  - Waiting time before continuing the Node Discovery process after retrieving all DCU nodes = 1.5s
             WAIT_BTW_NODE_ERROR      - Waiting time between attempts to perform the Node Discovery process, due to an exception or not getting an excellent result = 1s
         */
-        private const int CMD_VSWR                 = 0x23;  // 35 VSWR Test
+        private const int CMD_VSWR                 = 0x23;
         private const int CMD_VSWR_RES             = 6;
         private const int WAIT_BEFORE_NODE_INIT    = 1000;
         private const int CMD_NODE_INIT_TYPE       = ( int )NodeType.DCU;
@@ -173,37 +185,37 @@ namespace MTUComm
         private const int CMD_NODE_INIT_MAXDITHER  = 0x0A;
         private const int CMD_NODE_INIT_MINREQTIME = 0x00;
         private const int CMD_NODE_INIT_RFCHANNELS = 0x03;
-        private const int CMD_NODE_OVERHEAD_TIME   = 2;     // STAR Programmer comment: "Slack time. Necessary because the top of the second (TOS) on the MTU may not happen at the same time as the TOS on the Star Programmer, and the TOS on the DCUs"
-        private const int CMD_NODE_INIT            = 0x18;  // 24 Node discovery initiation command
-        private const int CMD_NODE_INIT_RES        = 5;     // Response ACK with result [0-4] = 5 bytes
-        private const int CMD_NODE_INIT_NOT        = 0x00;  // Node discovery not initiated
-        private const int CMD_NODE_INIT_OK         = 0x01;  // Node discovery initiated
+        private const int CMD_NODE_OVERHEAD_TIME   = 2;
+        private const int CMD_NODE_INIT            = 0x18;
+        private const int CMD_NODE_INIT_RES        = 5;
+        private const int CMD_NODE_INIT_NOT        = 0x00;
+        private const int CMD_NODE_INIT_OK         = 0x01;
         private const int WAIT_BEFORE_NODE_START   = 3000;
-        private const int CMD_NODE_QUERY           = 0x19;  // 25 Start/Reset node discovery response query
-        private const int CMD_NODE_QUERY_RES       = 5;     // Response ACK with result [0-4] = 5 bytes
-        private const int CMD_NODE_QUERY_BUSY      = 0x00;  // The MTU is busy
-        private const int CMD_NODE_QUERY_OK        = 0x01;  // The MTU is ready for query
+        private const int CMD_NODE_QUERY           = 0x19;
+        private const int CMD_NODE_QUERY_RES       = 5;
+        private const int CMD_NODE_QUERY_BUSY      = 0x00;
+        private const int CMD_NODE_QUERY_OK        = 0x01;
         private const int WAIT_BEFORE_NODE_NEXT    = 1000;
-        private const int CMD_NODE_NEXT            = 0x1A;  // 26 Get next node discovery response
-        private const int CMD_NODE_NEXT_RES_1      = 10;    // ACK with general information [0-9] = 10 bytes
-        private const int CMD_NODE_NEXT_RES_2      = 26;    // ACK with log entry [0-25] = 26 bytes
-        private const int CMD_NODE_NEXT_RES_3      = 5;     // ACK without log entry [0-4] = 5 bytes
-        private const byte CMD_NODE_NEXT_DATA      = 0x00;  // ACK with node entry
-        private const byte CMD_NODE_NEXT_EMPTY     = 0x01;  // ACK without node entry ( query complete )
+        private const int CMD_NODE_NEXT            = 0x1A;
+        private const int CMD_NODE_NEXT_RES_1      = 10;
+        private const int CMD_NODE_NEXT_RES_2      = 26;
+        private const int CMD_NODE_NEXT_RES_3      = 5;
+        private const byte CMD_NODE_NEXT_DATA      = 0x00;
+        private const byte CMD_NODE_NEXT_EMPTY     = 0x01;
         private const int WAIT_BTW_NODE_NEXT_ERROR = 1000;
         private const int WAIT_BTW_NODE_NEXT       = 100;
         private const int WAIT_BTW_NODE_NEXT_STEP  = 1500;
         private const int WAIT_BTW_NODE_ERROR      = 1000;
 
         /* Constants: Encryption
-            CMD_ENCRYP_MAX         - Maximum number of attempts to perform the new encryption process for OnDemand 1.2 MTUs = 3
+            CMD_ENCRYP_MAX         - Maximum number of attempts to perform the new encryption process for On-Demand 1.2 MTUs = 3
             CMD_ENCRYP_OLD_MAX     - Maximum number of attempts to perform the new encryption process for legacy MTUs = 5
             CMD_ENCRYP_LOAD        - Request code of the LExI command "LOAD ENCRUPTION ITEM" = 0x1B = 27
             CMD_ENCRYP_KEYS        - Request code of the LExI command "GENERATE ENCRYPTION KEYS" = 0x1D = 29
             WAIT_AFTER_ENCRYP_KEYS - Waiting time before checking if the MTU was encrypted correctly = 1s
             CMD_ENCRYP_READ        - Request code of the LExI command "READ ENCRYPTION ITEM" = 0x1C = 28
-            CMD_ENCRYP_READ_RES_2  - Number of bytes when the response, attempting to encrypt an MTU, includes an MTU public key = 68 ( ACK + ACK Info Size + Datax64 + CRCx2 )
-            CMD_ENCRYP_READ_RES_3  - Number of bytes when the response, attempting to encrypt an MTU, includes an MTU random number = 36 ( ACK + ACK Info Size + Datax32 + CRCx2 )
+            CMD_ENCRYP_READ_RES_2  - Number of bytes when the response, attempting to encrypt an MTU, includes an MTU public key = 68 ( ACK + ACK Info Size + Datax64 + CRCx2 = 2 + 64 + 2 = 68 )
+            CMD_ENCRYP_READ_RES_3  - Number of bytes when the response, attempting to encrypt an MTU, includes an MTU random number = 36 ( ACK + ACK Info Size + Datax32 + CRCx2 = 2 + 32 + 2 = 36 )
         */
         private const int CMD_ENCRYP_MAX          = 3;
         private const int CMD_ENCRYP_OLD_MAX      = 5;
@@ -211,8 +223,8 @@ namespace MTUComm
         private const int CMD_ENCRYP_KEYS         = 0x1D;
         private const int WAIT_AFTER_ENCRYP_KEYS  = 1000;
         private const int CMD_ENCRYP_READ         = 0x1C;
-        private const int CMD_ENCRYP_READ_RES_2   = 68; // ACK + 64 + CRC = 2 + 64 + 2 = 68
-        private const int CMD_ENCRYP_READ_RES_3   = 36; // ACK + 32 + CRC = 2 + 32 + 2 = 36
+        private const int CMD_ENCRYP_READ_RES_2   = 68;
+        private const int CMD_ENCRYP_READ_RES_3   = 36;
 
         /* Constants: Valve Operation  ( prev. Remote Disconnect )
             RDD_MAX_ATTEMPTS   - Maximum number of attempts to check if the valve is in the resired state = 5
@@ -228,9 +240,9 @@ namespace MTUComm
         */
         private const int RDD_MAX_ATTEMPTS        = 5;
         private const int WAIT_BTW_RDD            = 2000;
-        private const int CMD_RDD_ACTION          = 0x21; // 33
+        private const int CMD_RDD_ACTION          = 0x21;
         private const int WAIT_RDD_MAX            = 45000;
-        private const int CMD_RDD_STATUS          = 0x22; // 34
+        private const int CMD_RDD_STATUS          = 0x22;
         private const int CMD_RDD_STATUS_RES      = 18;
         private const int WAIT_BTW_CMD_RDD        = 1000;
         private const int RDD_OK                  = 0;
@@ -259,6 +271,13 @@ namespace MTUComm
         /// </summary>
         public event Delegates.ActionHandler OnReadMtu;
 
+        /// <summary>
+        /// Event invoked only if the <see cref="Action.ActionType"/>.RFCheck with On-Demand 1.2 MTUs
+        /// action completes successfully, with no exceptions.
+        /// <para>
+        /// See <see cref="Action.OnNodeDiscovery"/> for the associated method ( XAML <- Action <- MTUComm ).
+        /// </para>
+        /// </summary>
         public event Delegates.ActionHandler OnNodeDiscovery;
 
         /// <summary>
@@ -331,14 +350,15 @@ namespace MTUComm
         private Configuration configuration;
         private Global global;
         private Mtu mtu;
-       
         private AddMtuLog addMtuLog;
 
         #endregion
 
         #region Initialization
 
-        public MTUComm(ISerial serial, Configuration configuration)
+        public MTUComm (
+            ISerial serial,
+            Configuration configuration )
         {
             this.configuration = configuration;
             this.global        = this.configuration.Global;
@@ -360,16 +380,13 @@ namespace MTUComm
         /// </summary>
         /// <param name="type">Action to be performed</param>
         /// <returns>Indicates whether the action can be executed or not.</returns>
-        /// <seealso cref="AddMtu_Scripting(Action)"/>
-        /// <seealso cref="AddMtu(dynamic, string, Action)"/>
-        /// <seealso cref="DataRead_Scripting(Action)"/>
+        /// <seealso cref="AddMtu"/>
         /// <seealso cref="DataRead"/>
         /// <seealso cref="InstallConfirmation"/>
-        /// <seealso cref="RemoteDisconnect_Scripting(Action)"/>
         /// <seealso cref="RemoteDisconnect"/>
         /// <seealso cref="ReadFabric"/>
         /// <seealso cref="ReadMtu"/>
-        /// <seealso cref="TurnOnOffMtu(bool)"/>
+        /// <seealso cref="TurnOnOffMtu"/>
         public async Task<ValidationResult> LaunchValidationThread (
             ActionType type )
         {
@@ -428,16 +445,16 @@ namespace MTUComm
         /// </summary>
         /// <param name="type">Action to be performed</param>
         /// <param name="args">Arguments required for some actions</param>
-        /// <seealso cref="AddMtu_Scripting(Action)"/>
-        /// <seealso cref="AddMtu(dynamic, string, Action)"/>
-        /// <seealso cref="DataRead_Scripting(Action)"/>
+        /// <seealso cref="AddMtu_Scripting"/>
+        /// <seealso cref="AddMtu"/>
+        /// <seealso cref="DataRead_Scripting"/>
         /// <seealso cref="DataRead"/>
         /// <seealso cref="InstallConfirmation"/>
-        /// <seealso cref="RemoteDisconnect_Scripting(Action)"/>
+        /// <seealso cref="RemoteDisconnect_Scripting"/>
         /// <seealso cref="RemoteDisconnect"/>
         /// <seealso cref="ReadFabric"/>
         /// <seealso cref="ReadMtu"/>
-        /// <seealso cref="TurnOnOffMtu(bool)"/>
+        /// <seealso cref="TurnOnOffMtu"/>
         public async Task LaunchActionThread (
             ActionType type,
             params object[] args )
@@ -524,7 +541,7 @@ namespace MTUComm
         /// See <see cref="InstallConfirmation"/> for the RF-Check ( Install Confirmation + Node Discovery ) logic.
         /// </para>
         /// </summary>
-        /// <param name="textError">Text of the error detected, for the pop-up message.</param>
+        /// <param name="textError">Text of the error detected, for the pop-up message</param>
         /// <returns>Indicates whether the action can be executed or not.</returns>
         private bool Validate_InstallConfirmation (
             out string textError )
@@ -548,10 +565,10 @@ namespace MTUComm
         /// <summary>
         /// Validation method for the RF-Check process, executed before switching to its scene/window.
         /// <para>
-        /// See <see cref="RemoteDisconnect_Scripting(Action)"/> and <see cref="RemoteDisconnect"/> for the Remote Disconnect logic.
+        /// See <see cref="RemoteDisconnect_Scripting"/> and <see cref="RemoteDisconnect"/> for the Remote Disconnect logic.
         /// </para>
         /// </summary>
-        /// <param name="textError">Text of the error detected, for the pop-up message.</param>
+        /// <param name="textError">Text of the error detected, for the pop-up message</param>
         /// <returns>Indicates whether the action can be executed or not.</returns>
         private bool Validate_RemoteDisconnect (
             out string textError )
@@ -570,10 +587,10 @@ namespace MTUComm
         /// <summary>
         /// Validation method for the RF-Check process, executed before switching to its scene/window.
         /// <para>
-        /// See <see cref="DataRead_Scripting(Action)"/> and <see cref="DataRead()"/> for the Historical Read logic.
+        /// See <see cref="DataRead_Scripting"/> and <see cref="DataRead"/> for the Historical Read logic.
         /// </para>
         /// </summary>
-        /// <param name="textError">Text of the error detected, for the pop-up message.</param>
+        /// <param name="textError">Text of the error detected, for the pop-up message</param>
         /// <returns>Indicates whether the action can be executed or not.</returns>
         private bool Validate_DataRead (
             out string textError )
@@ -591,12 +608,16 @@ namespace MTUComm
         }
 
         /// <summary>
-        /// Validation method for the RF-Check process, executed before switching to its scene/window.
+        /// NOTE: This check is disabled because Aclara always wants to force
+        /// the shutdown of the MTU and record the action in the activity log
         /// <para>
-        /// See <see cref="TurnOnOffMtu(bool)"/> for the Turn Off logic.
+        /// Validation method for the RF-Check process, executed before switching to its scene/window.
+        /// </para>
+        /// <para>
+        /// See <see cref="TurnOnOffMtu"/> for the Turn Off logic.
         /// </para>
         /// </summary>
-        /// <param name="textError">Text of the error detected, for the pop-up message.</param>
+        /// <param name="textError">Text of the error detected, for the pop-up message</param>
         /// <returns>Indicates whether the action can be executed or not.</returns>
         private bool Validate_TurnOff (
             out string textError )
@@ -618,10 +639,10 @@ namespace MTUComm
         /// <summary>
         /// Validation method for the RF-Check process, executed before switching to its scene/window.
         /// <para>
-        /// See <see cref="TurnOnOffMtu(bool)"/> for the Turn On logic.
+        /// See <see cref="TurnOnOffMtu"/> for the Turn On logic.
         /// </para>
         /// </summary>
-        /// <param name="textError">Text of the error detected, for the pop-up message.</param>
+        /// <param name="textError">Text of the error detected, for the pop-up message</param>
         /// <returns>Indicates whether the action can be executed or not.</returns>
         private bool Validate_TurnOn (
             out string textError )
@@ -643,8 +664,8 @@ namespace MTUComm
         #region Scripting Validations
 
         /// <summary>
-        /// Process of validation of the parameters in scripting mode, translating them
-        /// first from the Aclara's nomenclatory to the one we use, and then verifying
+        /// Process of validation of the parameters in scripting mode, verifying the required ones,
+        /// translating them from the Aclara nomenclature to the one we use, and then verifying
         /// if each of them is necessary and, if so, if the value is allowed or incorrect.
         /// <para>
         /// See <see cref="Action.ActionType"/> for the full list of available actions.
@@ -654,7 +675,7 @@ namespace MTUComm
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.
         /// <para>
-        /// Instance of a dynamic memory map for current MTU.
+        /// Instance of a dynamic memory map for the current MTU.
         /// </para>
         /// </returns>
         private async Task<dynamic> ValidateParams (
@@ -701,6 +722,14 @@ namespace MTUComm
             }
         }
 
+        /// <summary>
+        /// Validation of mandatory parameters in scripted mode, using the default value
+        /// for those that are not present in the script file when possible or throwing
+        /// an exception with information about problematic parameters.
+        /// </summary>
+        /// <param name="action">Instance of the Action class to remove and add parameters</param>
+        /// <param name="paramsFail">Text of the error detected</param>
+        /// <returns>Boolean that indicates if the validation process has worked or not.</returns>
         private bool ValidateRequiredParams (
             Action action,
             out string paramsFail )
@@ -713,9 +742,7 @@ namespace MTUComm
             bool rddIn2  = this.mtu.TwoPorts && this.mtu.Port2.IsSetFlow;
             bool hasRDD  = ( rddIn1 || rddIn2 );
             int  rddPort = ( rddIn1 ) ? 0 : 1;
-            bool isReplaceMeter = ( actionType == ActionType.ReplaceMeter           ||
-                                    actionType == ActionType.ReplaceMtuReplaceMeter ||
-                                    actionType == ActionType.AddMtuReplaceMeter );
+            bool isReplaceMeter = action.IsReplaceMeter;
             bool paramsForPort2 = action.HasParametersForPort2;
 
             #region Methods
@@ -1090,11 +1117,11 @@ namespace MTUComm
         #region AutoDetection for E-coders|Encoders
 
         /// <summary>
-        /// Process performed only by MTU with ports compatible with Encoder or E-Coders,
+        /// Process performed only by MTU with ports compatible with Encoders ( Encoder, E-Coders or RDD ),
         /// to automatically recover the Meter protocol and live digits that will
         /// be used to filter the Meter list and during selected Meter validation.
         /// <para>
-        /// See <see cref="CheckSelectedEncoderMeter(int)"/> to validate a Meter for current MTU.
+        /// See <see cref="CheckSelectedEncoderMeter"/> to validate a Meter for the current MTU.
         /// </para>
         /// </summary>
         /// <param name="mtu">Current MTU</param>
@@ -1210,8 +1237,8 @@ namespace MTUComm
         /// Logic of Meters auto-detection process extracted from AutodetectMeterEcoders
         /// method, for an easy and readable reuse of the code for the two MTUs ports.
         /// <para>
-        /// See <see cref="AutodetectMeterEncoders(Mtu,int)"/> to detect automatically
-        /// the Meter protocol and live digits of compatible Meters for current MTU.
+        /// See <see cref="AutodetectMeterEncoders"/> to detect automatically
+        /// the Meter protocol and live digits of compatible Meters for the current MTU.
         /// </para>
         /// </summary>
         /// <param name="portIndex">Port number to read from the MTU</param>
@@ -1282,12 +1309,15 @@ namespace MTUComm
         #region Historical Read ( prev. Data Read )
 
         /// <summary>
+        /// NOTE: Project 2nd part - OnDemand 1.2
+        /// <para>
         /// In scripted mode this method overload is called before the main method,
         /// because it is necessary to translate the script parameters from Aclara into
         /// the app terminology and validate their values, removing unnecessary ones
         /// to avoid headaches.
+        /// </para>
         /// <para>
-        /// See <see cref="DataRead()"/> for the DataRead logic.
+        /// See <see cref="DataRead"/> for the DataRead logic.
         /// </para>
         /// </summary>
         /// <param name="action">Instance of the Action class to retrieve script parameters</param>
@@ -1336,10 +1366,13 @@ namespace MTUComm
         }
 
         /// <summary>
-        /// Process performed only by MTUs with the tag MtuDemand set to true in mtu.xml file,
-        /// recovering all the MeterReading events saved in the MTU for the number of days indicated.
+        /// NOTE: Project 2nd part - OnDemand 1.2
         /// <para>
-        /// See <see cref="DataRead_Scripting(Action)"/> for the entry point of the DataRead process in scripted mode.
+        /// Process performed only by On-Demand 1.2 MTUs with the tag MtuDemand set to true in mtu.xml file,
+        /// recovering all the MeterReading events saved in the MTU for the number of days indicated.
+        /// </para>
+        /// <para>
+        /// See <see cref="DataRead_Scripting"/> for the entry point of the DataRead process in scripted mode.
         /// </para>
         /// <para>&#160;</para>
         /// <para/><para>
@@ -1573,11 +1606,12 @@ namespace MTUComm
         #region RFCheck ( prev. Install Confirmation )
 
         /// <summary>
-        /// This method is called only executing the Installation Confirmation action but
-        /// the logic is in a different method, which allows to reuse it from the writing
-        /// logic without mixing the processing of the result of the process.
+        /// In scripted mode this method overload is called before the main method,
+        /// because it is necessary to translate the script parameters from Aclara into
+        /// the app terminology and validate their values, removing unnecessary ones
+        /// to avoid headaches.
         /// <para>
-        /// See <see cref="InstallConfirmation_Logic(bool,int)"/> for the Install Confirmation logic.
+        /// See <see cref="InstallConfirmation_Logic"/> for the Install Confirmation logic.
         /// </para>
         /// </summary>
         /// <returns>Task object required to execute the method asynchronously and
@@ -1595,21 +1629,21 @@ namespace MTUComm
         }
 
         /// <summary>
-        /// Process performed only if the MTU is switch on ( not in ship mode ) and all
+        /// Process performed only if the MTU is switch On ( not in ship mode ) and all
         /// related tags ( Global.TimeToSync, Mtu.TimeToSync ) are set to true, to confirm
-        /// the correct communication between the MTU and a DCU.
+        /// the correct communication between the MTU and a DCU, also know as RF-Check.
         /// <para>
         /// See <see cref="InstallConfirmation"/> for the entry point of the Installation Confirmation process executed directly.
         /// </para>
         /// </summary>
         /// <param name="force">Forces the Install Confirmation needed during installations,
         /// because sometimes the shipbit does not yet updated, resulting in a false positive</param>
-        /// <param name="time">Internally used by the method to control the max number of attempts</param>
+        /// <param name="time">Internally used by the method to control the maximum number of attempts</param>
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.
         /// <para>
         /// Integer value that indicates if the Installation Confirmation
-        /// has worked ( 0 ) or not ( 1 Not achieved, 2 Error )
+        /// has worked ( 0 ) or not ( 1 Not achieved, 2 Error ).
         /// </para>
         /// </returns>
         /// <exception cref="MemoryMapParseXmlException">( From GetMemoryMap )</exception>
@@ -1764,7 +1798,7 @@ namespace MTUComm
         /// <summary>
         /// NOTE: Project 2nd part - OnDemand 1.2
         /// <para>
-        /// The Node Discovery process is only performed working with OnDemand compatible MTUs,
+        /// The Node Discovery process is only performed by On-Demand 1.2 MTUs,
         /// verifying that the MTU will be able to communicate over the F1 and F2 channels with
         /// enough DCUs to be able ensure that readings messages will be properly sent to the head-end.
         /// </para>
@@ -2180,6 +2214,17 @@ namespace MTUComm
             return result;
         }
 
+        /// <summary>
+        /// NOTE: Project 2nd part - OnDemand 1.2
+        /// <para>
+        /// Simulates the successful execution of the installation confirmation process,
+        /// manually setting values ​​in the memory of the MTU, which is only available for On-Demand 1.2 MTUs.
+        /// </para>
+        /// </summary>
+        /// <param name="map"><see cref="MemoryMap"/> used in the Install Confirmation process</param>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.
+        /// </returns>
         private async Task ArtificialInstallConfirmation (
             dynamic map )
         {
@@ -2206,10 +2251,13 @@ namespace MTUComm
         #region Valve Operation ( prev. Remote Disconnect )
 
         /// <summary>
+        /// NOTE: Project 2nd part - OnDemand 1.2
+        /// <para>
         /// In scripted mode this method overload is called before the main method,
         /// because it is necessary to translate the script parameters from Aclara into
         /// the app terminology and validate their values, removing unnecessary ones
         /// to avoid headaches.
+        /// </para>
         /// <para>
         /// See <see cref="RemoteDisconnect"/> and <see cref="RemoteDisconnect_Logic"/>
         /// for the Remote Disconnect entry point and logic.
@@ -2239,14 +2287,20 @@ namespace MTUComm
         }
 
         /// <summary>
-        /// This method is called only executing the Installation Confirmation action but
-        /// the logic is in a different method, which allows to reuse it from the writing
+        /// NOTE: Project 2nd part - OnDemand 1.2
+        /// <para>
+        /// The entry point of the Remote Disconnect process, also know as Valve Operation,
+        /// but the logic is in a different method, which allows to reuse it from the writing
         /// logic without mixing the processing of the result of the process.
+        /// </para>
+        /// <para>
+        /// See <see cref="RemoteDisconnect_Scripting"/> for the entry point of the Remote Disconnect process in scripted mode.
+        /// </para>
         /// <para>
         /// See <see cref="RemoteDisconnect_Logic"/> for the Remote Disconnect logic.
         /// </para>
         /// </summary>
-        /// <param name="throwExceptions"></param>
+        /// <param name="throwExceptions">Indicates if the process will throw an exception if it fails</param>
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.</returns>
         public async Task RemoteDisconnect (
@@ -2267,13 +2321,16 @@ namespace MTUComm
         }
 
         /// <summary>
-        /// The logic for the Remote Disconnection process, also known as Valve Operation.
+        /// NOTE: Project 2nd part - OnDemand 1.2
         /// <para>
-        /// See <see cref="RemoteDisconnect_Scripting(Action)"/> and <see cref="RemoteDisconnect()"/>
+        /// The Remote Disconnect process, also know as Valve Operation, is only performed by On-Demand 1.2 MTUs.
+        /// </para>
+        /// <para>
+        /// See <see cref="RemoteDisconnect_Scripting"/> and <see cref="RemoteDisconnect"/>
         /// for the entry points of the Remote Disconnect process executed directly.
         /// </para>
         /// </summary>
-        /// <param name="throwExceptions"></param>
+        /// <param name="throwExceptions">Indicates if the process will throw an exception if it fails</param>
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.
         /// <para>
@@ -2494,11 +2551,12 @@ namespace MTUComm
         #region Turn On|Off
 
         /// <summary>
-        /// This method is called only executing the Switch Off action
-        /// but the logic is in different method, which allows to use it from the
-        /// writing logic without mixing the processing of the result of the process.
+        /// The entry point of the Turn On|Off process when the action is execute
+        /// directly, not as part of another composite process, but the logic is
+        /// in a different method, which allows to reuse it from the writing
+        /// logic without mixing the processing of the result of the process.
         /// <para>
-        /// See <see cref="TurnOnOffMtu_Logic(bool,int)"/> for the Turn On/Off logic
+        /// See <see cref="TurnOnOffMtu_Logic"/> for the Turn On|Off logic
         /// </para>
         /// </summary>
         /// <param name="on">Desired status of the MTU, true for run mode
@@ -2523,15 +2581,15 @@ namespace MTUComm
         }
 
         /// <summary>
-        /// Logic of the switch on or off of the MTU, changing between rune
-        /// mode and ship mode respectively.
+        /// Logic of the Turn On|Off process, changing the state of the MTU between
+        /// the run mode and the ship mode respectively.
         /// <para>
-        /// See <see cref="TurnOnOffMtu(bool)"/> for the entry point of the Turn On/Off process executed directly.
+        /// See <see cref="TurnOnOffMtu"/> for the entry point of the Turn On|Off process executed directly.
         /// </para>
         /// </summary>
         /// <param name="on">Desired status of the MTU, true for run mode
         /// and false for ship mode ( turned off )</param>
-        /// <param name="time">Internally used by the method to control the max number of attempts</param>
+        /// <param name="time">Internally used by the method to control the maximum number of attempts</param>
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.
         /// <para>
@@ -2628,9 +2686,10 @@ namespace MTUComm
         #region Read MTU
 
         /// <summary>
-        /// This method is called only executing the Read MTU action
-        /// but the logic is in different method, which allows to use it from the
-        /// writing logic without mixing the processing of the result of the process.
+        /// The entry point of the Read MTU process when the action is execute
+        /// directly, not as part of another composite process, but the logic
+        /// is in different method, which allows to use it from the writing
+        /// logic without mixing the processing of the result of the process.
         /// <para>
         /// See <see cref="ReadMtu_Logic"/> for the ReadMtu logic.
         /// </para>
@@ -2676,7 +2735,7 @@ namespace MTUComm
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.
         /// <para>
-        /// Instance of a dynamic memory map for current MTU.
+        /// Instance of a dynamic memory map for the current MTU.
         /// </para>
         /// </returns>
         /// <exception cref="MemoryMapParseXmlException">( From GetMemoryMap )</exception>
@@ -2718,14 +2777,9 @@ namespace MTUComm
         /// the app terminology and validate their values, removing unnecessary ones
         /// to avoid headaches.
         /// <para>
-        /// See <see cref="AddMtu(dynamic, string, Action)"/> for the writing logic.
+        /// See <see cref="AddMtu"/> for the writing logic.
         /// </para>
         /// </summary>
-        /// <remarks>
-        /// TODO: The parameters validation logic in this method is only used during
-        /// installations and should be replaced by the generic methods inside
-        /// <see cref="MTUComm.ScriptAux"/> class, using all actions the same unique validation logic.
-        /// </remarks>
         /// <param name="action">Instance of the Action class to retrieve script parameters</param>
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.</returns>
@@ -2764,11 +2818,11 @@ namespace MTUComm
         }
 
         /// <summary>
-        /// Installation process is used to install a new MTU or Meter unit or replace an old one,
-        /// configuring the MTU physical memory with the new values set in the application form or
-        /// read from the script file.
+        /// Installation process used to install a new MTU or Meter unit or replace an old one,
+        /// configuring the MTU physical memory with the new values set in the application form
+        /// or read from the script file.
         /// <para>
-        /// See <see cref="AddMtu_Scripting(Action)"/> for the entry point of the DataRead process in scripted mode.
+        /// See <see cref="AddMtu_Scripting"/> for the entry point of the DataRead process in scripted mode.
         /// </para>
         /// </summary>
         /// <param name="dynamic">Intermediate data store used only during installations</param>
@@ -2827,7 +2881,7 @@ namespace MTUComm
 
                     OnProgress ( this, new Delegates.ProgressArgs ( "Checking Encoder..." ) );
 
-                    // Check if selected Meter is supported for current MTU
+                    // Check if selected Meter is supported for the current MTU
                     if ( this.mtu.Port1.IsForEncoderOrEcoder )
                     {
                         // Updates the port information without fear, since it was only used to fill the meter list
@@ -3164,7 +3218,7 @@ namespace MTUComm
                          mtu.IsFamily342x )
                         await this.Encrypt_Old ( map );
                     
-                    else if ( mtu.IsFamily35xx36xx &&
+                    else if ( mtu.IsFamily35xx36xx && // and also 345x
                               mtu.STAREncryptionType != ENCRYPTION.NONE )
                         await this.Encrypt_OnDemand12 ( map );
                 }
@@ -3212,9 +3266,9 @@ namespace MTUComm
 
                 #region Verifying data 
 
-                Utils.Print("----FINAL_READ_START-----");
+                Utils.Print ( "----FINAL_READ_START-----" );
 
-                OnProgress(this, new Delegates.ProgressArgs("Verifying data..."));
+                OnProgress ( this, new Delegates.ProgressArgs ( "Verifying data..." ) );
 
                 // Checks if all data was write ok, and then generate the final log
                 // without read again from the MTU the registers already read
@@ -3342,7 +3396,7 @@ namespace MTUComm
         /// <summary>
         /// Encryption process for legacy MTUs.
         /// </summary>
-        /// <param name="map">Instance of a dynamic memory map for current MTU</param>
+        /// <param name="map">Instance of a dynamic memory map for the current MTU</param>
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.</returns>
         private async Task Encrypt_Old (
@@ -3458,9 +3512,9 @@ namespace MTUComm
         }
 
         /// <summary>
-        /// New encryption process for OnDemand 1.2 MTUs.
+        /// New encryption process for On-Demand 1.2 MTUs.
         /// </summary>
-        /// <param name="map">Instance of a dynamic memory map for current MTU</param>
+        /// <param name="map">Instance of a dynamic memory map for the current MTU</param>
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.</returns>
         private async Task Encrypt_OnDemand12 (
@@ -3655,10 +3709,10 @@ namespace MTUComm
 
         /// <summary>
         /// Writes to the MTU physical memory only the registers that have been modified
-        /// during the writing action performed, optimizing the process and lengthening
-        /// the MTU memory useful life.
+        /// during the installation performed, optimizing the process and extending
+        /// useful life of the MTU memory.
         /// </summary>
-        /// <param name="map">MemoryMap used in the writing process</param>
+        /// <param name="map"><see cref="MemoryMap"/> used in the installation process</param>
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.</returns>
         public async Task WriteMtuModifiedRegisters (
@@ -3752,7 +3806,11 @@ namespace MTUComm
         /// Boolean that indicates if the write action has completed successfully.
         /// </para>
         /// </returns>
-        public async Task<bool> WriteMtuBitAndVerify ( uint address, uint bit, bool active, bool verify = true )
+        public async Task<bool> WriteMtuBitAndVerify (
+            uint address,
+            uint bit,
+            bool active,
+            bool verify = true )
         {
             // Read current value
             byte systemFlags = ( await lexi.Read ( address, 1 ) )[ 0 ];
@@ -3782,7 +3840,7 @@ namespace MTUComm
         #region Auxiliary Functions
         
         /// <summary>
-        /// Generates a new instance of the dynamic MemoryMap for current MTU,
+        /// Generates a new instance of the dynamic MemoryMap for the current MTU,
         /// using the associated family to load the correct XML map, allowing
         /// to communicate ( write and read ) with the physical memory of the MTU.
         /// </summary>
@@ -3802,9 +3860,9 @@ namespace MTUComm
         }
         
         /// <summary>
-        /// Loads the basic information necessary to work with an MTU and be able to prepare
-        /// the forms of the UI with the correct values ( compatible Meters,.. ), but the logic
-        /// is in another method to create a more readable and easy to maintain source code.
+        /// Loads the basic information of the MTU, necessary to work ( read and write ) with it
+        /// and be able to prepare the forms of the UI with the correct values ( compatible Meters,.. ),
+        /// but the logic is in another method to create a more readable and easy to maintain source code.
         /// <para>
         /// See <see cref="LoadMtuBasicInfo_Logic"/> to recover basic data from the MTU.
         /// </para>
@@ -3833,8 +3891,8 @@ namespace MTUComm
         }
 
         /// <summary>
-        /// Loads the basic information necessary to work with an MTU and be able to
-        /// prepare the forms of the UI with the correct values ( compatible Meters,.. ).
+        /// Loads the basic information of the MTU, necessary to work ( read and write ) with it
+        /// and be able to prepare the forms of the UI with the correct values ( compatible Meters,.. ).
         /// </summary>
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.
@@ -3844,7 +3902,6 @@ namespace MTUComm
         /// </returns>
         /// <seealso cref="MTUBasicInfo"/>
         private async Task<bool> LoadMtuBasicInfo_Logic ()
-        //    bool isAfterWriting = false )
         {
             List<byte> finalRead = new List<byte> ();
         
@@ -3884,8 +3941,8 @@ namespace MTUComm
         }
 
         /// <summary>
-        /// Checks if the MTU is still the same as at the beginning of the process,
-        /// otherwise the process should be canceled immediately, forcing an exception.
+        /// Checks if the MTU is still the same as at the beginning of the process;
+        /// otherwise, the process should be canceled immediately, forcing an exception.
         /// </summary>
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.</returns>

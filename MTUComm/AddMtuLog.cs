@@ -466,11 +466,8 @@ namespace MTUComm
 
             ActionType actionType = this.action.Type;
 
-            bool isReplaceMeter = actionType == ActionType.ReplaceMeter           ||
-                                  actionType == ActionType.ReplaceMtuReplaceMeter ||
-                                  actionType == ActionType.AddMtuReplaceMeter;
-            bool isReplaceMtu   = actionType == ActionType.ReplaceMTU ||
-                                  actionType == ActionType.ReplaceMtuReplaceMeter;
+            bool isReplaceMeter = this.action.IsReplaceMeter;
+            bool isReplaceMtu   = this.action.IsReplaceMtu;
             
             bool rddIn1;
             bool usePort2 = Data.Get.UsePort2;

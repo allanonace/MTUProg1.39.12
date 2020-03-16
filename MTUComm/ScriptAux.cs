@@ -38,6 +38,11 @@ namespace MTUComm
         private const string MSG_MRR    = "should be one of the possible values ( 'Meter', 'Register', 'Both' )";
         private const string MSG_TWO    = "should be one of the possible values ( 'True' for Fast, 'False' for Slow )";
 
+        /* Enum: OldMeterWorking
+            YES    - The Meter was working correctly
+            NO     - The Meter was not working correctly
+            BROKEN - The Meter was damaged
+        */
         public enum OldMeterWorking
         {
             YES,
@@ -45,6 +50,11 @@ namespace MTUComm
             BROKEN
         }
 
+        /* Enum: MeterRegisterRecording
+            METER    - Meter unit
+            REGISTER - Register unit
+            BOTH     - Both units, Meter and Register
+        */
         public enum MeterRegisterRecording
         {
             METER,
@@ -52,13 +62,56 @@ namespace MTUComm
             BOTH
         }
 
-        // They are the indices in the dropdownlist
+        /* Enum: TwoWay
+            SLOW - Mode 0 for Slow or Off
+            FAST - Mode 1 for Fast or On
+        */
         public enum TwoWay
         {
             SLOW,
             FAST
         }
 
+        /* Enum: APP_FIELD
+            OldMtuId               - Old MTU ID
+            AccountNumber          - Account Number
+            AccountNumber_2        - Account number on the second port
+            WorkOrder              - Work Order
+            WorkOrder_2            - Work Order on the second port
+            ActivityLogId          - Activity Log ID
+            MeterNumber            - Meter Serial Number
+            MeterNumber_2          - Meter Serial Number on the second port
+            MeterNumberOld         - Old Meter Serial Number
+            MeterNumberOld_2       - Old Meter Serial Number on the second port
+            MeterReading           - Meter Reading
+            MeterReading_2         - Meter Reading on the second port
+            MeterReadingOld        - Old Meter Reading
+            MeterReadingOld_2      - Old Meter Reading on the second port
+            OldMeterWorking        - Old Meter Working
+            OldMeterWorking_2      - Old Meter Working on the second port
+            ReplaceMeterRegister   - Replace Meter Register
+            ReplaceMeterRegister_2 - Replace Meter Register on the second port
+            Meter                  - Meter Type
+            Meter_2                - Meter Type on the second port
+            NumberOfDials          - Number of Dials
+            NumberOfDials_2        - Number of Dials on the second port
+            DriveDialSize          - Drive Dial Size
+            DriveDialSize_2        - Drive Dial Size on the second port
+            UnitOfMeasure          - Unit of Measure
+            UnitOfMeasure_2        - Unit of Measure on the second port
+            ReadInterval           - Read Internval
+            SnapRead               - Snap Read
+            TwoWay                 - Two-Way
+            Alarm                  - Alarm
+            Demand                 - Demand
+            ForceTimeSync          - Force TimeSync
+            GpsLatitude            - GPS Latitude
+            GpsLongitude           - GPS Longitude
+            GpsAltitude            - GPS Altitude
+            NumOfDays              - Number of Days
+            RDDPosition            - Desired RDD Position
+            RDDFirmware            - RDD Firmware
+        */
         public enum APP_FIELD
         {
             NOTHING,
@@ -158,6 +211,13 @@ namespace MTUComm
 
         #region Logic
 
+        /// <summary>
+        /// Verifies if the indicated name is present in the <see cref="APP_FIELD"/>
+        /// enumeration and returns the name associated in the Aclara nomenclature,
+        /// represented by the <see cref="Parameter.ParameterType"/> enumeration.
+        /// </summary>
+        /// <param name="name">Name of the parameter in the application nomenclature</param>
+        /// <returns>Name of the parameter in the Aclara nomenclature.</returns>
         private static string GetAclaraName (
             APP_FIELD name )
         {
@@ -177,6 +237,12 @@ namespace MTUComm
             return result;
         }
 
+        /// <summary>
+        /// Translates the parameters in scripting mode, from the identifiers
+        /// listed in the <see cref="Parameter.ParameterType"/> enumeration
+        /// to the those listed in the <see cref="APP_FIELD"/> enumeration.
+        /// </summary>
+        /// <returns>List of parameters with translated identifiers.</returns>
         public static ( bool UsePort2InScript, Dictionary<APP_FIELD,( dynamic Value, int Port )> Data ) TranslateAclaraParams (
             Parameter[] scriptParams )
         {
@@ -257,6 +323,15 @@ namespace MTUComm
             }
         }
 
+        /// <summary>
+        /// Verify the value of each of the parameters present in the script file.
+        /// <para>
+        /// If any parameters are not required in the current action type, they will be removed to avoid unexpected errors.
+        /// </para>
+        /// </summary>
+        /// <param name="mtu"><see cref="Mtu"/> that represents the current MTU</param>
+        /// <param name="action"><see cref="Action"/> that represents the current MTU</param>
+        /// <returns>List of verified or updated parameters.</returns>
         public static Dictionary<APP_FIELD,dynamic> ValidateParams (
             Mtu mtu,
             Action action,
@@ -275,27 +350,9 @@ namespace MTUComm
             Meter meterPort2     = null;
             bool  autoMeterPort1 = false;
             bool  autoMeterPort2 = false;
-
-            // These actions do not need to get the meter types
-            bool isNotWrite = actionType == ActionType.ReadFabric ||
-                              actionType == ActionType.ReadMtu    ||
-                              actionType == ActionType.TurnOffMtu ||
-                              actionType == ActionType.TurnOnMtu  ||
-                              actionType == ActionType.RFCheck    ||
-                              actionType == ActionType.MtuInstallationConfirmation ||
-                              actionType == ActionType.DataRead   ||
-                              actionType == ActionType.ValveOperation;
-            
-            // Action is about Replace Meter
-            bool isReplaceMeter = (
-                action.Type == ActionType.ReplaceMeter ||
-                action.Type == ActionType.ReplaceMtuReplaceMeter ||
-                action.Type == ActionType.AddMtuReplaceMeter );
-
-            // Action is about Replace MTU
-            bool isReplaceMtu = (
-                action.Type == ActionType.ReplaceMTU ||
-                action.Type == ActionType.ReplaceMtuReplaceMeter );
+            bool isNotWrite      = ! action.IsWrite; // These actions do not need to get the meter types
+            bool isReplaceMeter  = action.IsReplaceMeter;
+            bool isReplaceMtu    = action.IsReplaceMtu;
 
             #region Get or Auto-detect Meters
 
@@ -971,7 +1028,7 @@ namespace MTUComm
                 if ( alarm != null )
                     entriesSelected.Add ( APP_FIELD.Alarm, alarm );
                 
-                // For current MTU does not exist "Scripting" profile inside Alarm.xml
+                // For the current MTU does not exist "Scripting" profile inside Alarm.xml
                 else throw new ScriptingAlarmForCurrentMtuException ();
             }
 
@@ -983,7 +1040,7 @@ namespace MTUComm
                 if ( demand != null )
                     entriesSelected.Add ( APP_FIELD.Demand, demand );
                 
-                // For current MTU does not exist "Scripting" profile inside DemandConf.xml
+                // For the current MTU does not exist "Scripting" profile inside DemandConf.xml
                 else throw new ScriptingDemandForCurrentMtuException ();
             }
 

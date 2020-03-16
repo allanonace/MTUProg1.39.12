@@ -59,11 +59,11 @@
     <Error id="311" message="The script file contains some parameters more than once for the same port: _var_" footer="Repeated parameters" />
     
     <!-- Alarm -->
-    <Error id="400" message="The alarm profile Scripting for current MTU is not defined in the Alarm.xml file" /> <!-- footer not necessary -->
+    <Error id="400" message="The alarm profile Scripting for the current MTU is not defined in the Alarm.xml file" /> <!-- footer not necessary -->
     <Error id="401" message="No alarm was selected but the MTU entry in Mtu.xml requires using an alarm" footer="No alarm selected" />
     
     <!-- Demand -->
-    <Error id="450" message="The demand profile Scripting for current MTU is not defined in the DemandConf.xml file" /> <!-- footer not necessary -->
+    <Error id="450" message="The demand profile Scripting for the current MTU is not defined in the DemandConf.xml file" /> <!-- footer not necessary -->
     <Error id="451" message="No demand was selected but the MTU entry in Mtu.xml requires using one" footer="No demand selected" />
 
     <!-- Turn Off -->
