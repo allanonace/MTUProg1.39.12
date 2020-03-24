@@ -768,7 +768,7 @@ namespace MTUComm
                         AddParameter          ( "AlarmConfiguration",        "Alarm Configuration Name",     alarmConfiguration );
                         AddParameter          ( "Overlap",                   "Message Overlap",              alarms.Overlap.ToString () );
                         AddParameter          ( "ImmediateAlarm",            "Immediate Alarm Transmit",     alarms.ImmediateAlarmTransmit.ToString () );
-                        await AddParamCond    ( "UrgentAlarm",               "DCU Urgent Alarm Transmit",    alarms.DcuUrgentAlarm.ToString (),      map.ContainsMember ( "UrgentAlarm" ) );
+                        AddParamCond          ( "UrgentAlarm",               "DCU Urgent Alarm Transmit",    alarms.DcuUrgentAlarm.ToString (),      map.ContainsMember ( "UrgentAlarm" ) );
 
                         // NOTE: In the ADD block in the log, alarms must be written without checking the status of the tampers
                         // NOTE: Immediate alarms use a custom method that only takes into account the alarm status,
