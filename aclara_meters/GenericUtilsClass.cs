@@ -136,7 +136,7 @@ namespace aclara_meters
                                         if (file.Name.Contains("jpg"))
                                             sName = file.Name.Substring(0, file.Name.Length - 4) + "-" + sTick + ".jpg";
                                         else if (file.Name.ToLower().Contains("mtuid"))
-                                            sName = file.Name.Substring(0, file.Name.Length - 4) + "-" + sTick + ".xml";
+                                            sName = file.Name;
                                         else
                                         {
                                             string dayfix = file.Name.ToLower().Substring(0, 10);
