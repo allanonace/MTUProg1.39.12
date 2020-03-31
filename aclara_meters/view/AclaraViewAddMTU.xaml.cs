@@ -258,6 +258,8 @@ namespace aclara_meters.view
                 name_of_window_port1.Text = texts[0] + " - " + LB_PORT1;
                 name_of_window_port2.Text = texts[1] + " - " + LB_PORT2;
                 name_of_window_misc.Text = texts[2] + " - " + LB_MISC;
+                name_of_window_valve.Text = texts[0] + " - " + LB_VALVE;
+
                 bottomBar.GetImageElement("bg_action_button_img").Source = texts[3];
                
 
