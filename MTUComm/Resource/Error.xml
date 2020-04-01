@@ -6,10 +6,10 @@
     -->
 
     <!-- MTU -->
-    <Error id="100" message="MTU is not the same as at the beginning of the process" footer="Different MTU" no_error="true" />
-    <Error id="101" message="Puck can't communicate with MTU" footer="Puck comm." />
-    <Error id="102" message="Puck can't communicate with MTU after has completed writing process" footer="Puck comm. after writing" />
-    <Error id="103" message="The Mtu.xml file does no contain the MTU ID specified" footer="MTU not in Mtu.xml" />
+    <Error id="100" message="The MTU is not the same as at the beginning of the process" footer="Different MTU" no_error="true" />
+    <Error id="101" message="The puck can't communicate with MTU" footer="Puck comm." />
+    <Error id="102" message="The puck can't communicate with MTU after has completed writing process" footer="Puck comm. after writing" />
+    <Error id="103" message="The Mtu.xml file does not contain the MTU ID specified" footer="MTU not in Mtu.xml" />
     <Error id="104" message="Historical Read process can't be performed because initialization didn't work" footer="HR not started" />
     <Error id="105" message="Historical Read process has failed trying to recover data from the MTU" /> <!-- footer not necessary -->
     <Error id="106" message="Historical Read process can't be performed because the MTU is busy" footer="MTU is busy" />
@@ -52,64 +52,63 @@
     <Error id="304" message="Action type _var_ in the script file is not one of the available options" footer="Action not supported" />
     <Error id="305" message="The script file used has not valid structure or format" footer="Invalid XML structure" />
     <Error id="306" message="The script file used is empty" footer="Empty script file" />
-    <Error id="307" message="The script file does not contain the ( Old|New ) Meter serial number parameter that is mandatory in writing actions" footer="Missing Meter serial number" />
+    <Error id="307" message="The script file does not contain the ( Old|New ) Meter serial number parameter that is mandatory in writing actions" footer="Missing Meter serial number" /> <!-- DEPRECATED -->
     <Error id="308" message="The script file contains the same parameter more than once" footer="Repeated params" />
     <Error id="309" message="The script file does not contain userName parameter or it has some invalid character" footer="Missing Username" />
-    <Error id="310" message="The script file does not contain the required parameters: _var_" footer="Missing Tag" />
-    <Error id="311" message="The script file contains some parameters more than once for the same port: _var_" footer="Repeated parameters" />
+    <Error id="310" message="The script file does not contain the required parameters: _var_" footer="Missing param" />
+    <Error id="311" message="The script file contains some parameters more than once for the same port: _var_" footer="Repeated params" />
     
     <!-- Alarm -->
     <Error id="400" message="The alarm profile Scripting for the current MTU is not defined in the Alarm.xml file" /> <!-- footer not necessary -->
-    <Error id="401" message="No alarm was selected but the MTU entry in Mtu.xml requires using an alarm" footer="No alarm selected" />
+    <Error id="401" message="No alarm was selected but the entry in Mtu.xml for the current MTU requires the use of one" footer="No alarm selected" />
     
     <!-- Demand -->
     <Error id="450" message="The demand profile Scripting for the current MTU is not defined in the DemandConf.xml file" /> <!-- footer not necessary -->
-    <Error id="451" message="No demand was selected but the MTU entry in Mtu.xml requires using one" footer="No demand selected" />
+    <Error id="451" message="No demand was selected but the entry in Mtu.xml for the current MTU requires the use of one" footer="No demand selected" />
 
     <!-- Turn Off -->
-    <Error id="500" message="Turn off MTU process has failed trying to activated the ShipBit" footer="MTU already Off" />
-    <Error id="501" message="MTU can't be turned on or off after having tried it _var_ times" footer="Turn On|Off not achieved" />
+    <Error id="500" message="Turn off MTU process has failed trying to activate the ShipBit" footer="MTU already Off" />
+    <Error id="501" message="The MTU can't be turned on or off after having tried it _var_ times" footer="Turn On|Off not achieved" />
     
     <!-- Install Confirmation -->    
     <Error id="600" message="The MTU does not support for two-way or tag TimeToSync is false in Global.xml" footer="MTU not support 2-way" no_error="true" />
     <Error id="601" message="The MTU is turned off" footer="MTU turned Off" no_error="true" />
     <Error id="602" message="Installation Confirmation process has failed trying to communicate with the DCU" /> <!-- footer not necessary -->
     <Error id="603" message="Installation Confirmation can't be performed after having tried it _var_ times" footer="IC not achieved" />
-    <Error id="604" message="Node Discovery not initialized correctly" footer="ND not initialized" />
-    <Error id="605" message="Node Discovery not started correctly" footer="ND not started" />
+    <Error id="604" message="Node Discovery not initialized correctly" footer="ND not initialized" /> <!-- DEPRECATED -->
+    <Error id="605" message="Node Discovery not started correctly" footer="ND not started" /> <!-- DEPRECATED -->
     <Error id="606" message="Node Discovery can't be performed because it ended prematurely due to an exception" no_error="true" /> <!-- footer not necessary -->
-    <!--<Error id="607" message="Node Discovery can't be performed after having tried it _var_ times" footer="ND not achieved" />-->
     <Error id="607" message="Node Discovery can't be performed after having tried it for _var_ seconds" no_error="true" /> <!-- footer not necessary -->
 
     <!-- Encryption -->
     <Error id="700" message="The MTU encryption process can't be performed after having tried it _var_ times" footer="Encryption not achieved" />
-    <Error id="701" message="The MTU encryption process can't be performed because public key is not present in Global.xml" footer="Public key missed" />
-    <Error id="702" message="The MTU encryption process can't be performed because public key does not have the correct format" footer="Public key format" />
-    <Error id="703" message="The MTU encryption process can't be performed because broadcast key is not present in Global.xml" footer="Broadcast key missed" />
-    <Error id="704" message="The MTU encryption process can't be performed because broadcast key does not have the correct format" footer="Broadcast key format" />
+    <Error id="701" message="The MTU encryption process can't be performed because the public key is not present in Global.xml" footer="Public key missed" />
+    <Error id="702" message="The MTU encryption process can't be performed because the public key does not have the correct format" footer="Public key format" />
+    <Error id="703" message="The MTU encryption process can't be performed because the broadcast key is not present in Global.xml" footer="Broadcast key missed" />
+    <Error id="704" message="The MTU encryption process can't be performed because the broadcast key does not have the correct format" footer="Broadcast key format" />
     <Error id="705" message="The MTU encryption index has reached its limit" footer="Encryption index limit" no_error="true" />
 
     <!-- Configuration Files -->
+    <!-- Footers not necessary -->
     <Error id="800" message="Some of the configuration files are not present in the root folder. Contact your IT administrator" no_error="true" />
     <Error id="801" message="There is a problem with the configuration files and some of them are corrupted or may not have a port type defined. Contact your IT administrator" no_error="true" />
-    <Error id="802" message="The certificate that you tried to install is not a valid certificate file ( *.cer ). Contact your IT administrator" no_error="true" />
-    <Error id="803" message="It is not possible to use the currently installed certificate. Contact your IT administrator" />
+    <Error id="802" message="The certificate that you tried to install is not a valid certificate file ( *.cer ). Contact your IT administrator" no_error="true" /> <!-- DEPRECATED -->
+    <Error id="803" message="It is not possible to use currently installed certificate. Contact your IT administrator" />
     <Error id="804" message="Download or install a new certificate because the one that is currently used has expired. Contact your IT administrator" no_error="true" />
-    <Error id="805" message="Not all necessary permissions have been granted on the Android device" no_error="true" />
-    <Error id="806" message="There is a problem with the FTP and configuration files could not be downloaded. Contact your IT administrator" />
+    <Error id="805" message="Not all necessary permissions have been granted on the Android device" no_error="true" /> <!-- DEPRECATED -->
+    <Error id="806" message="There is a problem with the SFTP and configuration files could not be downloaded. Contact your IT administrator" />
     <Error id="807" message="The device has not internet connection" no_error="true" />
     <Error id="808" message="The current device date is less than allowed. Contact your IT administrator" no_error="true" />
     <Error id="809" message="Missing credentials for the SFTP" />
-    <Error id="810" message="The app can't communicate with the FTP" no_error="true" />
-    <Error id="811" message="Sending activity logs to the FTP has failed, only _var_ files have been uploaded" />
+    <Error id="810" message="The app can't communicate with the SFTP" no_error="true" />
+    <Error id="811" message="Sending activity logs to SFTP has failed, only _var_ files have been uploaded" />
 	  <Error id="812" message="Changed configuration files"/>
-    <Error id="813" message="The new version configuration files are corrupted and the app will continues with the actual ones when restart it. Contact your IT administrator"/>
-    <Error id="814" message="Credentials from Intune missing" />
+    <Error id="813" message="The new version of the configuration files is corrupted and the app will continue with the actual ones when restarted. Contact your IT administrator"/>
+    <Error id="814" message="Missing credentials from Intune" />
     <Error id="815" message="There is a problem with the camera to scan or take photos" />
-    <Error id="816" message="Modification of the content of Global.xml file has failed" />
-    <Error id="817" message="Port type missing in MTU ID _var_" />
-    <Error id="818" message="The configuration files are corrupted and the app will continue with the current files. Contact your IT administrator" no_error="true" />
-    <Error id="819" message="The current device date is less than allowed and the app will continues with the actual ones when restart it. Contact your IT administrator" no_error="true" />
+    <Error id="816" message="Modifying the content of Global.xml configuration file has failed" />
+    <Error id="817" message="Missing port type for the MTU ID _var_ in the configuration files" />
+    <Error id="818" message="The configuration files are corrupted and the app will continue with the actual ones. Contact your IT administrator" no_error="true" />
     
     <!-- Configuration Files -->
     <Error id="850" message="The interface for the specified MTU ID was not found" /> <!-- message_release="" /> -->

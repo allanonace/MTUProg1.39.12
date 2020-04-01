@@ -655,7 +655,7 @@ namespace aclara_meters.view
                         GenericUtilsClass.RestoreConfigFiles();
 
                         if (ex is DeviceMinDateAllowedException)
-                            base.ShowAlert(new DeviceMinDateAllowedSettingsException());
+                            base.ShowAlert(new DeviceMinDateAllowedException());
                         else base.ShowAlert(new ConfigFilesCorruptedSettingsException());
                     }
                 }
@@ -1126,7 +1126,7 @@ namespace aclara_meters.view
                                     GenericUtilsClass.RestoreConfigFiles ();
                                     await SecureStorage.SetAsync(VAR_VERSION,currentVersion);
                                     if ( e is DeviceMinDateAllowedException )
-                                         base.ShowAlert ( new DeviceMinDateAllowedSettingsException () );
+                                         base.ShowAlert ( new DeviceMinDateAllowedException () );
                                     else base.ShowAlert ( new ConfigFilesCorruptedSettingsException () );
                                 }
                             }

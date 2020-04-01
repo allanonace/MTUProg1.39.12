@@ -819,10 +819,5 @@
         public ConfigFilesCorruptedSettingsException(string message = "", int port = 1, string messagePopup = "") : base(message, port, messagePopup) { }
     }
     
-    public class DeviceMinDateAllowedSettingsException : OwnExceptionsBase
-    {
-        public DeviceMinDateAllowedSettingsException(string message = "", int port = 1, string messagePopup = "") : base(message, port, messagePopup) { }
-    }
-    
     #endregion
 }
