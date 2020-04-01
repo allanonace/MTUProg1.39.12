@@ -170,6 +170,28 @@ namespace MTUComm
 
             Optional,
         }
+        public enum APP_FIELD_MTU
+        {
+            OldMtuId,
+            ActivityLogId,
+
+            ReadInterval,
+            SnapRead,
+            TwoWay,
+            Alarm,
+            Demand,
+
+            ForceTimeSync,
+
+            GpsLatitude,
+            GpsLongitude,
+            GpsAltitude,
+
+            NumOfDays,
+
+            RDDPosition,
+            RDDFirmware
+        }
 
         public readonly static Dictionary<ParameterType,APP_FIELD> IdsAclara =
             new Dictionary<ParameterType,APP_FIELD> ()
@@ -316,7 +338,7 @@ namespace MTUComm
                 APP_FIELD typeOwn = IdsAclara[ typeAclara ];
 
                 // If is for port two, find the correct enum element adding two ( "_2" ) as suffix
-                if ( param.Port == 1 )
+                if ( param.Port == 1 && !Enum.TryParse<APP_FIELD_MTU>(typeOwn.ToString(), out _))
                     Enum.TryParse<APP_FIELD> ( typeOwn.ToString () + PT2_SUFFIX, out typeOwn );
 
                 return typeOwn;
@@ -601,6 +623,8 @@ namespace MTUComm
                 int  portIndex     = entry.Value.Port;
                 bool fail          = false;
                 bool paramPort1    = ( portIndex == 0 );
+                bool HasRDD = rddIn1 || rddIn2;
+
                 bool rddInThisPort =   paramPort1 && rddIn1 ||
                                      ! paramPort1 && rddIn2;
 
@@ -936,7 +960,7 @@ namespace MTUComm
                         #region Valve Position [ Writing or RemoteDisconnect ]
                         case APP_FIELD.RDDPosition:
                         // Do not use
-                        if ( ! rddInThisPort ||
+                        if ( ! HasRDD ||
                              isNotWrite &&
                              actionType != ActionType.ValveOperation )
                             continue;
@@ -952,7 +976,7 @@ namespace MTUComm
                         #region RDD Firmware [ Writing or RemoteDisconnect ]
                         case APP_FIELD.RDDFirmware:
                         // Do not use
-                        if ( ! rddInThisPort ||
+                        if ( ! HasRDD ||
                              isNotWrite &&
                              actionType != ActionType.ValveOperation )
                             continue;
