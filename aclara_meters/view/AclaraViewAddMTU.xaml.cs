@@ -833,10 +833,13 @@ namespace aclara_meters.view
 
                 this.InitializePicker_ReadInterval ( this.mtuBasicInfo, this.currentMtu );
 
-                this.pck_ReadInterval.IsEnabled = global.IndividualReadInterval;
+                this.div_ReadInterval.IsEnabled = global.IndividualReadInterval;
 
                 if ( ! global.IndividualReadInterval )
+                {
                     this.div_ReadInterval.Opacity = OPACITY_DISABLE;
+                    this.pck_ReadInterval.Opacity = OPACITY_DISABLE;
+                }
 
                 #endregion
 
