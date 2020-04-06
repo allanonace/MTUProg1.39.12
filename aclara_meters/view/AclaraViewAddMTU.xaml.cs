@@ -2716,9 +2716,7 @@ namespace aclara_meters.view
                    
                     this.tbx_MeterReading.IsEnabled = true;
                     this.tbx_MeterReading_Dual.IsEnabled = true;
-                    this.btnScanMeterReading.IsEnabled = true;
-                    this.btnScanMeterReadingDual.IsEnabled = true;
-                  
+                                   
                     this.lb_MeterReading_MeterType.IsVisible = false;
                     this.lb_MeterReading_DualMeterType.IsVisible = false;
                 });
@@ -2746,9 +2744,7 @@ namespace aclara_meters.view
                   
                     this.tbx_MeterReading_2.IsEnabled = true;
                     this.tbx_MeterReading_Dual_2.IsEnabled = true;
-                    this.btnScannerMeterReading_2.IsEnabled = true;
-                    this.btnScannerMeterReadingDual_2.IsEnabled = true;
-                   
+                                 
                     this.lb_MeterReading_MeterType_2.IsVisible = false;
                     this.lb_MeterReading_DualMeterType_2.IsVisible = false;
                 

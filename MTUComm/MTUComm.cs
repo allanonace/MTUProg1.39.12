@@ -3349,7 +3349,7 @@ namespace MTUComm
                                         bool.Parse ( Data.Get[ APP_FIELD.ForceTimeSync.ToString () ] ) :
                                         this.global.ForceTimeSync;
 
-                // After TurnOn has to be performed an InstallConfirmation
+                 // After TurnOn has to be performed an InstallConfirmation
                 // if certain tags/registers are validated/true
                 if ( ! Data.Get.UNIT_TEST && // Avoid this subprocess during the unit test because the RFCheck has its own test
                      global.TimeToSync && // Indicates that is a two-way MTU and enables TimeSync request
