@@ -361,7 +361,7 @@
                                         <StackLayout Margin="0,4,0,0" x:Name="div_TwoWay">
                                             <Label Text="2-Way" x:Name="lb_TwoWay" Margin="0,4,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,4" BackgroundColor="#7a868c">
-                                                <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                                <Frame x:Name="div_PckTwoWay" CornerRadius="6" HeightRequest="30" Opacity="1" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                         <Controls:BorderlessPicker x:Name="pck_TwoWay" Title="" HorizontalOptions="FillAndExpand" FontSize="17" HeightRequest="40" />
                                                     </StackLayout>
@@ -811,7 +811,7 @@
                                         <StackLayout Margin="0,4,0,0" x:Name="div_TwoWay_V">
                                             <Label Text="2-Way" x:Name="lb_TwoWay_V" Margin="0,4,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,4" BackgroundColor="#7a868c">
-                                                <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                                <Frame x:Name="div_PckTwoWay_V" CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                         <Controls:BorderlessPicker x:Name="pck_TwoWay_V" Title="" HorizontalOptions="FillAndExpand" FontSize="17" HeightRequest="40" />
                                                     </StackLayout>

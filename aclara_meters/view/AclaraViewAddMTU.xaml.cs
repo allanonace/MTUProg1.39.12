@@ -833,13 +833,12 @@ namespace aclara_meters.view
 
                 this.InitializePicker_ReadInterval ( this.mtuBasicInfo, this.currentMtu );
 
-                this.pck_ReadInterval.IsEnabled = global.IndividualReadInterval;
+                this.div_ReadInterval.IsEnabled = global.IndividualReadInterval;
 
                 if ( ! global.IndividualReadInterval )
                 {
-                    this.div_ReadInterval.BackgroundColor = Color.LightGray;
-                    this.pck_ReadInterval.BackgroundColor = Color.LightGray;
-                    this.pck_ReadInterval.TextColor = Color.Gray;
+                    this.div_ReadInterval.Opacity = OPACITY_DISABLE;
+                    this.pck_ReadInterval.Opacity = OPACITY_DISABLE;
                 }
 
                 #endregion
@@ -856,7 +855,14 @@ namespace aclara_meters.view
                 if ( useDailyReads )
                 {
                     this.divSub_SnapReads.IsEnabled = this.global.IndividualDailyReads;
-                    this.divSub_SnapReads.Opacity = ( this.global.IndividualDailyReads ) ? 1 : 0.8d;
+                    this.sld_SnapReads   .IsEnabled = this.global.IndividualDailyReads;
+                    this.cbx_SnapReads   .IsVisible = this.global.IndividualDailyReads;
+
+                    if ( ! this.global.IndividualDailyReads )
+                    {
+                        this.lb_SnapReads_Num.Opacity = OPACITY_DISABLE;
+                        this.divSub_SnapReads.Opacity = OPACITY_DISABLE;
+                    }
 
                     this.snapReadsStep = 1.0;
 
@@ -888,6 +894,14 @@ namespace aclara_meters.view
                     this.Initialize_TwoWay ( pck_TwoWay_V );
                     div_TwoWay_V.IsVisible = useTwoWay;
                     div_TwoWay_V.IsEnabled = useTwoWay && global.IndividualFastMessageConfig;
+                }
+
+                if ( ! global.IndividualFastMessageConfig )
+                {
+                    this.div_PckTwoWay  .Opacity = OPACITY_DISABLE;
+                    this.div_PckTwoWay_V.Opacity = OPACITY_DISABLE;
+                    this.pck_TwoWay     .Opacity = OPACITY_DISABLE;
+                    this.pck_TwoWay_V   .Opacity = OPACITY_DISABLE;
                 }
                 
                 #endregion
