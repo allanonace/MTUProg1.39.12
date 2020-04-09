@@ -116,7 +116,7 @@
     <NoStdLib>false</NoStdLib>
     <MtouchHttpClientHandler>NSUrlSessionHandler</MtouchHttpClientHandler>
     <MtouchDebug />
-    <MtouchEnableSGenConc />
+    <MtouchEnableSGenConc>true</MtouchEnableSGenConc>
     <OnDemandResourcesInitialInstallTags />
     <IpaPackageName></IpaPackageName>
     <CrashReportingApiKey></CrashReportingApiKey>
@@ -132,6 +132,7 @@
     <PlatformTarget>anycpu</PlatformTarget>
     <WarningsNotAsErrors></WarningsNotAsErrors>
     <Nullable></Nullable>
+    <MtouchUseLlvm>true</MtouchUseLlvm>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Ad-Hoc|iPhone' ">
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

@@ -48,11 +48,12 @@
     <MtouchVerbosity>2</MtouchVerbosity>
     <MtouchUseThumb>
     </MtouchUseThumb>
-    <MtouchEnableSGenConc>
-    </MtouchEnableSGenConc>
+    <MtouchEnableSGenConc>true</MtouchEnableSGenConc>
     <MtouchVerbosity>2</MtouchVerbosity>
     <DeviceSpecificBuild>
     </DeviceSpecificBuild>
+    <MtouchUseLlvm>true</MtouchUseLlvm>
+    <MtouchFloat32>true</MtouchFloat32>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhoneSimulator' ">
     <DebugType>pdbonly</DebugType>
